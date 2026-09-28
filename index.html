@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Savoro - mockup</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div>
+        <h1>Savoro</h1>
+        <p>Toate comenzile tale de mâncare, într-un singur loc.</p>
+        <p class="app-count">3 comenzi, dintre care 2 pe drum</p>
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-value">155 lei</span>
+          <span class="stat-label">cheltuiți luna asta</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">1 din 3</span>
+          <span class="stat-label">comenzi livrate</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="sidebar">
+      <section class="panel">
+        <h2>Comandă nouă</h2>
+        <form class="item-form">
+          <label>Preparat
+            <input type="text" name="preparat" placeholder="Ex: Pizza Margherita" />
+          </label>
+          <label>Restaurant
+            <input type="text" name="restaurant" placeholder="Ex: Pizzeria Napoli" />
+          </label>
+          <div class="form-row">
+            <label>Tip livrare
+              <select name="livrare">
+                <option value="standard">Standard</option>
+                <option value="express">Express</option>
+                <option value="ridicare">Ridicare personală</option>
+              </select>
+            </label>
+            <label>Preț (lei)
+              <input type="number" name="pret" min="0" placeholder="42" />
+            </label>
+          </div>
+          <button type="submit">Plasează comanda</button>
+        </form>
+      </section>
+
+      <section class="panel">
+        <h2>Tipuri de livrare</h2>
+        <ul class="legend">
+          <li><span class="badge badge-standard">Standard</span> cam 45 de minute</li>
+          <li><span class="badge badge-express">Express</span> cam 20 de minute</li>
+          <li><span class="badge badge-ridicare">Ridicare</span> o iei tu de la local</li>
+        </ul>
+      </section>
+    </aside>
+
+    <section class="panel">
+      <div class="list-header">
+        <h2>Comenzile mele</h2>
+        <div class="filters">
+          <button type="button" class="filter active">Toate</button>
+          <button type="button" class="filter">Pe drum</button>
+          <button type="button" class="filter">Livrate</button>
+        </div>
+      </div>
+      <!-- Când lista e goală: <p class="empty">Nu ai nicio comandă. Plasează prima din formular.</p> -->
+      <ul class="item-list">
+        <li class="item-card card-express">
+          <div class="card-main">
+            <span class="thumb" aria-hidden="true">🍕</span>
+            <div>
+              <p class="restaurant">Pizzeria Napoli</p>
+              <h3>Pizza Margherita</h3>
+              <div class="meta">
+                <span class="badge badge-express">Express</span>
+                <span class="eta">Sosește în ~20 min</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-side">
+            <span class="price">42 lei</span>
+            <span class="status">Pe drum</span>
+          </div>
+        </li>
+        <li class="item-card card-standard done">
+          <div class="card-main">
+            <span class="thumb" aria-hidden="true">🍔</span>
+            <div>
+              <p class="restaurant">Burger Van</p>
+              <h3>Burger de vită cu cartofi</h3>
+              <div class="meta">
+                <span class="badge badge-standard">Standard</span>
+                <span class="eta">Livrată azi, 13:40</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-side">
+            <span class="price">48 lei</span>
+            <span class="status">Livrată</span>
+          </div>
+        </li>
+        <li class="item-card card-ridicare">
+          <div class="card-main">
+            <span class="thumb" aria-hidden="true">🍣</span>
+            <div>
+              <p class="restaurant">Sushi Kyo</p>
+              <h3>Platou sushi (12 buc.)</h3>
+              <div class="meta">
+                <span class="badge badge-ridicare">Ridicare personală</span>
+                <span class="eta">Gata de ridicat la 19:30</span>
+              </div>
+            </div>
+          </div>
+          <div class="card-side">
+            <span class="price">65 lei</span>
+            <span class="status">Pe drum</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="app-footer">Proiect Tehnologii Web</footer>
+</body>
+</html>

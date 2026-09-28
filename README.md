@@ -5,19 +5,21 @@ see which ones are still on the way and mark them as delivered.
 
 ## Data model
 
-| Field     | Type         | Notes                                            |
-| --------- | ------------ | ------------------------------------------------ |
-| name      | text         | the ordered dish, required, max 100 chars        |
-| delivered | boolean      | toggled from the list, default false             |
-| delivery  | fixed values | Standard, Express, Pickup                        |
-| category  | relation     | Pizza, Burgers, Asian                            |
-| user      | relation     | the customer who placed the order (from week 11) |
+| Field      | Type         | Notes                                            |
+| ---------- | ------------ | ------------------------------------------------ |
+| name       | text         | the ordered dish, required, max 100 chars        |
+| delivered  | boolean      | toggled from the list, default false             |
+| delivery   | fixed values | Standard, Express, Pickup                        |
+| category   | relation     | Pizza, Burgers, Asian                            |
+| user       | relation     | the customer who placed the order (from week 11) |
+| restaurant | text         | extra field, where the order comes from          |
+| price      | number       | extra field, in lei                              |
 
 Sample data used across all stages:
 
-1. Pizza Margherita, active, Express
-2. Beef burger with fries, done, Standard
-3. Sushi set (12 pcs), active, Pickup
+1. Pizza Margherita, active, Express, Pizzeria Napoli, 42 lei
+2. Beef burger with fries, done, Standard, Burger Van, 48 lei
+3. Sushi set (12 pcs), active, Pickup, Sushi Kyo, 65 lei
 
 ## How to run
 
