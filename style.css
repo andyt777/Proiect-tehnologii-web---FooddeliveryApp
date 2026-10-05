@@ -1,20 +1,24 @@
-/* 4.1 Variabile de culoare */
+/* 4.1 Variabile de culoare (stil inspirat de aplicațiile de livrare: alb, negru, roșu aprins) */
 * { box-sizing: border-box; }
 
 :root {
-  --bg: #f5f5f2;
+  --bg: #ffffff;
+  --surface: #f7f7f7;      /* fundal pentru câmpuri, chips, imagini */
   --card: #ffffff;
-  --text: #1d1b1a;
-  --muted: #6d6865;
-  --accent: #b3261e;       /* roșu de roșie */
-  --accent-dark: #8c1d17;
-  --accent-soft: #fbe9e7;
+  --text: #191919;
+  --muted: #767676;
+  --accent: #eb1700;       /* roșul principal */
+  --accent-dark: #c41400;
+  --accent-soft: #fff0ee;
   --on-accent: #ffffff;    /* text pe fundal colorat */
-  --border: #e4e1dd;
+  --ink: #191919;          /* butoane negre (filtrul activ) */
+  --on-ink: #ffffff;
+  --border: #e7e7e7;
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
   /* câte o culoare pentru fiecare tip de livrare */
   --standard: #2f6fa3;
-  --express: #d9480f;
-  --ridicare: #6b4fa0;
+  --express: #eb1700;
+  --ridicare: #00838a;
 }
 
 body {
@@ -25,38 +29,143 @@ body {
   line-height: 1.5;
 }
 
-/* 4.2 Antet: text în stânga, statistici în dreapta (Flexbox) */
+/* 4.2 Bara de sus: logo, adresă, căutare, coș (Flexbox), fixă la derulare */
 .app-header {
-  background: var(--accent);
-  color: var(--on-accent);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
 }
 .header-inner {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 28px 16px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--accent);
+}
+.logo-mark {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  font-size: 1.1rem;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.address-pill,
+.cart-pill {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--surface);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.cart-pill {
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-radius: 999px;
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Zona de bun venit: text + statistici, apoi categoriile */
+.hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 8px;
+}
+.hero-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 24px;
 }
-.app-header h1 { margin: 0; font-size: 2rem; }
-.app-header p { margin: 4px 0 0; }
-.app-count { font-weight: 600; }
+.hero h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+.app-count { margin: 6px 0 0; font-weight: 600; color: var(--muted); }
 
 .stats { display: flex; gap: 12px; }
 .stat {
   display: flex;
   flex-direction: column;
-  padding: 10px 16px;
-  border: 1px solid var(--on-accent);
-  border-radius: 10px;
+  padding: 12px 18px;
+  background: var(--surface);
+  border-radius: 12px;
 }
-.stat-value { font-size: 1.3rem; font-weight: 700; }
-.stat-label { font-size: 0.8rem; }
+.stat-value { font-size: 1.3rem; font-weight: 800; }
+.stat-label { font-size: 0.8rem; color: var(--muted); }
+
+/* Categoriile: iconițe rotunde cu text dedesubt */
+.categories {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  gap: 24px;
+}
+.categories li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cat-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  font-size: 1.9rem;
+  background: var(--surface);
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+.categories li:hover .cat-icon { transform: scale(1.06); }
 
 /* 4.3 Două coloane (Grid) */
 .container {
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 24px auto;
   padding: 0 16px;
   display: grid;
@@ -75,11 +184,16 @@ body {
 /* 4.4 Panouri */
 .panel {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
+  box-shadow: var(--shadow);
 }
-.panel h2 { margin: 0 0 16px; font-size: 1.2rem; }
+.panel h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
 
 /* 4.5 Formular (Flexbox, coloană) */
 .item-form,
@@ -88,7 +202,7 @@ body {
   flex-direction: column;
   gap: 12px;
 }
-.item-form label { gap: 4px; font-weight: 600; flex: 1; }
+.item-form label { gap: 4px; font-size: 0.85rem; font-weight: 700; flex: 1; }
 
 /* livrarea și prețul stau pe același rând */
 .form-row { display: flex; gap: 12px; }
@@ -96,23 +210,25 @@ body {
 .item-form input,
 .item-form select {
   width: 100%;
-  padding: 8px 10px;
+  padding: 10px 12px;
   font: inherit;
   font-weight: 400;
   color: var(--text);
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 10px;
 }
+.item-form input:focus,
+.item-form select:focus { border-color: var(--ink); outline: none; }
 
 .item-form button {
-  padding: 10px;
+  padding: 12px;
   font: inherit;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--on-accent);
   background: var(--accent);
   border: none;
-  border-radius: 8px;
+  border-radius: 999px;
   cursor: pointer;
 }
 .item-form button:hover { background: var(--accent-dark); }
@@ -136,26 +252,26 @@ body {
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .list-header h2 { margin: 0; }
 
 .filters { display: flex; gap: 6px; }
 .filter {
-  padding: 4px 12px;
+  padding: 6px 14px;
   font: inherit;
   font-size: 0.85rem;
+  font-weight: 700;
   color: var(--text);
-  background: var(--card);
-  border: 1px solid var(--border);
+  background: var(--surface);
+  border: none;
   border-radius: 999px;
   cursor: pointer;
 }
-.filter:hover { border-color: var(--accent); }
+.filter:hover { background: var(--border); }
 .filter.active {
-  color: var(--on-accent);
-  background: var(--accent);
-  border-color: var(--accent);
+  color: var(--on-ink);
+  background: var(--ink);
 }
 
 /* 4.6 Lista și cardul (Flexbox) */
@@ -165,7 +281,6 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
 }
 
 .item-card {
@@ -173,37 +288,42 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  border-left-width: 5px;   /* dunga colorată după tipul de livrare */
-  border-radius: 10px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px;
+  transition: background 0.15s;
 }
-.card-standard { border-left-color: var(--standard); }
-.card-express  { border-left-color: var(--express); }
-.card-ridicare { border-left-color: var(--ridicare); }
-
-.item-card:hover { background: var(--accent-soft); }
+.item-card:last-child { border-bottom: none; }
+.item-card:hover { background: var(--surface); }
 
 /* partea stângă a cardului: imagine + informații */
 .card-main {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
 }
 .thumb {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-shrink: 0;           /* nu se micșorează pe ecrane înguste */
-  width: 52px;
-  height: 52px;
-  font-size: 1.6rem;
-  background: var(--bg);
+  width: 76px;
+  height: 76px;
+  font-size: 2.2rem;
   border-radius: 12px;
 }
+/* fundalul imaginii are culoarea tipului de livrare, foarte deschisă */
+.card-standard .thumb { background: color-mix(in srgb, var(--standard) 12%, var(--bg)); }
+.card-express  .thumb { background: color-mix(in srgb, var(--express) 12%, var(--bg)); }
+.card-ridicare .thumb { background: color-mix(in srgb, var(--ridicare) 12%, var(--bg)); }
 
-.item-card h3 { margin: 0 0 6px; font-size: 1rem; }
-.restaurant { margin: 0; font-size: 0.8rem; color: var(--muted); }
+.item-card h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; }
+.restaurant {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
 
 .meta {
   display: flex;
@@ -212,6 +332,7 @@ body {
   gap: 8px;
 }
 .eta { font-size: 0.8rem; color: var(--muted); }
+.eta::before { content: "· "; }
 
 /* partea dreaptă a cardului: preț și stare, una sub alta */
 .card-side {
@@ -220,10 +341,11 @@ body {
   align-items: flex-end;
   gap: 6px;
 }
-.price { font-weight: 700; white-space: nowrap; }
+.price { font-weight: 800; white-space: nowrap; }
 .status {
-  padding: 2px 10px;
-  font-size: 0.8rem;
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
   color: var(--accent);
   background: var(--accent-soft);
   border-radius: 999px;
@@ -234,7 +356,8 @@ body {
 .badge {
   display: inline-block;
   padding: 2px 10px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--on-accent);
   border-radius: 999px;
 }
@@ -247,10 +370,10 @@ body {
   text-decoration: line-through;
   color: var(--muted);
 }
-.item-card.done { opacity: 0.7; }
+.item-card.done { opacity: 0.6; }
 .item-card.done .status {
   color: var(--muted);
-  background: var(--bg);
+  background: var(--surface);
 }
 
 /* Mesaj pentru lista goală (folosit din Etapa 4) */
@@ -259,31 +382,46 @@ body {
 .app-footer {
   text-align: center;
   color: var(--muted);
+  font-size: 0.85rem;
   padding: 24px 16px;
+  border-top: 1px solid var(--border);
 }
 
 /* 5. Focus vizibil la navigarea cu Tab */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
 
 /* 5. Tema întunecată: se redefinesc doar variabilele */
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #161312;
-    --card: #211c1b;
-    --text: #ece7e4;
-    --muted: #a39c98;
-    --accent: #e0574b;
-    --accent-dark: #c2453a;
-    --accent-soft: #3a2320;
-    --border: #3a3230;
+    --bg: #121212;
+    --surface: #242424;
+    --card: #1b1b1b;
+    --text: #f2f2f2;
+    --muted: #a3a3a3;
+    --accent: #ff3b22;
+    --accent-dark: #e02a12;
+    --accent-soft: #3a1a15;
+    --ink: #f2f2f2;
+    --on-ink: #121212;
+    --border: #2e2e2e;
+    --shadow: 0 0 0 1px #2e2e2e;
+    --standard: #5a9bd4;
+    --express: #ff3b22;
+    --ridicare: #2bb5bc;
   }
 }
 
 /* 4.9 Ecrane înguste (la final, ca să suprascrie regulile de mai sus) */
 @media (max-width: 700px) {
   .container { grid-template-columns: 1fr; }
-  .header-inner { flex-direction: column; align-items: flex-start; }
+  .header-inner { flex-wrap: wrap; }
+  .search { order: 1; flex-basis: 100%; }
+  .address-pill { display: none; }
+  .cart-pill { margin-left: auto; }
+  .hero-inner { flex-direction: column; align-items: flex-start; }
+  .hero h2 { font-size: 1.4rem; }
+  .thumb { width: 60px; height: 60px; font-size: 1.8rem; }
 }
