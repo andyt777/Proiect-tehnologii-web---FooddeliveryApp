@@ -5,15 +5,16 @@ see which ones are still on the way and mark them as delivered.
 
 ## Data model
 
-| Field      | Type         | Notes                                            |
-| ---------- | ------------ | ------------------------------------------------ |
-| name       | text         | the ordered dish, required, max 100 chars        |
-| delivered  | boolean      | toggled from the list, default false             |
-| delivery   | fixed values | Standard, Express, Pickup                        |
-| category   | relation     | Pizza, Burgers, Asian                            |
-| user       | relation     | the customer who placed the order (from week 11) |
-| restaurant | text         | extra field, where the order comes from          |
-| price      | number       | extra field, in lei                              |
+| Field      | In code (`comenzi.js`) | Type         | Notes                                            |
+| ---------- | ---------------------- | ------------ | ------------------------------------------------ |
+| id         | `id`                   | number       | unique, new id = max existing id + 1 (stage 2)   |
+| name       | `preparat`             | text         | the ordered dish, required, max 100 chars        |
+| delivered  | `livrata`              | boolean      | toggled from the list, default false             |
+| delivery   | `livrare`              | fixed values | Standard, Express, Pickup (`LIVRARI`)            |
+| category   | `categorie`            | relation     | Pizza, Burgers, Asian (`CATEGORII`)              |
+| user       | (not yet)              | relation     | the customer who placed the order (from week 11) |
+| restaurant | `restaurant`           | text         | extra field, where the order comes from          |
+| price      | `pret`                 | number       | extra field, in lei, must be positive            |
 
 Sample data used across all stages:
 
@@ -24,16 +25,38 @@ Sample data used across all stages:
 ## How to run
 
 Open index.html in a browser. No build step, no server.
+To see the stage 2 results, open the browser console (F12).
+
+## Stage 2: data logic
+
+Plain JavaScript, no DOM. `comenzi.js` holds the `comenzi` array and the functions
+that read and change it. Results are printed in the browser console (F12).
+
+| Function            | What it does                                                 |
+| ------------------- | ------------------------------------------------------------ |
+| `listeazaPreparate` | list of dish names (`map`)                                   |
+| `numaraPeDrum`      | how many orders are not delivered yet (`filter`)             |
+| `cautaComenzi`      | search by dish or restaurant, case-insensitive (`filter`)    |
+| `gasesteDupaId`     | one order by id (`find`)                                     |
+| `adaugaComanda`     | validated add, new id = max id + 1 (`reduce`), returns a new array |
+| `comutaLivrata`     | toggle delivered for one id (`map` + spread)                 |
+| `stergeComanda`     | remove one id (`filter`)                                     |
+
+Validation rejects: empty or >100 char dish name, delivery type not in `LIVRARI`,
+empty restaurant, price that is not a positive number, category not in `CATEGORII`.
 
 ## AI usage
 
 | Tool   | Used for                                                                  |
 | ------ | ------------------------------------------------------------------------- |
 | Claude | README draft, HTML structure and CSS (Grid, Flexbox, dark theme), stage 1 |
+| Claude | data array, immutable functions and console tests in comenzi.js, stage 2 |
+| Claude | restyled the mockup in a food-delivery-app look (top bar, categories, cards), stage 2 |
 
 Details per stage: see the ai-log/ folder.
 
 ## Status
 
 - [x] Stage 1: static mockup
-- [ ] Stage 2: data logic in JavaScript
+- [x] Stage 2: data logic in JavaScript
+- [ ] Stage 3: Vite and React project
