@@ -5,7 +5,7 @@ see which ones are still on the way and mark them as delivered.
 
 ## Data model
 
-| Field      | In code (`comenzi.js`) | Type         | Notes                                            |
+| Field      | In code (`App.jsx`)    | Type         | Notes                                            |
 | ---------- | ---------------------- | ------------ | ------------------------------------------------ |
 | id         | `id`                   | number       | unique, new id = max existing id + 1 (stage 2)   |
 | name       | `preparat`             | text         | the ordered dish, required, max 100 chars        |
@@ -24,12 +24,29 @@ Sample data used across all stages:
 
 ## How to run
 
-Open index.html in a browser. No build step, no server.
-To see the stage 2 results, open the browser console (F12).
+```
+cd frontend
+npm install
+npm run dev
+```
+
+Then open the address printed in the terminal (http://localhost:5173).
+
+The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
+
+## Stage 3: Vite and React project
+
+The app now lives in `frontend/`, built with Vite. The data from stage 2
+moved into the main component; the list is still printed raw.
+
+`frontend/src/App.jsx` holds the `comenzi` array above the `App` function. The header
+values are computed from it: total orders, orders on the way (`filter`), delivered orders
+and money spent (`reduce`). The stage 1 styles are reused in `frontend/src/App.css`,
+with a single column until the form comes back in stage 7.
 
 ## Stage 2: data logic
 
-Plain JavaScript, no DOM. `comenzi.js` holds the `comenzi` array and the functions
+Plain JavaScript, no DOM. `mockup/comenzi.js` holds the `comenzi` array and the functions
 that read and change it. Results are printed in the browser console (F12).
 
 | Function            | What it does                                                 |
@@ -64,6 +81,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | README draft, HTML structure and CSS (Grid, Flexbox, dark theme), stage 1 |
 | Claude | data array, immutable functions and console tests in comenzi.js, stage 2 |
 | Claude | restyled the mockup in a food-delivery-app look (top bar, categories, cards), stage 2 |
+| Claude | Vite + React setup, App.jsx with computed header values, stage 3          |
 
 Details per stage: see the ai-log/ folder.
 
@@ -71,4 +89,4 @@ Details per stage: see the ai-log/ folder.
 
 - [x] Stage 1: static mockup
 - [x] Stage 2: data logic in JavaScript
-- [ ] Stage 3: Vite and React project
+- [x] Stage 3: Vite and React project

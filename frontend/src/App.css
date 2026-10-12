@@ -1,0 +1,428 @@
+/* 4.1 Variabile de culoare (stil inspirat de aplicațiile de livrare: alb, negru, roșu aprins) */
+* { box-sizing: border-box; }
+
+:root {
+  --bg: #ffffff;
+  --surface: #f7f7f7;      /* fundal pentru câmpuri, chips, imagini */
+  --card: #ffffff;
+  --text: #191919;
+  --muted: #767676;
+  --accent: #eb1700;       /* roșul principal */
+  --accent-dark: #c41400;
+  --accent-soft: #fff0ee;
+  --on-accent: #ffffff;    /* text pe fundal colorat */
+  --ink: #191919;          /* butoane negre (filtrul activ) */
+  --on-ink: #ffffff;
+  --border: #e7e7e7;
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 4px 16px rgba(0, 0, 0, 0.06);
+  /* câte o culoare pentru fiecare tip de livrare */
+  --standard: #2f6fa3;
+  --express: #eb1700;
+  --ridicare: #00838a;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* 4.2 Bara de sus: logo, adresă, căutare, coș (Flexbox), fixă la derulare */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--accent);
+}
+.logo-mark {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  font-size: 1.1rem;
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.address-pill,
+.cart-pill {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: var(--surface);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.cart-pill {
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  border-radius: 999px;
+}
+.search input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* Zona de bun venit: text + statistici, apoi categoriile */
+.hero {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px 8px;
+}
+.hero-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+.hero h2 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+.app-count { margin: 6px 0 0; font-weight: 600; color: var(--muted); }
+
+.stats { display: flex; gap: 12px; }
+.stat {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 18px;
+  background: var(--surface);
+  border-radius: 12px;
+}
+.stat-value { font-size: 1.3rem; font-weight: 800; }
+.stat-label { font-size: 0.8rem; color: var(--muted); }
+
+/* Categoriile: iconițe rotunde cu text dedesubt */
+.categories {
+  list-style: none;
+  margin: 24px 0 0;
+  padding: 0;
+  display: flex;
+  gap: 24px;
+}
+.categories li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cat-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  font-size: 1.9rem;
+  background: var(--surface);
+  border-radius: 50%;
+  transition: transform 0.15s;
+}
+.categories li:hover .cat-icon { transform: scale(1.06); }
+
+/* 4.3 Două coloane (Grid) */
+.container {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 0 16px;
+  display: grid;
+  /* Etapa 3: doar panoul cu date; a doua coloană revine în Etapa 7 */
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* coloana din stânga: două panouri unul sub altul */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 4.4 Panouri */
+.panel {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.panel h2 {
+  margin: 0 0 16px;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+/* 4.5 Formular (Flexbox, coloană) */
+.item-form,
+.item-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.item-form label { gap: 4px; font-size: 0.85rem; font-weight: 700; flex: 1; }
+
+/* livrarea și prețul stau pe același rând */
+.form-row { display: flex; gap: 12px; }
+
+.item-form input,
+.item-form select {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 400;
+  color: var(--text);
+  background: var(--surface);
+  border: 2px solid transparent;
+  border-radius: 10px;
+}
+.item-form input:focus,
+.item-form select:focus { border-color: var(--ink); outline: none; }
+
+.item-form button {
+  padding: 12px;
+  font: inherit;
+  font-weight: 700;
+  color: var(--on-accent);
+  background: var(--accent);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.item-form button:hover { background: var(--accent-dark); }
+
+/* Legenda tipurilor de livrare */
+.legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+/* Titlul listei și filtrele pe același rând */
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.list-header h2 { margin: 0; }
+
+.filters { display: flex; gap: 6px; }
+.filter {
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--surface);
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.filter:hover { background: var(--border); }
+.filter.active {
+  color: var(--on-ink);
+  background: var(--ink);
+}
+
+/* 4.6 Lista și cardul (Flexbox) */
+.item-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 8px;
+  border-bottom: 1px solid var(--border);
+  border-radius: 12px;
+  transition: background 0.15s;
+}
+.item-card:last-child { border-bottom: none; }
+.item-card:hover { background: var(--surface); }
+
+/* partea stângă a cardului: imagine + informații */
+.card-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.thumb {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;           /* nu se micșorează pe ecrane înguste */
+  width: 76px;
+  height: 76px;
+  font-size: 2.2rem;
+  border-radius: 12px;
+}
+/* fundalul imaginii are culoarea tipului de livrare, foarte deschisă */
+.card-standard .thumb { background: color-mix(in srgb, var(--standard) 12%, var(--bg)); }
+.card-express  .thumb { background: color-mix(in srgb, var(--express) 12%, var(--bg)); }
+.card-ridicare .thumb { background: color-mix(in srgb, var(--ridicare) 12%, var(--bg)); }
+
+.item-card h3 { margin: 0 0 6px; font-size: 1.05rem; font-weight: 800; }
+.restaurant {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.eta { font-size: 0.8rem; color: var(--muted); }
+.eta::before { content: "· "; }
+
+/* partea dreaptă a cardului: preț și stare, una sub alta */
+.card-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+.price { font-weight: 800; white-space: nowrap; }
+.status {
+  padding: 3px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+/* 4.7 Etichete colorate */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--on-accent);
+  border-radius: 999px;
+}
+.badge-standard { background: var(--standard); }
+.badge-express  { background: var(--express); }
+.badge-ridicare { background: var(--ridicare); }
+
+/* 4.8 Comandă livrată: titlu tăiat, totul estompat */
+.item-card.done h3 {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.item-card.done { opacity: 0.6; }
+.item-card.done .status {
+  color: var(--muted);
+  background: var(--surface);
+}
+
+/* Mesaj pentru lista goală (folosit din Etapa 4) */
+.empty { color: var(--muted); text-align: center; }
+
+.app-footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  padding: 24px 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* 5. Focus vizibil la navigarea cu Tab */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* 5. Tema întunecată: se redefinesc doar variabilele */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --surface: #242424;
+    --card: #1b1b1b;
+    --text: #f2f2f2;
+    --muted: #a3a3a3;
+    --accent: #ff3b22;
+    --accent-dark: #e02a12;
+    --accent-soft: #3a1a15;
+    --ink: #f2f2f2;
+    --on-ink: #121212;
+    --border: #2e2e2e;
+    --shadow: 0 0 0 1px #2e2e2e;
+    --standard: #5a9bd4;
+    --express: #ff3b22;
+    --ridicare: #2bb5bc;
+  }
+}
+
+/* 4.9 Ecrane înguste (la final, ca să suprascrie regulile de mai sus) */
+@media (max-width: 700px) {
+  .container { grid-template-columns: 1fr; }
+  .header-inner { flex-wrap: wrap; }
+  .search { order: 1; flex-basis: 100%; }
+  .address-pill { display: none; }
+  .cart-pill { margin-left: auto; }
+  .hero-inner { flex-direction: column; align-items: flex-start; }
+  .hero h2 { font-size: 1.4rem; }
+  .thumb { width: 60px; height: 60px; font-size: 1.8rem; }
+}
