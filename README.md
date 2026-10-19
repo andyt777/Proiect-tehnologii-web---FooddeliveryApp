@@ -74,6 +74,18 @@ that read and change it. Results are printed in the browser console (F12).
 Validation rejects: empty or >100 char dish name, delivery type not in `LIVRARI`,
 empty restaurant, price that is not a positive number, category not in `CATEGORII`.
 
+## Stage 4 checklist
+
+| ID    | Requirement | Where | How to check |
+| ----- | ----------- | ----- | ------------ |
+| S4-R1 | 2+ components in src/components/ | [frontend/src/components/](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/tree/cbb84db3164875a9e08934ffa4c67269634e170f/frontend/src/components) | open folder |
+| S4-R2 | card receives data through props | [ComandaCard.jsx#L6-L27](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/frontend/src/components/ComandaCard.jsx#L6-L27) | read |
+| S4-R3 | map + key={id}, no console warnings | [ComandaList.jsx#L8-L14](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/frontend/src/components/ComandaList.jsx#L8-L14) | F12, Console |
+| S4-R4 | message for empty list | [ComandaList.jsx#L4-L6](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/frontend/src/components/ComandaList.jsx#L4-L6) | set array to [] |
+| S4-R5 | state changes the card look | [ComandaCard.jsx#L8](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/frontend/src/components/ComandaCard.jsx#L8), [L24](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/frontend/src/components/ComandaCard.jsx#L24) | toggle livrata |
+| S4-R6 | README Stage 4 section + AI log | [README.md#L37](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/README.md#L37), [ai-log/etapa-04.md](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/cbb84db3164875a9e08934ffa4c67269634e170f/ai-log/etapa-04.md) | read |
+| S4-R7 | commit "Stage 4" pushed | [cbb84db](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/commit/cbb84db3164875a9e08934ffa4c67269634e170f) | commit history |
+
 ## Stage 3 checklist
 
 | ID    | Requirement                                   | Where                                                                                     | How to check             |
