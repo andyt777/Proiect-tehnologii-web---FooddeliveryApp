@@ -46,6 +46,14 @@ The labels shown on screen are kept apart from the values in the data (`ETICHETE
 `DURATE_LIVRARE`, `ICONITE_CATEGORIE`): the data says `ridicare`, the card says "Ridicare personală".
 A delivered order gets the `done` class (struck-through title, faded card).
 
+### Redesign
+
+After the stage 4 components were done, the page was restyled after the Figma Community file
+"Food app delivery - Mobile App": dark grey surfaces, coral accent (`#ff7269`), the Urbanist font
+and icons from `lucide-react`. Orders are shown as a grid of cards (3 columns on desktop, 2 on phones),
+and header, hero, sections and footer share one container width so they line up.
+The components, props, `key` and the empty-list message are unchanged.
+
 ## Stage 3: Vite and React project
 
 The app now lives in `frontend/`, built with Vite. The data from stage 2
@@ -119,6 +127,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | restyled the mockup in a food-delivery-app look (top bar, categories, cards), stage 2 |
 | Claude | Vite + React setup, App.jsx with computed header values, stage 3          |
 | Claude | ComandaCard and ComandaList components, list rendered from data, stage 4  |
+| Claude | redesign after a Figma Community template (dark theme, card grid, layout), stage 4 |
 
 Details per stage: see the ai-log/ folder.
 

@@ -22,6 +22,11 @@
 - Got: `npm run lint` and `npm run build` with no errors; a render of the app gives 3 cards, the delivered one with the `done` class, no React warnings; `ComandaList` with `[]` gives "Nu ai nicio comandă.".
 - Changed or rejected: Kept it. To see the key warning from the guide, remove `key={comanda.id}` for a moment, save, look at the console, then put it back.
 
+### 4. Redesign after a Figma template
+- Asked: add an icon library and a font, then restyle the page after a Figma Community template, aligned and polished like a finished app.
+- Got: `lucide-react` icons in the header and on the cards, the Urbanist font, the colors read from the Figma file with the Figma connector (dark grey, coral accent), category chips with a count per category, a grid of order cards, a common container for header, hero, content and footer, a footer with the design credit, a favicon and a phone layout. Checked in Chrome on desktop and at 390px.
+- Changed or rejected: The first template I chose had a personal-use-only license that forbids web apps, so I picked another one. The template's photos were not used, because the orders have no images; the emojis stay. The light theme was dropped, because the design is dark.
+
 ## What I learned / what did not work
 - A component is a function whose name starts with a capital letter; the props arrive as one object, destructured in the parameters (`{ comanda }`).
 - The prop name in the parent (`comenzi={comenzi}`) must match the destructured name, otherwise the child gets `undefined`.
