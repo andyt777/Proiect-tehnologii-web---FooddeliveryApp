@@ -34,6 +34,18 @@ Then open the address printed in the terminal (http://localhost:5173).
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
 
+## Stage 4: components
+
+The list is rendered from the data, through two components in `frontend/src/components/`:
+- `ComandaList` receives the whole `comenzi` array and renders one card per order (`map`, `key={comanda.id}`),
+  or the message "Nu ai nicio comandă." when the array is empty
+- `ComandaCard` receives a single order through props and displays it: category icon, restaurant,
+  dish, delivery badge, estimated time, price and status (Pe drum / Livrată)
+
+The labels shown on screen are kept apart from the values in the data (`ETICHETE_LIVRARE`,
+`DURATE_LIVRARE`, `ICONITE_CATEGORIE`): the data says `ridicare`, the card says "Ridicare personală".
+A delivered order gets the `done` class (struck-through title, faded card).
+
 ## Stage 3: Vite and React project
 
 The app now lives in `frontend/`, built with Vite. The data from stage 2
@@ -94,6 +106,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | data array, immutable functions and console tests in comenzi.js, stage 2 |
 | Claude | restyled the mockup in a food-delivery-app look (top bar, categories, cards), stage 2 |
 | Claude | Vite + React setup, App.jsx with computed header values, stage 3          |
+| Claude | ComandaCard and ComandaList components, list rendered from data, stage 4  |
 
 Details per stage: see the ai-log/ folder.
 
@@ -102,3 +115,5 @@ Details per stage: see the ai-log/ folder.
 - [x] Stage 1: static mockup
 - [x] Stage 2: data logic in JavaScript
 - [x] Stage 3: Vite and React project
+- [x] Stage 4: components rendered from data
+- [ ] Stage 5: local state and events

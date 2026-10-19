@@ -1,3 +1,5 @@
+import ComandaList from "./components/ComandaList.jsx";
+
 const comenzi = [
   { id: 1, preparat: "Pizza Margherita", livrata: false, livrare: "express", categorie: "Pizza", restaurant: "Pizzeria Napoli", pret: 42 },
   { id: 2, preparat: "Burger de vită cu cartofi", livrata: true, livrare: "standard", categorie: "Burgers", restaurant: "Burger Van", pret: 48 },
@@ -52,8 +54,7 @@ export default function App() {
       <main className="container">
         <section className="panel">
           <h2>Comenzile mele</h2>
-          {/* Temporar: date brute; componentele apar în Etapa 4 */}
-          <pre>{JSON.stringify(comenzi, null, 2)}</pre>
+          <ComandaList comenzi={comenzi} />
         </section>
       </main>
 
