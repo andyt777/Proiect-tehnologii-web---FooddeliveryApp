@@ -34,6 +34,54 @@ Then open the address printed in the terminal (http://localhost:5173).
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
 
+## Stage 5: local state and events
+
+The list lives in React state. Checking and deleting work from the page,
+and the counters in the header follow automatically. A button in the
+header switches between light and dark mode. Changes are lost on refresh,
+which is what stage 6 and stage 10 fix.
+
+- `App` keeps the orders in `useState(COMENZI_INITIALE)` and is the only place that changes them:
+  `handleToggleLivrata` (`map` + spread) and `handleDelete` (`filter`), both with the `setComenzi((prev) => ...)` form
+- the functions go down as `onToggle` / `onDelete` through `ComandaList` to each `ComandaCard`
+- on the card, the status pill is a controlled checkbox (`checked` + `onChange`), and the trash button
+  in the corner has `aria-label="Șterge <dish>"`
+- the counters (orders on the way, delivered, money spent, orders per category) are computed from the list on
+  every render, not kept in state
+- the theme is a second state, `tema`, starting from the system setting; the button writes
+  `data-theme` on `<html>` and the CSS swaps the color variables (light base, dark under
+  `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` and `:root[data-theme="dark"]`)
+- deleting asks first, in our own `ConfirmDialog` (`<dialog>`, closes with Esc, a backdrop click or "Renunță"),
+  never with the browser's `confirm()`; the deletion itself is still `handleDelete` with `filter`
+
+### Redesign
+
+Together with stage 5 the page was restyled after my CodeAlpha restaurant project (Trattoria):
+- cream background and espresso header / hero, terracotta accent, olive green for delivered orders;
+  a separate espresso-toned dark theme
+- Fraunces (serif) for headings, Inter for text
+- a summary strip under the hero instead of stat cards
+- orders as rows of a printed menu: category icon, dish ..... price, then restaurant, delivery badge
+  and time; "Livrată" and delete on the right. Category pills above the list
+- `lucide-react` icons instead of emojis (`src/categorii.js`), sums through `formatLei`
+- every small text passes WCAG AA (lowest measured: 5.44:1 light, 5.69:1 dark); 44px touch areas;
+  on phones each row stacks and the dialog buttons go full width
+
+### Design details
+
+- a "receipt" in the hero shows the next order on the way and the total still on the way
+  (`BonComanda`, derived from the list); when nothing is on the way it says so
+- orders on the way come first, delivered ones below a "Livrate" separator (a sorted copy, the state is unchanged)
+- checking, deleting, undoing and switching the theme animate with the View Transitions API (`src/tranzitie.js`);
+  without browser support, or with reduced motion turned on, the change is instant
+- the strike-through on a delivered order draws from left to right; the numbers in the summary strip slide in
+- after a delete, a message offers "Anulează" for 5 seconds; undo puts the order back in its place (immutable insert)
+- the theme choice is kept in `localStorage` (optional in the guide); a small script in `index.html` applies it
+  before the first paint, so the page never flashes in the wrong theme
+- own logo and favicon (a bowl whose steam forms an "S"), an illustrated empty state, an icon in the dialog
+- correct Romanian plurals: 1 comandă, 2 comenzi, 20 de comenzi (`formatComenzi`)
+- print styles (Ctrl+P): white page, no buttons, the list like a receipt
+
 ## Stage 4: components
 
 The list is rendered from the data, through two components in `frontend/src/components/`:
@@ -128,6 +176,8 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | Vite + React setup, App.jsx with computed header values, stage 3          |
 | Claude | ComandaCard and ComandaList components, list rendered from data, stage 4  |
 | Claude | redesign after a Figma Community template (dark theme, card grid, layout), stage 4 |
+| Claude | list in state, toggle and delete, light / dark theme button, stage 5      |
+| Claude | delete dialog and redesign after my CodeAlpha restaurant project, stage 5 |
 
 Details per stage: see the ai-log/ folder.
 
@@ -137,4 +187,5 @@ Details per stage: see the ai-log/ folder.
 - [x] Stage 2: data logic in JavaScript
 - [x] Stage 3: Vite and React project
 - [x] Stage 4: components rendered from data
-- [ ] Stage 5: local state and events
+- [x] Stage 5: local state and events
+- [ ] Stage 6: loading data from a mock API
