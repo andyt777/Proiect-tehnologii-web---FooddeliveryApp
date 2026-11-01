@@ -130,6 +130,20 @@ that read and change it. Results are printed in the browser console (F12).
 Validation rejects: empty or >100 char dish name, delivery type not in `LIVRARI`,
 empty restaurant, price that is not a positive number, category not in `CATEGORII`.
 
+## Stage 5 checklist
+
+| ID    | Requirement | Where | How to check |
+| ----- | ----------- | ----- | ------------ |
+| S5-R1 | list kept in useState in App | [App.jsx#L13-L17](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L13-L17), [L32](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L32) | read |
+| S5-R2 | toggle delivered, immutable (map + spread) | [App.jsx#L47-L53](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L47-L53) | tick "Livrată" |
+| S5-R3 | delete from the page (filter), with confirmation | [App.jsx#L55-L60](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L55-L60), [ConfirmDialog.jsx](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/components/ConfirmDialog.jsx) | trash button, confirm |
+| S5-R4 | handlers passed down through props | [App.jsx#L157-L161](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L157-L161), [ComandaList.jsx#L5](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/components/ComandaList.jsx#L5) | read |
+| S5-R5 | controlled checkbox and delete button on the card | [ComandaCard.jsx#L37-L52](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/components/ComandaCard.jsx#L37-L52) | click, F12 Console clean |
+| S5-R6 | counters derived from the list, not stored | [App.jsx#L85-L88](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L85-L88) | toggle / delete, header updates |
+| S5-R7 | light / dark theme button | [App.jsx#L72-L83](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L72-L83), [L104-L111](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/frontend/src/App.jsx#L104-L111) | click the button |
+| S5-R8 | README Stage 5 section + AI log | [README.md#L37](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/README.md#L37), [ai-log/etapa-05.md](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/4cad5bd264470eb3990441dfb04a34e283ce876d/ai-log/etapa-05.md) | read |
+| S5-R9 | commit "Stage 5" pushed | [4cad5bd](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/commit/4cad5bd264470eb3990441dfb04a34e283ce876d) | commit history |
+
 ## Stage 4 checklist
 
 | ID    | Requirement | Where | How to check |
