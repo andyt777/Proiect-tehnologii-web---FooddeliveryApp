@@ -5,7 +5,11 @@ see which ones are still on the way and mark them as delivered.
 
 ## Data model
 
-| Field      | In code (`App.jsx`)    | Type         | Notes                                            |
+Since stage 6 the data lives in `frontend/db.json` (served by json-server), not in React code:
+`comenzi` holds the orders described below, `meniu` the 9 dishes that can be added to the cart
+(`id` "p1".."p9", `preparat`, `restaurant`, `categorie`, `pret`).
+
+| Field      | In code (`db.json` → `comenzi`) | Type   | Notes                                    |
 | ---------- | ---------------------- | ------------ | ------------------------------------------------ |
 | id         | `id`                   | number       | unique, new id = max existing id + 1 (stage 2)   |
 | name       | `preparat`             | text         | the ordered dish, required, max 100 chars        |
@@ -22,17 +26,92 @@ Sample data used across all stages:
 2. Beef burger with fries, done, Standard, Burger Van, 48 lei
 3. Sushi set (12 pcs), active, Pickup, Sushi Kyo, 65 lei
 
+`db.json` adds three more (ramen, 2 × Pizza Diavola, veggie burger), so there are 6 orders.
+
 ## How to run
+
+Two terminals, both in `frontend/` (`npm run api` keeps running, so it needs its own terminal).
+
+Terminal 1, the mock API at http://localhost:3001:
 
 ```
 cd frontend
 npm install
+npm run api
+```
+
+Terminal 2, the app at http://localhost:5173:
+
+```
+cd frontend
 npm run dev
 ```
 
-Then open the address printed in the terminal (http://localhost:5173).
+Then open the address printed in terminal 2. Without `npm run api` the page shows an error
+with a "Încearcă din nou" button. `npm test` runs the unit tests (no server needed).
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
+
+## Stage 6: data from a mock API
+
+The orders and the menu are no longer written in React code. They live in `frontend/db.json`
+and are served by json-server (`0.17.4`, pinned: 1.x generates random string ids):
+
+| Route          | Returns                    |
+| -------------- | -------------------------- |
+| `GET /comenzi` | the 6 orders (numeric ids) |
+| `GET /meniu`   | the 9 dishes ("p1".."p9")  |
+
+- `src/api.js` is the only file with `fetch`: `fetchComenzi()` and `fetchMeniu()` check `res.ok`
+  and throw `Eroare server: <status>`. The address comes from `VITE_API_URL` (see `.env.example`),
+  falling back to `http://localhost:3001`; `.env` is git-ignored
+- `App` starts with `useState([])` for `comenzi` and `meniu`, plus `loading` (true) and `error` (null).
+  One `useEffect` with an inner `async function load()` loads both resources in parallel with
+  `Promise.all`, in `try / catch / finally`; the `let ignore = false` cleanup stops a late answer
+  from overwriting state (StrictMode runs the effect twice in development)
+- three states on the page: "Se încarcă meniul…" / "Se încarcă comenzile…" over grey skeletons;
+  an error that says what happened and what to do
+  ("Nu am putut încărca datele: … Rulează `npm run api`?"); the lists once the data arrived
+- checking, deleting, undo and placing an order still change only the local state:
+  they are lost on refresh until stage 7 sends them to the server
+
+### Extras
+
+- retry without reload: "Încearcă din nou" puts the page back in the loading state and runs the
+  effect again (a `reincercari` counter in its dependencies)
+- timeout: every request is cancelled after 8 seconds with an `AbortController`
+  ("Serverul nu a răspuns în 8 secunde"); a stopped server gives "Serverul nu poate fi contactat"
+  instead of the browser's "Failed to fetch"
+- validation: a response that is not a list (or not JSON) gives "Răspuns neașteptat de la server"
+- skeletons for the menu, the orders and the receipt (`aria-busy`, a visible status text; the shimmer
+  stops with reduced motion). While loading or on error the receipt and the summary strip show "—",
+  never "0 lei" or "Nicio comandă încă"
+- the cart is still read from `localStorage` on the first render, but `citesteCos` now checks only
+  the shape; `pastreazaDinMeniu` removes dishes missing from the menu once the menu has arrived
+- working search: the header field filters both the menu and the orders by dish or restaurant,
+  ignoring case and diacritics (`src/cautare.js`). The section titles show "2 din 9 produse",
+  empty results say "Niciun preparat pentru „x”" with a "Șterge căutarea" button, and Esc clears
+  the field. Header, summary and receipt counters still count all orders
+- review fixes for the cart: Enter on a delivery option no longer places the order; the delivery
+  choice goes back to Standard after an order; only the two headings focused from code
+  (`.titlu-focus`) drop the focus outline; the page behind an open dialog does not scroll;
+  on phones `--header-h` is 124px (two header rows), so the menu title stops right under the header
+- tests: `tests/api.test.js` (fake `fetch`: list, 500, non-list, network error, timeout),
+  `tests/db.test.js` (integrity of `db.json`), `tests/cautare.test.js`, and the updated
+  `tests/cos.test.js`; run them with `npm test`
+
+### Cart
+
+Added between stage 5 and stage 6 (commit "Cart: menu and cart drawer"):
+- a "Meniu" section above the orders: one card per dish with "Adaugă", which turns into a
+  "− 2 +" quantity selector (max 20 per dish)
+- the cart button in the header opens a side panel (`CosDrawer`, a native `<dialog>`): lines with
+  quantity and subtotal, a delivery choice (Standard / Express / Ridicare personală), the total and
+  "Plasează comanda"
+- placing the order turns every cart line into a new order "on the way" (new id = max id + 1),
+  empties the cart and shows a confirmation for 5 seconds
+- the cart is kept in `localStorage` under the key `cos` and validated when read
+  (`src/cos.js` holds the pure cart logic, tested in `tests/cos.test.js`)
 
 ## Stage 5: local state and events
 
@@ -192,6 +271,9 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | redesign after a Figma Community template (dark theme, card grid, layout), stage 4 |
 | Claude | list in state, toggle and delete, light / dark theme button, stage 5      |
 | Claude | delete dialog and redesign after my CodeAlpha restaurant project, stage 5 |
+| Claude | menu, cart drawer and placing orders, unit tests and code review, cart |
+| Claude | short Romanian comments on every line of code, stage 6                    |
+| Claude | db.json, api.js, loading / error states, retry, timeout, search, tests, stage 6 |
 
 Details per stage: see the ai-log/ folder.
 
@@ -202,4 +284,5 @@ Details per stage: see the ai-log/ folder.
 - [x] Stage 3: Vite and React project
 - [x] Stage 4: components rendered from data
 - [x] Stage 5: local state and events
-- [ ] Stage 6: loading data from a mock API
+- [x] Stage 6: loading data from a mock API
+- [ ] Stage 7: form and validation

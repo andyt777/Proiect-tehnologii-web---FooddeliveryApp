@@ -1,11 +1,41 @@
-import { CircleCheck, Clock } from "lucide-react"; // iconițe: bifă și ceas
+import { CircleAlert, CircleCheck, Clock } from "lucide-react"; // iconițe: avertisment, bifă și ceas
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
 import { DURATE_LIVRARE } from "../livrare.js"; // textele cu timpul estimat
 import { formatLei } from "../format.js"; // formatarea sumelor în lei
 
 // „Bonul” din zona de sus: următoarea comandă care e pe drum, calculată din listă.
-export default function BonComanda({ comenzi }) { // primește toată lista de comenzi prin props
-  const peDrum = comenzi.filter((c) => !c.livrata); // doar comnzile nelivrate
+// Etapa 6: `stare` e „incarcare”, „eroare” sau „gata”; până sosesc datele bonul nu pretinde „Nicio comandă încă”.
+export default function BonComanda({ comenzi, stare }) { // primește toată lista de comenzi și starea încărcării prin props
+  if (stare === "incarcare") { // comenzile nu au sosit încă
+    return ( // bonul cu forme gri în loc de text
+      <aside className="receipt" aria-label="Următoarea comandă" aria-busy="true">{/* aria-busy: conținutul încă se încarcă */}
+        <p className="receipt-label">Urmează să ajungă</p>{/* eticheta rămâne, ca bonul să nu-și schimbe forma */}
+        <div className="receipt-dish" aria-hidden="true">{/* locul preparatului, doar decor */}
+          <span className="thumb skeleton" />{/* locul iconiței */}
+          <div className="schelet-text schelet-bon">{/* locul numelui și al restaurantului */}
+            <span className="skeleton skeleton-line" />{/* numele */}
+            <span className="skeleton skeleton-line skeleton-short" />{/* restaurantul */}
+          </div>
+        </div>
+        <p className="sr-only">Se încarcă…</p>{/* textul citit în locul formelor gri */}
+        <div className="receipt-total" aria-hidden="true">{/* rândul de total, fără sumă */}
+          <span>Total pe drum</span>{/* eticheta */}
+          <strong>—</strong>{/* liniuță, nu „0 lei” */}
+        </div>
+      </aside>
+    ); // sfârșitul JSX-ului pentru încărcare
+  } // sfârșitul ramurii if
+
+  if (stare === "eroare") { // serverul nu a răspuns; detaliile și „Încearcă din nou” sunt în pagină
+    return ( // varianta neutră a bonului
+      <aside className="receipt receipt-done receipt-indisponibil" aria-label="Comenzi pe drum">{/* același aspect ca bonul „gata” */}
+        <CircleAlert size={28} aria-hidden="true" />{/* iconiță decorativă */}
+        <p>Comenzile nu sunt disponibile acum.</p>{/* nu spunem „0” sau „nicio comandă”: nu știm */}
+      </aside>
+    ); // sfârșitul JSX-ului pentru eroare
+  } // sfârșitul ramurii if
+
+  const peDrum = comenzi.filter((c) => !c.livrata); // doar comenzile nelivrate
   const urmatoarea = peDrum[0]; // prima dintre ele (undefined dacă nu există)
   const totalPeDrum = peDrum.reduce((suma, c) => suma + c.pret, 0); // suma prețurilor comenzilor pe drum
 

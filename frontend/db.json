@@ -1,0 +1,21 @@
+{
+  "comenzi": [
+    { "id": 1, "preparat": "Pizza Margherita", "livrata": false, "livrare": "express", "categorie": "Pizza", "restaurant": "Pizzeria Napoli", "pret": 42 },
+    { "id": 2, "preparat": "Burger de vită cu cartofi", "livrata": true, "livrare": "standard", "categorie": "Burgers", "restaurant": "Burger Van", "pret": 48 },
+    { "id": 3, "preparat": "Platou sushi (12 buc.)", "livrata": false, "livrare": "ridicare", "categorie": "Asian", "restaurant": "Sushi Kyo", "pret": 65 },
+    { "id": 4, "preparat": "Ramen cu porc", "livrata": true, "livrare": "express", "categorie": "Asian", "restaurant": "Sushi Kyo", "pret": 44 },
+    { "id": 5, "preparat": "Pizza Diavola × 2", "livrata": false, "livrare": "standard", "categorie": "Pizza", "restaurant": "Pizzeria Napoli", "pret": 96 },
+    { "id": 6, "preparat": "Burger vegetarian", "livrata": true, "livrare": "ridicare", "categorie": "Burgers", "restaurant": "Burger Van", "pret": 36 }
+  ],
+  "meniu": [
+    { "id": "p1", "preparat": "Pizza Margherita", "restaurant": "Pizzeria Napoli", "categorie": "Pizza", "pret": 42 },
+    { "id": "p2", "preparat": "Pizza Diavola", "restaurant": "Pizzeria Napoli", "categorie": "Pizza", "pret": 48 },
+    { "id": "p3", "preparat": "Pizza Quattro Formaggi", "restaurant": "Pizzeria Napoli", "categorie": "Pizza", "pret": 52 },
+    { "id": "p4", "preparat": "Burger de vită cu cartofi", "restaurant": "Burger Van", "categorie": "Burgers", "pret": 48 },
+    { "id": "p5", "preparat": "Burger cu pui crocant", "restaurant": "Burger Van", "categorie": "Burgers", "pret": 39 },
+    { "id": "p6", "preparat": "Burger vegetarian", "restaurant": "Burger Van", "categorie": "Burgers", "pret": 36 },
+    { "id": "p7", "preparat": "Platou sushi (12 buc.)", "restaurant": "Sushi Kyo", "categorie": "Asian", "pret": 65 },
+    { "id": "p8", "preparat": "Ramen cu porc", "restaurant": "Sushi Kyo", "categorie": "Asian", "pret": 44 },
+    { "id": "p9", "preparat": "Gyoza cu legume (6 buc.)", "restaurant": "Sushi Kyo", "categorie": "Asian", "pret": 28 }
+  ]
+}

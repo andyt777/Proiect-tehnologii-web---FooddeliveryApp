@@ -11,6 +11,7 @@ import {
   totalCos,
   cosInComenzi,
   citesteCos,
+  pastreazaDinMeniu,
 } from "../src/cos.js";
 
 // Îngheață recursiv: orice mutație a intrării aruncă TypeError (ESM rulează în strict mode)
@@ -261,34 +262,34 @@ test("cosInComenzi cu coș gol întoarce o copie a comenzilor existente", () => 
 // --- citesteCos ---
 
 test("citesteCos întoarce coș gol pentru null", () => {
-  assert.deepEqual(citesteCos(null, MENIU_TEST), []);
+  assert.deepEqual(citesteCos(null), []);
 });
 
 test("citesteCos întoarce coș gol pentru undefined și alte tipuri ne-text", () => {
-  assert.deepEqual(citesteCos(undefined, MENIU_TEST), []);
-  assert.deepEqual(citesteCos(42, MENIU_TEST), []);
-  assert.deepEqual(citesteCos([{ produsId: "a", cantitate: 1 }], MENIU_TEST), []);
+  assert.deepEqual(citesteCos(undefined), []);
+  assert.deepEqual(citesteCos(42), []);
+  assert.deepEqual(citesteCos([{ produsId: "a", cantitate: 1 }]), []);
 });
 
 test("citesteCos întoarce coș gol pentru text gol", () => {
-  assert.deepEqual(citesteCos("", MENIU_TEST), []);
+  assert.deepEqual(citesteCos(""), []);
 });
 
 test("citesteCos întoarce coș gol pentru JSON invalid", () => {
-  assert.deepEqual(citesteCos("{nu e json", MENIU_TEST), []);
-  assert.deepEqual(citesteCos("[{\"produsId\":\"a\",", MENIU_TEST), []);
+  assert.deepEqual(citesteCos("{nu e json"), []);
+  assert.deepEqual(citesteCos("[{\"produsId\":\"a\","), []);
 });
 
 test("citesteCos întoarce coș gol când JSON-ul e obiect, nu listă", () => {
-  assert.deepEqual(citesteCos('{"produsId":"a","cantitate":1}', MENIU_TEST), []);
-  assert.deepEqual(citesteCos("null", MENIU_TEST), []);
-  assert.deepEqual(citesteCos('"text"', MENIU_TEST), []);
-  assert.deepEqual(citesteCos("5", MENIU_TEST), []);
+  assert.deepEqual(citesteCos('{"produsId":"a","cantitate":1}'), []);
+  assert.deepEqual(citesteCos("null"), []);
+  assert.deepEqual(citesteCos('"text"'), []);
+  assert.deepEqual(citesteCos("5"), []);
 });
 
 test("citesteCos păstrează un coș valid", () => {
   const text = JSON.stringify([{ produsId: "a", cantitate: 2 }, { produsId: "c", cantitate: 20 }]);
-  assert.deepEqual(citesteCos(text, MENIU_TEST), [
+  assert.deepEqual(citesteCos(text), [
     { produsId: "a", cantitate: 2 },
     { produsId: "c", cantitate: 20 },
   ]);
@@ -308,13 +309,21 @@ test("citesteCos aruncă liniile invalide și le păstrează pe cele bune", () =
     { produsId: "b", cantitate: -1 }, // negativă
     { produsId: "b", cantitate: 21 }, // peste plafon
     { produsId: "b", cantitate: 1.5 }, // nu e întreagă
-    { produsId: "x", cantitate: 1 }, // id necunoscut
     { produsId: 1, cantitate: 1 }, // id numeric
+    { produsId: "", cantitate: 1 }, // id gol
     { produsId: "c", cantitate: 3 }, // bună
   ]);
-  assert.deepEqual(citesteCos(text, MENIU_TEST), [
+  assert.deepEqual(citesteCos(text), [
     { produsId: "a", cantitate: 1 },
     { produsId: "c", cantitate: 3 },
+  ]);
+});
+
+test("citesteCos verifică doar forma: păstrează id-uri care nu sunt (încă) în meniu", () => {
+  const text = JSON.stringify([{ produsId: "x", cantitate: 1 }, { produsId: "a", cantitate: 2 }]);
+  assert.deepEqual(citesteCos(text), [
+    { produsId: "x", cantitate: 1 },
+    { produsId: "a", cantitate: 2 },
   ]);
 });
 
@@ -324,7 +333,7 @@ test("citesteCos păstrează doar prima apariție a unui produs duplicat", () =>
     { produsId: "b", cantitate: 1 },
     { produsId: "a", cantitate: 5 },
   ]);
-  assert.deepEqual(citesteCos(text, MENIU_TEST), [
+  assert.deepEqual(citesteCos(text), [
     { produsId: "a", cantitate: 2 },
     { produsId: "b", cantitate: 1 },
   ]);
@@ -332,27 +341,58 @@ test("citesteCos păstrează doar prima apariție a unui produs duplicat", () =>
 
 test("citesteCos: o primă apariție invalidă nu blochează un duplicat valid ulterior", () => {
   const text = JSON.stringify([{ produsId: "a", cantitate: 0 }, { produsId: "a", cantitate: 4 }]);
-  assert.deepEqual(citesteCos(text, MENIU_TEST), [{ produsId: "a", cantitate: 4 }]);
+  assert.deepEqual(citesteCos(text), [{ produsId: "a", cantitate: 4 }]);
 });
 
 test("citesteCos elimină cheile în plus din linii", () => {
   const text = JSON.stringify([{ produsId: "a", cantitate: 2, pret: 1, __proto__x: "rău", extra: { y: 1 } }]);
-  const rezultat = citesteCos(text, MENIU_TEST);
+  const rezultat = citesteCos(text);
   assert.deepEqual(rezultat, [{ produsId: "a", cantitate: 2 }]);
   assert.deepEqual(Object.keys(rezultat[0]), ["produsId", "cantitate"]);
 });
 
 test("citesteCos nu e afectat de o cheie __proto__ în JSON", () => {
-  const rezultat = citesteCos('[{"produsId":"a","cantitate":1,"__proto__":{"admin":true}}]', MENIU_TEST);
+  const rezultat = citesteCos('[{"produsId":"a","cantitate":1,"__proto__":{"admin":true}}]');
   assert.deepEqual(rezultat, [{ produsId: "a", cantitate: 1 }]);
   assert.equal(rezultat[0].admin, undefined);
   assert.equal({}.admin, undefined);
 });
 
-test("citesteCos cu meniu gol aruncă toate liniile", () => {
-  assert.deepEqual(citesteCos(JSON.stringify([{ produsId: "a", cantitate: 1 }]), []), []);
+test("citesteCos cu listă goală întoarce coș gol", () => {
+  assert.deepEqual(citesteCos("[]"), []);
 });
 
-test("citesteCos cu listă goală întoarce coș gol", () => {
-  assert.deepEqual(citesteCos("[]", MENIU_TEST), []);
+// --- pastreazaDinMeniu ---
+
+test("pastreazaDinMeniu scoate produsele care nu există în meniu, păstrând ordinea", () => {
+  const cos = deepFreeze([
+    { produsId: "c", cantitate: 2 },
+    { produsId: "sters", cantitate: 4 },
+    { produsId: "a", cantitate: 1 },
+  ]);
+  const rezultat = pastreazaDinMeniu(cos, MENIU_TEST);
+  assert.deepEqual(rezultat, [{ produsId: "c", cantitate: 2 }, { produsId: "a", cantitate: 1 }]);
+  assert.notEqual(rezultat, cos);
+  assert.equal(rezultat[0], cos[0]); // liniile păstrate sunt aceleași obiecte
+  assert.equal(cos.length, 3);
+});
+
+test("pastreazaDinMeniu întoarce același coș când toate produsele există", () => {
+  const cos = deepFreeze([{ produsId: "a", cantitate: 1 }, { produsId: "b", cantitate: 3 }]);
+  assert.equal(pastreazaDinMeniu(cos, MENIU_TEST), cos);
+});
+
+test("pastreazaDinMeniu cu coș gol întoarce același coș gol", () => {
+  const cos = deepFreeze([]);
+  assert.equal(pastreazaDinMeniu(cos, MENIU_TEST), cos);
+});
+
+test("pastreazaDinMeniu cu meniu gol golește coșul", () => {
+  const cos = deepFreeze([{ produsId: "a", cantitate: 1 }]);
+  assert.deepEqual(pastreazaDinMeniu(cos, deepFreeze([])), []);
+});
+
+test("citesteCos + pastreazaDinMeniu: coșul salvat, apoi filtrat după sosirea meniului", () => {
+  const text = JSON.stringify([{ produsId: "a", cantitate: 2 }, { produsId: "x", cantitate: 1 }, { produsId: "a", cantitate: 9 }]);
+  assert.deepEqual(pastreazaDinMeniu(citesteCos(text), MENIU_TEST), [{ produsId: "a", cantitate: 2 }]);
 });

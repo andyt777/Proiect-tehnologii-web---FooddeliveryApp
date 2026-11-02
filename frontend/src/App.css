@@ -33,6 +33,10 @@
   --shadow: 0 1px 3px rgba(42, 26, 18, 0.06), 0 12px 32px rgba(42, 26, 18, 0.08);
   --backdrop: rgba(42, 26, 18, 0.5);
   --toast-bg: #2a1a12;
+  --error-bg: #fcefe6;      /* Etapa 6: panoul de eroare, teracotă foarte deschisă (textul --text pe el: 15:1) */
+  --error-border: #e8b394;  /* conturul panoului de eroare */
+  --skeleton: #f1e7db;      /* Etapa 6: formele gri de încărcare (doar decor, fără text) */
+  --skeleton-shine: rgba(255, 255, 255, 0.7); /* luciul care trece peste schelet */
 
   /* fonturi */
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -71,6 +75,10 @@
     --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     --backdrop: rgba(0, 0, 0, 0.6);
     --toast-bg: #4a362a;
+    --error-bg: #2b1810;
+    --error-border: #8a4426;
+    --skeleton: #2c2119;
+    --skeleton-shine: rgba(255, 255, 255, 0.06);
   }
 }
 
@@ -97,6 +105,10 @@
   --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
   --backdrop: rgba(0, 0, 0, 0.6);
   --toast-bg: #4a362a;
+  --error-bg: #2b1810;
+  --error-border: #8a4426;
+  --skeleton: #2c2119;
+  --skeleton-shine: rgba(255, 255, 255, 0.06);
 }
 
 body {
@@ -313,6 +325,8 @@ svg { flex-shrink: 0; }
   --accent-soft: #fbeee6;
   --brand: #3f6a0b;
   --brand-soft: #eef5e1;
+  --skeleton: #f1e7db;
+  --skeleton-shine: rgba(255, 255, 255, 0.7);
   --zimt: 8px;
   display: flex;
   flex-direction: column;
@@ -348,6 +362,10 @@ svg { flex-shrink: 0; }
 .receipt-total strong { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; color: var(--text); }
 .receipt-done { flex-direction: row; align-items: center; font-weight: 600; }
 .receipt-done svg { color: var(--brand); }
+/* Etapa 6: bonul când serverul nu a răspuns: iconiță neutră, nu bifa verde de „gata” */
+.receipt-indisponibil svg { color: var(--muted); }
+/* Etapa 6: liniile gri din bonul care se încarcă ocupă lățimea rămasă */
+.schelet-bon { flex: 1; }
 
 /* Rezumatul: un rând de cifre despărțite de linii, nu încă un rând de carduri */
 .proof {
@@ -368,7 +386,7 @@ svg { flex-shrink: 0; }
   font-weight: 600;
   letter-spacing: -0.02em;
 }
-.proof-stat span { font-size: 0.92rem; color: var(--muted); }
+.proof-stat > span { font-size: 0.92rem; color: var(--muted); } /* doar eticheta; nu și liniuța „—” din <strong> (Etapa 6) */
 .proof-sep { width: 1px; height: 28px; background: var(--line); }
 /* cifra nouă urcă la locul ei când valoarea se schimbă (elementul are key = valoarea) */
 .tick { display: inline-block; animation: tick 0.25s ease-out; }
@@ -712,6 +730,85 @@ svg { flex-shrink: 0; }
 .empty-illus { margin-bottom: 12px; }
 .empty p:first-of-type { font-size: 1.05rem; font-weight: 600; color: var(--text); }
 .empty-hint { font-size: 0.92rem; }
+/* căutare fără rezultate: iconiță în cerc, ca la coșul gol */
+.empty-icon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-radius: 50%;
+}
+/* „Șterge căutarea”, puțin despărțit de text */
+.empty .btn-secondary { margin-top: 14px; }
+
+/* Etapa 6: mesajul „Se încarcă…” de deasupra scheletelor (--muted: 6:1 pe cremă, 9:1 în tema întunecată) */
+.info {
+  margin-bottom: 16px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+/* Etapa 6: panoul de eroare, în paleta Savoro (teracotă), nu roz; textul e --text, deci contrastul e de peste 14:1 în ambele teme */
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px;
+  color: var(--text);
+  background: var(--error-bg);
+  border: 1.5px solid var(--error-border);
+  border-radius: var(--radius-lg);
+}
+/* iconița de avertisment, aliniată cu primul rând de text */
+.error > svg { margin-top: 2px; color: var(--accent-text); }
+/* textul deasupra, butonul „Încearcă din nou” dedesubt */
+.error-body { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; }
+/* comanda de rulat, scrisă ca un cod */
+.error code {
+  padding: 1px 6px;
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.92em;
+  background: color-mix(in srgb, var(--error-border) 30%, transparent);
+  border-radius: 6px;
+}
+
+/* Etapa 6: scheletele de încărcare: forme în culoarea --skeleton, peste care trece un luciu */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--skeleton);
+}
+/* luciul: o bandă deschisă care alunecă de la stânga la dreapta */
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--skeleton-shine), transparent);
+  transform: translateX(-100%);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+/* mișcarea luciului */
+@keyframes shimmer {
+  to { transform: translateX(100%); }
+}
+/* iconița gri are prioritate față de culorile pe categorii / livrare */
+.thumb.skeleton { background: var(--skeleton); }
+/* o linie de text gri */
+.skeleton-line { display: block; width: 72%; height: 14px; border-radius: 999px; }
+/* linia mai scurtă (restaurantul) */
+.skeleton-short { width: 44%; }
+/* locul unui buton rotunjit */
+.skeleton-pill { display: block; width: 104px; height: 44px; border-radius: 999px; }
+/* liniile de text, una sub alta, centrate pe verticală */
+.schelet-text { display: flex; flex-direction: column; justify-content: center; gap: 10px; }
+/* în zona espresso de sus scheletul e o linie albă translucidă, nu crem */
+.hero { --skeleton: rgba(255, 255, 255, 0.1); --skeleton-shine: rgba(255, 255, 255, 0.08); }
+/* linia din zona de sus are lungimea textului „6 comenzi, dintre care 2 pe drum” */
+.skeleton-hero { width: 280px; max-width: 100%; height: 18px; margin-top: 6px; }
 
 /* Dialogul de confirmare a ștergerii (în loc de confirm() din browser) */
 .dialog {
@@ -999,8 +1096,13 @@ svg { flex-shrink: 0; }
   outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
   outline-offset: 2px;
 }
-/* titlurile care primesc focus doar din cod (tabIndex -1) nu au nevoie de contur: nu sunt controale */
-[tabindex="-1"]:focus { outline: none; }
+/* doar cele două titluri care primesc focus din cod (Meniu, Coșul tău) renunță la contur: nu sunt controale.
+   Clasă aleasă explicit, nu [tabindex="-1"], ca un element nou cu tabIndex -1 să nu-și piardă conturul fără să știm */
+.titlu-focus:focus { outline: none; }
+
+/* Cât e deschis un dialog modal (coșul sau confirmarea ștergerii), pagina din spate nu se mai derulează;
+   scrollbar-gutter păstrează locul barei de derulare, ca pagina să nu sară în lateral */
+html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
 
 /* Fără animații pentru cine le-a dezactivat din sistem */
 @media (prefers-reduced-motion: reduce) {
@@ -1009,6 +1111,8 @@ svg { flex-shrink: 0; }
     animation: none !important;
     transition: none !important;
   }
+  /* Etapa 6: scheletele rămân forme gri statice, fără luciu */
+  .skeleton::after { display: none; }
 }
 
 /* 4.9 Ecrane medii: adresa iese din antet, bonul trece sub titlu */
@@ -1020,7 +1124,11 @@ svg { flex-shrink: 0; }
 
 /* 4.9 Ecrane înguste (la final, ca să suprascrie regulile de mai sus) */
 @media (max-width: 640px) {
-  :root { --gutter: 16px; }
+  /* --header-h = înălțimea antetului pe două rânduri, calculată din regulile de mai jos:
+     12px (padding sus) + 44px (rândul 1: logo 34px, temă și coș 44px) + 12px (row-gap)
+     + 44px (rândul 2: căutarea) + 12px (padding jos) = 124px; la fel ca pe desktop (72px), fără bordura de 1px.
+     Titlul meniului folosește variabila în scroll-margin-top, deci nu mai are nevoie de o valoare scrisă de mână. */
+  :root { --gutter: 16px; --header-h: 124px; }
   .header-inner {
     height: auto;
     flex-wrap: wrap;
@@ -1044,7 +1152,7 @@ svg { flex-shrink: 0; }
   .proof-sep { display: none; }
   .proof-stat { flex-direction: column; gap: 0; }
   .proof-stat strong { font-size: 1.3rem; }
-  .proof-stat span { font-size: 0.82rem; line-height: 1.3; }
+  .proof-stat > span { font-size: 0.82rem; line-height: 1.3; }
   .main { padding-top: 36px; padding-bottom: 48px; }
   .categories {
     flex-wrap: nowrap;
@@ -1070,9 +1178,8 @@ svg { flex-shrink: 0; }
   .dialog-body { padding: 24px; }
   /* butoanele unul sub altul, pe toată lățimea; acțiunea principală sus, la îndemâna degetului */
   .dialog-actions { flex-direction: column-reverse; }
-  /* meniul: o coloană; antetul e pe două rânduri, deci titlul se oprește mai jos */
+  /* meniul: o coloană (titlul se oprește sub antet prin --header-h, redefinit mai sus) */
   .menu-section { margin-bottom: 40px; }
-  .menu-title { scroll-margin-top: 140px; }
   .menu-grid { grid-template-columns: 1fr; gap: 12px; }
   .menu-card { padding: 16px; }
   /* coșul ocupă tot ecranul */
@@ -1108,7 +1215,8 @@ svg { flex-shrink: 0; }
   }
   .address-pill, .search, .theme-toggle, .cart-pill,
   .receipt, .card-side, .dialog, .toast-region,
-  .menu-section, .drawer { display: none !important; }
+  .menu-section, .drawer,
+  .error .btn-primary, .empty .btn-secondary, .skeleton { display: none !important; }
   .app-header { position: static; border-bottom: 2px solid #000000; }
   .hero { padding: 24px 0 8px; }
   .display { font-size: 1.8rem; max-width: none; }

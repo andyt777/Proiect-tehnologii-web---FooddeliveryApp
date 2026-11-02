@@ -63,7 +63,9 @@ export function cosInComenzi(linii, comenzi, livrare) { // primește liniile co�
 
 // Citește coșul salvat în localStorage. Textul vine din afara aplicației (poate fi modificat de oricine),
 // deci îl verificăm: la orice problemă întoarcem un coș gol, iar liniile invalide sunt aruncate.
-export function citesteCos(text, meniu) { // primește textul brut (sau null) și meniul
+// Etapa 6: aici verificăm doar forma. Meniul vine acum de la server, după prima randare, deci produsele
+// care nu mai există sunt scoase separat, de pastreazaDinMeniu, imediat ce meniul s-a încărcat.
+export function citesteCos(text) { // primește textul brut (sau null)
   if (typeof text !== "string") return []; // null (nimic salvat) sau alt tip
   let date; // aici va ajunge rezultatul parsării
   try { // JSON.parse aruncă eroare la text invalid
@@ -72,13 +74,20 @@ export function citesteCos(text, meniu) { // primește textul brut (sau null) ș
     return []; // coș gol
   } // sfârșitul try/catch
   if (!Array.isArray(date)) return []; // trebuie să fie o listă
-  const iduriMeniu = new Set(meniu.map((p) => p.id)); // id-urile valide, pentru verificare rapidă
   return date.reduce((valide, linie) => { // construim o listă nouă doar cu liniile bune
     const ok = // o linie e bună doar dacă trece toate verificările
       linie !== null && typeof linie === "object" && // trebuie să fie un obiect
-      typeof linie.produsId === "string" && iduriMeniu.has(linie.produsId) && // produsul există în meniu
+      typeof linie.produsId === "string" && linie.produsId !== "" && // id text, nevid (existența în meniu se verifică mai târziu)
       Number.isInteger(linie.cantitate) && linie.cantitate >= 1 && linie.cantitate <= CANTITATE_MAXIMA && // cantitate întreagă, în limite
       !valide.some((v) => v.produsId === linie.produsId); // fără dubluri: păstrăm prima apariție
     return ok ? [...valide, { produsId: linie.produsId, cantitate: linie.cantitate }] : valide; // copiem doar câmpurile cunoscute
   }, []); // pornim de la o listă goală
+} // sfârșitul funcției
+
+// Păstrează în coș doar produsele care există în meniul primit de la server (apelată o dată, după încărcare).
+// Dacă nu dispare nimic, întoarce același coș: React nu mai randează și nu mai rescrie localStorage degeaba.
+export function pastreazaDinMeniu(cos, meniu) { // primește coșul și lista de preparate
+  const iduriMeniu = new Set(meniu.map((p) => p.id)); // id-urile valide, pentru verificare rapidă
+  const ramase = cos.filter((linie) => iduriMeniu.has(linie.produsId)); // listă nouă, doar cu produsele cunoscute
+  return ramase.length === cos.length ? cos : ramase; // aceeași referință când nu s-a scos nimic
 } // sfârșitul funcției

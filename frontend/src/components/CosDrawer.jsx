@@ -10,7 +10,7 @@ const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE); // ["standard", "express",
 
 // Coșul: panou lateral construit pe <dialog> nativ, ca ConfirmDialog (Esc și clicul pe fundal îl închid).
 // Primește liniile deja calculate de App; nu modifică singur coșul, doar anunță prin callback-uri.
-export default function CosDrawer({ deschis, linii, onClose, onSchimba, onScoate, onPlaseaza, onVeziMeniul }) { // props: starea, datele și callback-urile
+export default function CosDrawer({ deschis, linii, disponibil, onClose, onSchimba, onScoate, onPlaseaza, onVeziMeniul }) { // props: starea, datele și callback-urile; disponibil = meniul s-a încărcat
   const ref = useRef(null); // elementul <dialog>
   const inchideRef = useRef(null); // butonul X, primește focusul la deschidere
   const titluRef = useRef(null); // titlul, primește focusul când o linie dispare
@@ -49,6 +49,13 @@ export default function CosDrawer({ deschis, linii, onClose, onSchimba, onScoate
   function handleSubmit(e) { // trimiterea formularului = plasarea comenzii
     e.preventDefault(); // fără reîncărcarea paginii
     onPlaseaza(livrare); // App transformă coșul în comenzi
+    setLivrare("standard"); // următoarea comandă pornește iar de la livrarea standard
+  } // sfârșitul funcției
+
+  // Enter pe un buton radio ar trimite formularul (trimitere implicită) și ar plasa comanda din greșeală.
+  // Oprim tasta doar pe radio-uri; comanda se plasează numai din buton (Enter sau Space pe el merg în continuare).
+  function handleKeyDown(e) { // tastă apăsată oriunde în formular
+    if (e.key === "Enter" && e.target.type === "radio") e.preventDefault(); // fără acțiunea implicită a tastei, browserul nu mai trimite formularul
   } // sfârșitul funcției
 
   return ( // întoarcem JSX
@@ -62,7 +69,7 @@ export default function CosDrawer({ deschis, linii, onClose, onSchimba, onScoate
     >
       <div className="drawer-body">{/* conținutul ocupă toată înălțimea, deci clicurile din panou nu ajung la <dialog> */}
         <div className="drawer-head">{/* titlul și X-ul */}
-          <h2 id="cos-titlu" ref={titluRef} tabIndex={-1}>Coșul tău</h2>{/* tabIndex -1: focus doar din cod */}
+          <h2 id="cos-titlu" className="titlu-focus" ref={titluRef} tabIndex={-1}>Coșul tău</h2>{/* tabIndex -1: focus doar din cod; titlu-focus: fără contur la acest focus */}
           <button // butonul de închidere
             ref={inchideRef} // primește focusul la deschidere
             type="button" // buton simplu
@@ -74,7 +81,13 @@ export default function CosDrawer({ deschis, linii, onClose, onSchimba, onScoate
           </button>
         </div>
 
-        {linii.length === 0 ? ( // coșul e gol
+        {linii.length === 0 && !disponibil ? ( // meniul nu s-a încărcat: nu știm încă ce e în coș
+          <div className="drawer-empty">{/* aceeași așezare ca starea goală */}
+            <span className="drawer-empty-icon" aria-hidden="true"><ShoppingBag size={26} /></span>{/* iconiță decorativă */}
+            <p className="drawer-empty-title">Coșul nu e disponibil încă</p>{/* nu spunem „gol”: produsele salvate apar după încărcare */}
+            <p>Produsele din coș apar după ce se încarcă meniul.</p>{/* explicația */}
+          </div>
+        ) : linii.length === 0 ? ( // coșul e gol
           <div className="drawer-empty">{/* starea goală */}
             <span className="drawer-empty-icon" aria-hidden="true"><ShoppingBag size={26} /></span>{/* iconiță decorativă */}
             <p className="drawer-empty-title">Coșul e gol</p>{/* mesajul principal */}
@@ -82,7 +95,7 @@ export default function CosDrawer({ deschis, linii, onClose, onSchimba, onScoate
             <button type="button" className="btn-primary" onClick={handleVeziMeniul}>Vezi meniul</button>{/* închide coșul și duce la meniu */}
           </div>
         ) : ( // coșul are produse
-          <form className="drawer-form" onSubmit={handleSubmit}>{/* formular: Enter pe un radio plasează comanda */}
+          <form className="drawer-form" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>{/* formular: se trimite doar din butonul „Plasează comanda” */}
             <div className="drawer-scroll">{/* zona care se derulează */}
               <ul className="cos-lista">{/* liniile coșului */}
                 {linii.map((linie) => { // un rând pentru fiecare linie
