@@ -209,6 +209,18 @@ that read and change it. Results are printed in the browser console (F12).
 Validation rejects: empty or >100 char dish name, delivery type not in `LIVRARI`,
 empty restaurant, price that is not a positive number, category not in `CATEGORII`.
 
+## Stage 6 checklist
+
+| ID    | Requirement | Where | How to check |
+| ----- | ----------- | ----- | ------------ |
+| S6-R1 | npm run api starts, route shows JSON | [package.json#L12](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/package.json#L12), [L28](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/package.json#L28), [db.json](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/db.json) | open localhost:3001/comenzi and /meniu |
+| S6-R2 | data no longer in React code | [App.jsx#L43-L46](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/App.jsx#L43-L46) (useState([])), [L63-L81](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/App.jsx#L63-L81) (useEffect + ignore) | read |
+| S6-R3 | loading message while waiting | [App.jsx#L329](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/App.jsx#L329), [Meniu.jsx](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/components/Meniu.jsx) | `npx json-server --watch db.json --port 3001 --delay 4000` |
+| S6-R4 | error message when API is down | [App.jsx#L295-L304](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/App.jsx#L295-L304) | stop npm run api, refresh |
+| S6-R5 | fetch only in api.js, URL from env | [api.js#L6](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/api.js#L6), [L16-L17](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/src/api.js#L16-L17), [.env.example](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/frontend/.env.example) | search for fetch |
+| S6-R6 | README Stage 6 section + AI log | [README.md#L55](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/README.md#L55), [ai-log/etapa-06.md](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/blob/55428cf5144466cb6ab503ede5827bcb4fbae605/ai-log/etapa-06.md) | read |
+| S6-R7 | commit "Stage 6" pushed | [55428cf](https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp/commit/55428cf5144466cb6ab503ede5827bcb4fbae605) | commit history |
+
 ## Stage 5 checklist
 
 | ID    | Requirement | Where | How to check |
