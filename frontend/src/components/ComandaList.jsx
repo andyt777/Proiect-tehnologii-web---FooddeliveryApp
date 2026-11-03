@@ -1,7 +1,7 @@
 import ComandaCard from "./ComandaCard.jsx"; // componenta pentru o singură comandă
 
 // Primește lista și funcțiile și le transmite fiecărui card.
-// Ordinea afișată e derivată: întâi comenzile pe drum, apoi cele livrate, sub un separator.
+// Ordinea afișată e derivată: întâi comenzile pe drum, apoi cele livrate, fiecare grup sub separatorul lui.
 export default function ComandaList({ comenzi, onToggle, onDelete }) { // props: lista și callback-urile din App
   if (comenzi.length === 0) { // lista e goală
     return ( // afișăm starea „gol”
@@ -16,15 +16,15 @@ export default function ComandaList({ comenzi, onToggle, onDelete }) { // props:
   // sort e stabil: în fiecare grup rămâne ordinea din listă
   const ordonate = [...comenzi].sort((a, b) => a.livrata - b.livrata); // copie sortată (sort modifică array-ul, deci nu sortăm state-ul direct); false(0) înaintea lui true(1)
   const livrate = comenzi.filter((c) => c.livrata).length; // câte comenzi sunt livrate
-  const primaLivrata = livrate > 0 && livrate < comenzi.length ? ordonate[comenzi.length - livrate].id : null; // id-ul primei livrate, doar dacă există ambele grupuri
+  const peDrum = comenzi.length - livrate; // restul sunt pe drum
 
   return ( // lista propriu-zisă
-    <ul className="item-list">{/* lista neordonată */}
-      {ordonate.map((comanda) => ( // pentru fiecare comandă randăm un rând
+    <ul className="item-list">{/* o singură listă; separatoarele sunt rânduri ale ei */}
+      {ordonate.map((comanda, i) => ( // pentru fiecare comandă randăm un rând
         <ComandaRand // componenta ajutătoare definită mai jos
           key={comanda.id} // key unic și stabil, ca React să știe ce element s-a mutat sau a dispărut
           comanda={comanda} // datele comenzii
-          separator={comanda.id === primaLivrata ? livrate : 0} // numărul din separator, doar pentru prima livrată
+          separator={separatorInainte(ordonate, i, peDrum, livrate)} // separatorul dinaintea rândului (sau null)
           onToggle={onToggle} // transmitem callback-ul mai departe
           onDelete={onDelete} // la fel pentru ștergere
         />
@@ -33,13 +33,22 @@ export default function ComandaList({ comenzi, onToggle, onDelete }) { // props:
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei
 
-// Cardul, precedat de separatorul „Livrate” când e prima comandă livrată
+// Separatorul unui grup apare înaintea primei lui comenzi, oricând grupul are cel puțin o comandă
+// (și când există un singur grup: titlul spune ce fel de comenzi sunt în listă)
+function separatorInainte(ordonate, i, peDrum, livrate) { // lista sortată, poziția rândului și mărimea grupurilor
+  const comanda = ordonate[i]; // rândul curent
+  const primaDinGrup = i === 0 || ordonate[i - 1].livrata !== comanda.livrata; // rândul de dinainte e din alt grup (sau nu există)
+  if (!primaDinGrup) return null; // în mijlocul grupului: fără separator
+  return comanda.livrata ? { id: "livrate", text: "Livrate", numar: livrate } : { id: "pe-drum", text: "Pe drum", numar: peDrum }; // id-ul dă și numele unic pentru View Transitions
+} // sfârșitul funcției
+
+// Cardul, precedat de separatorul grupului când e prima comandă din grup
 function ComandaRand({ separator, ...props }) { // scoatem `separator`, restul props-urilor merg în `props`
   return ( // întoarcem JSX
     <>{/* Fragment: grupează elemente fără să adauge un nod în DOM */}
-      {separator > 0 && ( // separatorul apare doar când are un număr
-        <li className="group-divider" role="presentation" style={{ viewTransitionName: "separator-livrate" }}>{/* role="presentation": nu e un element real al listei pentru cititoarele de ecran */}
-          Livrate · {separator}{/* textul separatorului */}
+      {separator && ( // separatorul apare doar înaintea primei comenzi din grup
+        <li className="group-divider" role="presentation" style={{ viewTransitionName: `separator-${separator.id}` }}>{/* role="presentation": nu e un element real al listei pentru cititoarele de ecran; nume unic per separator */}
+          {separator.text} · {separator.numar}{/* ex. „Pe drum · 3” */}
         </li>
       )}{/* sfârșitul randării condiționate */}
       <ComandaCard {...props} />{/* spread: transmitem toate props-urile rămase cardului */}

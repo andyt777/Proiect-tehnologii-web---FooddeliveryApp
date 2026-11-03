@@ -1,11 +1,13 @@
 import { CircleCheck, Clock, Trash2 } from "lucide-react"; // iconițe: bifă, ceas, coș de gunoi
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
+import { imagineComanda } from "../imagini.js"; // fotografia preparatului comandat (sau null)
 import { DURATE_LIVRARE, ETICHETE_LIVRARE } from "../livrare.js"; // texte pentru tipul și durata livrării
 import { formatLei } from "../format.js"; // formatarea prețului
 
 // O singură comandă din listă, primită prin props: un rând ca într-un meniu tipărit.
 export default function ComandaCard({ comanda, onToggle, onDelete }) { // destructurăm props: datele comenzii și cele două callback-uri
-  const Iconita = ICONITE_CATEGORIE[comanda.categorie]; // alegem iconița după categorie
+  const Iconita = ICONITE_CATEGORIE[comanda.categorie]; // alegem iconița după categorie (când nu avem fotografie)
+  const imagine = imagineComanda(comanda); // fotografia preparatului, a categoriei sau null
 
   return ( // întoarcem JSX
     <li // fiecare card e un element de listă
@@ -13,7 +15,11 @@ export default function ComandaCard({ comanda, onToggle, onDelete }) { // destru
       // numele leagă rândul de el însuși între două randări, ca să alunece la noua poziție
       style={{ viewTransitionName: `comanda-${comanda.id}` }} // nume unic per comandă pentru View Transitions
     >
-      <span className="thumb" aria-hidden="true"><Iconita size={22} strokeWidth={1.75} /></span>{/* iconița categoriei */}
+      {imagine ? ( // avem o fotografie
+        <img className="thumb thumb-foto" src={imagine} alt="" width="48" height="48" loading="lazy" decoding="async" />// miniatura, decorativă: numele e în titlu
+      ) : ( // fără fotografie
+        <span className="thumb" aria-hidden="true"><Iconita size={22} strokeWidth={1.75} /></span>// iconița categoriei, ca înainte
+      )}{/* sfârșitul randării condiționate */}
       <div className="card-main">{/* partea principală a cardului */}
         <div className="card-top">{/* rândul de sus: titlu ..... preț */}
           {/* span-ul poartă linia care taie titlul, desenată treptat la bifare */}

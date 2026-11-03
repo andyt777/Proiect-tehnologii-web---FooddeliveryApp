@@ -1,19 +1,22 @@
 import { useEffect, useRef, useState } from "react"; // hook-urile React: useState pentru date care se schimbă, useEffect pentru efecte secundare, useRef pentru titlul meniului
-import { CircleAlert, MapPin, Moon, RotateCw, Search, ShoppingBag, Sun } from "lucide-react"; // iconițele din header și din mesajul de eroare
+import { ArrowDown, CircleAlert, MapPin, Moon, RotateCw, Search, ShoppingBag, Sun } from "lucide-react"; // iconițele din header, din hero și din mesajul de eroare
 import BonComanda from "./components/BonComanda.jsx"; // „bonul” din zona hero
+import CategoriiCarduri from "./components/CategoriiCarduri.jsx"; // cardurile „Ce poftești azi?”
 import CautareGoala from "./components/CautareGoala.jsx"; // starea „niciun rezultat” a căutării
 import ComandaList from "./components/ComandaList.jsx"; // lista de comenzi
 import ConfirmDialog from "./components/ConfirmDialog.jsx"; // dialogul de confirmare a ștergerii
 import CosDrawer from "./components/CosDrawer.jsx"; // panoul lateral al coșului
 import Logo from "./components/Logo.jsx"; // logo-ul Savoro
 import Meniu from "./components/Meniu.jsx"; // grila de preparate
+import RezumatBento from "./components/RezumatBento.jsx"; // plăcile cu cifrele comenzilor
 import { ScheletComenzi } from "./components/Schelete.jsx"; // rândurile gri afișate cât se încarcă comenzile
 import UndoToast from "./components/UndoToast.jsx"; // mesajul cu „Anulează” și confirmarea comenzii
 import { fetchComenzi, fetchMeniu } from "./api.js"; // Etapa 6: datele vin de la server, prin singurul fișier cu fetch
-import { CATEGORII } from "./categorii.js"; // lista de categorii
+import { potrivesteCategoria } from "./categorii.js"; // filtrul de categorie al meniului
 import { normalizeaza, potrivesteCautarea } from "./cautare.js"; // filtrarea după textul din câmpul de căutare
 import { adaugaInCos, citesteCos, cosInComenzi, liniiCos, numarProduse, pastreazaDinMeniu, schimbaCantitate, scoateDinCos, totalCos } from "./cos.js"; // logica pură a coșului
-import { formatComenzi, formatLei, formatProduse } from "./format.js"; // funcții de formatare a textelor
+import { formatComenzi, formatProduse } from "./format.js"; // funcții de formatare a textelor
+import { formatRestaurante, restauranteDinMeniu } from "./rezumat.js"; // textele din hero, derivate din meniu
 import { cuTranzitie } from "./tranzitie.js"; // învelește actualizările de state într-o animație
 
 // Tema de pornire: cea aleasă data trecută, altfel cea a sistemului de operare.
@@ -55,7 +58,8 @@ export default function App() { // componenta principală; deține tot state-ul
   // ultima comandă plasată, pentru mesajul de confirmare (null = ascuns); obiect nou la fiecare plasare, ca timer-ul să repornească
   const [confirmare, setConfirmare] = useState(null); // state pentru toast-ul de confirmare
   const [cautare, setCautare] = useState(""); // textul din câmpul de căutare (input controlat)
-  const meniuTitluRef = useRef(null); // titlul secțiunii „Meniu”, ca să-i putem da focus din coșul gol
+  const [categorieActiva, setCategorieActiva] = useState(null); // categoria aleasă din „Ce poftești azi?” (null = toate)
+  const meniuTitluRef = useRef(null); // titlul secțiunii „Meniu”, ca să-i putem da focus din coșul gol și din hero
   const cautareRef = useRef(null); // câmpul de căutare, primește focusul după „Șterge căutarea”
   const focusDupaReincercare = useRef(false); // true între clicul pe „Încearcă din nou” și randarea stării de încărcare (ref, nu state: nu trebuie să redeseneze nimic)
 
@@ -167,14 +171,19 @@ export default function App() { // componenta principală; deține tot state-ul
     cuTranzitie(() => setComenzi((prev) => cosInComenzi(linii, prev, livrare))); // doar lista de comenzi e animată; `linii` vine din randarea curentă, deci golirea de mai sus nu o afectează
   } // sfârșitul funcției
 
-  // „Vezi meniul” din coșul gol: panoul s-a închis deja, ducem utilizatorul la meniu
-  function handleVeziMeniul() { // apelată de CosDrawer
-    setCosDeschis(false); // state-ul urmează dialogul închis
+  // Duce utilizatorul la meniu: focus pe titlu și derulare; folosită de butonul din hero și de coșul gol
+  function mergiLaMeniu() { // fără parametri
     const titlu = meniuTitluRef.current; // titlul secțiunii „Meniu”
     if (!titlu) return; // în starea de eroare secțiunea „Meniu” nu e afișată
     const fluid = !window.matchMedia("(prefers-reduced-motion: reduce)").matches; // derulare lină doar dacă nu s-au cerut mai puține animații
     titlu.focus({ preventScroll: true }); // focus pe titlu (cititorul de ecran anunță „Meniu”), fără salt brusc
     titlu.scrollIntoView({ behavior: fluid ? "smooth" : "auto", block: "start" }); // derulăm până la meniu
+  } // sfârșitul funcției
+
+  // „Vezi meniul” din coșul gol: panoul s-a închis deja, ducem utilizatorul la meniu
+  function handleVeziMeniul() { // apelată de CosDrawer
+    setCosDeschis(false); // state-ul urmează dialogul închis
+    mergiLaMeniu(); // același drum ca butonul din hero
   } // sfârșitul funcției
 
   // Căutarea: Esc golește câmpul (în plus față de „×”-ul pe care unele browsere îl pun în input[type=search])
@@ -183,9 +192,15 @@ export default function App() { // componenta principală; deține tot state-ul
   } // sfârșitul funcției
 
   // „Șterge căutarea” din starea fără rezultate: butonul dispare, deci ducem focusul în câmp
-  function handleStergeCautarea() { // apelată de CautareGoala
+  function handleStergeCautarea() { // apelată de CautareGoala (lista de comenzi)
     setCautare(""); // golim textul
     cautareRef.current.focus(); // utilizatorul poate scrie imediat altă căutare
+  } // sfârșitul funcției
+
+  // Meniul fără rezultate: butonul golește și căutarea, și categoria, apoi focusul merge tot în câmp
+  function handleStergeFiltrele() { // apelată de CautareGoala (meniul)
+    setCategorieActiva(null); // înapoi la „Toate”
+    handleStergeCautarea(); // golim textul și mutăm focusul
   } // sfârșitul funcției
 
   // Comutarea temei: state-ul pentru buton, atributul data-theme pentru CSS
@@ -205,19 +220,17 @@ export default function App() { // componenta principală; deține tot state-ul
   // Valori derivate: se recalculează la fiecare randare
   const gata = !loading && !error; // datele au sosit cu bine
   const stare = loading ? "incarcare" : error ? "eroare" : "gata"; // aceeași informație, ca text, pentru bon
-  const peDrum = comenzi.filter((c) => !c.livrata).length; // câte comenzi nu sunt livrate
-  const livrate = comenzi.length - peDrum; // restul sunt livrate
-  const total = comenzi.reduce((suma, c) => suma + c.pret, 0); // suma tuturor prețurilor
   const comandaDeSters = comenzi.find((c) => c.id === deSters) ?? null; // obiectul comenzii din dialog (sau null)
   const linii = liniiCos(cos, meniu); // coșul unit cu meniul: preparat, preț, cantitate, subtotal (gol cât meniul nu a sosit)
   const produseInCos = numarProduse(linii); // numărul de pe butonul coșului, doar din produsele care există în meniu
   const totalDePlata = totalCos(linii); // totalul coșului
   const cautareActiva = normalizeaza(cautare) !== ""; // doar spațiile nu contează ca o căutare
   const textCautat = cautareActiva ? cautare.trim() : ""; // textul afișat în mesaje, fără spațiile de la margini
-  const meniuAfisat = meniu.filter((p) => potrivesteCautarea(p, cautare)); // meniul filtrat (tot meniul dacă nu se caută nimic)
-  const comenziAfisate = comenzi.filter((c) => potrivesteCautarea(c, cautare)); // comenzile filtrate; contoarele de mai sus rămân pe toată lista
-  // în locul cifrelor, cât timp nu avem date: o liniuță vizibilă și un text pentru cititoarele de ecran
-  const faraValoare = <><span aria-hidden="true">—</span><span className="sr-only">{loading ? "se încarcă" : "indisponibil"}</span></>; // nu „0 lei”: încă nu știm
+  const meniuAfisat = meniu.filter((p) => potrivesteCautarea(p, cautare) && potrivesteCategoria(p, categorieActiva)); // meniul filtrat de căutare și de categorie (tot meniul dacă nu e niciun filtru)
+  const comenziAfisate = comenzi.filter((c) => potrivesteCautarea(c, cautare)); // comenzile filtrate doar de căutare; rezumatul rămâne pe toată lista
+  const restaurante = restauranteDinMeniu(meniu); // ["Pizzeria Napoli", ...], pentru hero
+  // anunțul cititoarelor de ecran: câte rezultate lasă filtrele (gol când nu e niciun filtru)
+  const anuntFiltre = !gata || (!cautareActiva && !categorieActiva) ? "" : `${categorieActiva ? `${categorieActiva}: ` : ""}${formatProduse(meniuAfisat.length)}${cautareActiva ? ` și ${formatComenzi(comenziAfisate.length)} găsite` : ""}`; // ex. „Pizza: 3 produse” sau „2 produse și 1 comandă găsite”
 
   return ( // JSX-ul paginii
     <>{/* Fragment: mai multe elemente de nivel superior fără un <div> în plus */}
@@ -242,7 +255,7 @@ export default function App() { // componenta principală; deține tot state-ul
             />
           </label>
           <span className="sr-only" role="status">{/* anunță numărul de rezultate, fără să mute focusul */}
-            {gata && cautareActiva ? `${formatProduse(meniuAfisat.length)} și ${formatComenzi(comenziAfisate.length)} găsite` : ""}{/* gol când nu se caută */}
+            {anuntFiltre}{/* gol când nu se caută și nu e aleasă nicio categorie */}
           </span>
           <button // butonul de temă
             className="theme-toggle" // clasa pentru stiluri
@@ -252,7 +265,7 @@ export default function App() { // componenta principală; deține tot state-ul
             {tema === "dark" ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}{/* iconița depinde de tema curentă */}
             <span className="theme-label">{tema === "dark" ? "Mod luminos" : "Mod întunecat"}</span>{/* textul arată ce se întâmplă la clic */}
           </button>
-          <button // butonul coșului (comenzile pe drum rămân în banda de rezumat)
+          <button // butonul coșului (comenzile pe drum rămân în rezumatul „Comenzile tale”)
             type="button" // buton simplu
             className="cart-pill" // clasa pentru stiluri
             onClick={() => setCosDeschis(true)} // deschidem panoul
@@ -265,30 +278,30 @@ export default function App() { // componenta principală; deține tot state-ul
         </div>
       </header>
 
-      <section className="hero">{/* zona mare de sus */}
-        <div className="wrap hero-inner">{/* containerul centrat */}
-          <div>{/* coloana cu texte */}
-            <span className="eyebrow">Comenzile tale</span>{/* supratitlul mic */}
-            <h2 className="display">Toate comenzile tale de mâncare, <em>într-un singur loc</em>.</h2>{/* titlul mare */}
-            {gata && ( // numărătoarea apare doar când avem datele
-              <p className="app-count">{/* numărătoarea */}
-                {formatComenzi(comenzi.length)}, dintre care {peDrum} pe drum{/* ex. „3 comenzi, dintre care 2 pe drum” */}
+      <section className="hero" aria-labelledby="hero-titlu">{/* zona mare de sus, cu fotografie pe toată lățimea */}
+        <picture className="hero-foto">{/* fotografia potrivită ecranului: portret pe telefon, peisaj în rest */}
+          <source media="(max-width: 640px)" srcSet="/img/hero-900.webp" width="828" height="1100" />{/* telefon: fișierul îngust (aceeași regulă ca preload-ul din index.html) */}
+          <img src="/img/hero-1600.webp" alt="" width="1600" height="1000" fetchPriority="high" decoding="async" />{/* decorativă (titlul spune tot); fetchPriority: prima imagine cerută */}
+        </picture>
+        <div className="wrap hero-inner">{/* containerul centrat, peste fotografie */}
+          <div className="hero-text">{/* coloana cu texte */}
+            {gata && restaurante.length > 0 && <p className="eyebrow">{restaurante.join(" · ")}</p>}{/* restaurantele din meniu, ex. „Pizzeria Napoli · Burger Van · Sushi Kyo” */}
+            {loading && <p className="eyebrow" aria-hidden="true"><span className="skeleton skeleton-line skeleton-eyebrow" /></p>}{/* cât se încarcă: o linie gri */}
+            <h2 id="hero-titlu" className="display">Cina ta preferată, <em>la ușă</em>.</h2>{/* titlul mare */}
+            {gata && ( // textul apare doar când avem datele
+              <p className="hero-sub">{/* subtitlul, derivat din meniu */}
+                {meniu.length > 0 ? `${formatProduse(meniu.length)} din ${formatRestaurante(restaurante.length)}.` : "Meniul nu are preparate momentan."}{/* ex. „9 produse din 3 restaurante.” */}
               </p>
             )}{/* sfârșitul randării condiționate */}
-            {loading && <p className="app-count" aria-hidden="true"><span className="skeleton skeleton-line skeleton-hero" /></p>}{/* cât se încarcă: o linie gri în locul textului */}
+            {loading && <p className="hero-sub" aria-hidden="true"><span className="skeleton skeleton-line skeleton-hero" /></p>}{/* cât se încarcă: o linie gri în locul textului */}
+            {!error && ( // în starea de eroare meniul nu e afișat, deci butonul n-ar avea unde duce
+              <button type="button" className="btn-primary hero-cta" onClick={mergiLaMeniu}>{/* focus pe titlul meniului + derulare */}
+                Vezi meniul{/* textul butonului */}
+                <ArrowDown size={18} aria-hidden="true" />{/* iconiță decorativă */}
+              </button>
+            )}{/* sfârșitul randării condiționate */}
           </div>
-          <BonComanda comenzi={comenzi} stare={stare} />{/* bonul primește lista și starea încărcării prin props */}
-        </div>
-      </section>
-
-      {/* key = valoarea: când cifra se schimbă, elementul e randat din nou și animația pornește */}
-      <section className="proof" aria-label="Rezumat" aria-busy={loading}>{/* banda cu statistici */}
-        <div className="wrap proof-inner">{/* containerul centrat */}
-          <div className="proof-stat"><strong key={gata ? total : stare} className="tick">{gata ? formatLei(total) : faraValoare}</strong><span>cheltuiți luna asta</span></div>{/* totalul cheltuit */}
-          <span className="proof-sep" aria-hidden="true" />{/* separator vizual */}
-          <div className="proof-stat"><strong key={gata ? peDrum : stare} className="tick">{gata ? peDrum : faraValoare}</strong><span>pe drum</span></div>{/* comenzi pe drum */}
-          <span className="proof-sep" aria-hidden="true" />{/* separator vizual */}
-          <div className="proof-stat"><strong key={gata ? `${livrate}/${comenzi.length}` : stare} className="tick">{gata ? `${livrate} din ${comenzi.length}` : faraValoare}</strong><span>livrate</span></div>{/* comenzi livrate din total */}
+          <div className="hero-bon"><BonComanda comenzi={comenzi} stare={stare} /></div>{/* învelișul poartă umbra (masca zimțată a bonului ar tăia un box-shadow pus chiar pe bon) */}
         </div>
       </section>
 
@@ -305,13 +318,20 @@ export default function App() { // componenta principală; deține tot state-ul
             </div>
           </div>
         ) : ( // se încarcă sau datele au sosit
-          <>{/* Fragment: cele două secțiuni */}
+          <>{/* Fragment: cele trei secțiuni */}
+            <CategoriiCarduri // „Ce poftești azi?”, deasupra meniului
+              meniu={meniu} // tot meniul: numerele de pe carduri nu depind de căutare
+              activa={categorieActiva} // categoria aleasă (null = „Toate”)
+              onAlege={setCategorieActiva} // primește numele categoriei sau null
+              incarcare={loading} // true = carduri gri
+            />
             <Meniu // grila de preparate, deasupra comenzilor
-              meniu={meniuAfisat} // preparatele care se potrivesc cu căutarea
+              meniu={meniuAfisat} // preparatele care se potrivesc cu căutarea și cu categoria
               totalMeniu={meniu.length} // câte are meniul întreg, pentru „2 din 9 produse”
               incarcare={loading} // true = schelete în loc de carduri
               cautare={textCautat} // textul căutat ("" = nu se caută)
-              onStergeCautarea={handleStergeCautarea} // butonul din starea fără rezultate
+              categorie={categorieActiva} // categoria aleasă (null = toate), pentru numărătoare și starea goală
+              onStergeFiltrele={handleStergeFiltrele} // butonul din starea fără rezultate
               cos={cos} // ca fiecare card să-și știe cantitatea
               onAdauga={handleAdauga} // „Adaugă”
               onSchimba={handleSchimbaCantitate} // „−” / „+”
@@ -319,27 +339,19 @@ export default function App() { // componenta principală; deține tot state-ul
             />
             <section className="orders-section" aria-labelledby="comenzi-titlu" aria-busy={loading}>{/* secțiunea comenzilor */}
               <div className="section-header">{/* titlul secțiunii */}
-                <h2 id="comenzi-titlu">Comenzile mele</h2>{/* textul titlului */}
+                <h2 id="comenzi-titlu">Comenzile tale</h2>{/* textul titlului */}
                 {gata && ( // numărul apare doar după încărcare
                   <span className="section-meta">{cautareActiva ? `${comenziAfisate.length} din ${formatComenzi(comenzi.length)}` : formatComenzi(comenzi.length)}</span> // la căutare: „1 din 6 comenzi”
                 )}{/* sfârșitul randării condiționate */}
               </div>
+              <RezumatBento comenzi={comenzi} stare={stare} />{/* cifrele, din toată lista (nu din cea căutată) */}
               {loading ? ( // comenzile nu au sosit încă
                 <>{/* mesajul și scheletele */}
                   <p className="info" role="status">Se încarcă comenzile…</p>{/* role="status": textul e anunțat de cititoarele de ecran */}
                   <ScheletComenzi />{/* rânduri gri, doar decor */}
                 </>
               ) : ( // datele au sosit
-                <>{/* categoriile și lista */}
-                  <ul className="categories" aria-label="Categorii">{/* lista de categorii */}
-                    {CATEGORII.map((cat) => ( // un <li> pentru fiecare categorie
-                      <li key={cat.nume}>{/* numele e unic, deci bun ca key */}
-                        <cat.Icon size={16} aria-hidden="true" />{/* componenta iconiței, luată din obiect */}
-                        {cat.nume}{/* numele categoriei */}
-                        <span className="cat-count">{comenzi.filter((c) => c.categorie === cat.nume).length}</span>{/* câte comenzi are categoria (din toată lista) */}
-                      </li>
-                    ))}{/* sfârșitul map-ului */}
-                  </ul>
+                <>{/* lista (sau mesajul fără rezultate) */}
                   {cautareActiva && comenziAfisate.length === 0 && comenzi.length > 0 ? ( // căutarea nu a găsit nicio comandă
                     <CautareGoala mesaj={`Nicio comandă pentru „${textCautat}”`} onSterge={handleStergeCautarea} />// mesaj + „Șterge căutarea”
                   ) : ( // lista (sau mesajul „Nu ai nicio comandă.” dacă lista e chiar goală)
@@ -376,6 +388,7 @@ export default function App() { // componenta principală; deține tot state-ul
       <footer className="app-footer">{/* subsolul paginii */}
         <div className="wrap footer-inner">{/* containerul centrat */}
           <p>© Savoro · Proiect Tehnologii Web · UNSTPB 2026–2027</p>{/* textul de copyright */}
+          <p><a href="https://github.com/andyt777/Proiect-tehnologii-web---FooddeliveryApp#fotografii">Fotografii: Unsplash</a></p>{/* autorii fotografiilor sunt în README */}
         </div>
       </footer>
     </>

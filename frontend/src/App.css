@@ -43,7 +43,7 @@
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 
   /* dimensiuni comune: toate secțiunile se aliniază la aceeași lățime */
-  --page: 960px;
+  --page: 1120px;           /* redesign: mai lat, pentru grila de fotografii */
   --gutter: 24px;
   --header-h: 72px;
   --radius-sm: 10px;
@@ -148,14 +148,21 @@ svg { flex-shrink: 0; }
   white-space: nowrap;
 }
 
-/* 4.2 Antetul: espresso în ambele teme, fix la derulare */
+/* 4.2 Antetul: espresso translucid în ambele teme, fix la derulare; fotografia și pagina se văd estompate prin el */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 10;
   color: var(--on-ink);
-  background: var(--ink);
+  /* 86% espresso: textul --on-ink-muted rămâne peste 5:1 chiar și cu alb în spate */
+  background: color-mix(in srgb, var(--ink) 86%, transparent);
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
   border-bottom: 1px solid var(--header-border);
+}
+/* fără backdrop-filter, translucidul ar lăsa textul paginii să se citească prin antet: fundal plin */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .app-header { background: var(--ink); }
 }
 .header-inner {
   height: var(--header-h);
@@ -275,44 +282,81 @@ svg { flex-shrink: 0; }
   40% { transform: scale(1.35); }
 }
 
-/* Zona de sus: titlu cu serif pe espresso */
+/* Zona de sus: fotografie pe toată lățimea, sub antetul translucid; textul stă jos, pe partea întunecată */
 .hero {
-  padding: 56px 0 64px;
+  position: relative;
+  isolation: isolate;       /* z-index-urile negative de mai jos rămân în hero, nu ajung sub pagină */
+  display: flex;
+  align-items: flex-end;
+  min-height: calc(var(--header-h) + 540px);
+  /* urcă sub antet (înălțimea lui + bordura de 1px), ca fotografia să înceapă din vârful paginii */
+  margin-top: calc(-1 * var(--header-h) - 1px);
+  padding: calc(var(--header-h) + 56px) 0 56px;
+  overflow: hidden;
   color: var(--on-ink);
-  background: var(--ink);
+  background: var(--ink);   /* culoarea de sub fotografie, cât timp se încarcă */
 }
+/* fotografia acoperă toată secțiunea, decupată după nevoie */
+.hero-foto,
+.hero-foto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-foto { z-index: -2; }
+.hero-foto img { object-fit: cover; object-position: center 40%; }
+/* umbra peste fotografie: întunecată jos și în stânga, unde stă textul alb (contrast AA) */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(20, 10, 5, 0.72) 0%, rgba(20, 10, 5, 0.35) 45%, rgba(20, 10, 5, 0) 75%),
+    linear-gradient(180deg, rgba(20, 10, 5, 0.55) 0%, rgba(20, 10, 5, 0.3) 30%, rgba(20, 10, 5, 0.78) 65%, rgba(20, 10, 5, 0.94) 100%);
+}
+/* o umbră fină sub litere, pentru zonele mai luminoase ale fotografiei */
+.hero-text { text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35); }
 .eyebrow {
-  display: inline-block;
+  display: block;
   margin-bottom: 14px;
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--accent-on-ink);
+  color: var(--on-ink);
 }
 .display {
-  max-width: 18ch;
+  max-width: 15ch;
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4.8vw, 3.4rem);
+  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
   font-weight: 600;
-  line-height: 1.08;
+  line-height: 1.04;
   letter-spacing: -0.025em;
   text-wrap: balance;       /* rânduri de lungimi apropiate */
 }
 .display em { color: var(--accent-on-ink); }
-.app-count {
-  margin-top: 18px;
-  font-size: 1.08rem;
-  color: var(--on-ink-muted);
+/* subtitlul derivat din meniu: „9 produse din 3 restaurante.” */
+.hero-sub {
+  margin-top: 16px;
+  font-size: 1.12rem;
+  color: var(--on-ink);
 }
+/* „Vezi meniul”: butonul principal, rotunjit, fără umbra textului */
+.hero-cta { margin-top: 26px; border-radius: 999px; text-shadow: none; }
+/* conturul de focus alb se vede pe fotografie (cel teracotă translucid, nu) */
+.hero :focus-visible { outline-color: #ffffff; }
 
-/* titlul în stânga, „bonul” următoarei comenzi în dreapta */
+/* titlul în stânga, „bonul” următoarei comenzi în dreapta, aliniate jos */
 .hero-inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: end;
   gap: 48px;
 }
+/* umbra bonului stă pe înveliș: drop-shadow urmează zimții, iar un box-shadow pe bon ar fi tăiat de mască */
+.hero-bon { filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.45)); }
 
 /* Bonul: hârtie cremă (în ambele teme), cu marginea de jos zimțată */
 .receipt {
@@ -367,27 +411,6 @@ svg { flex-shrink: 0; }
 /* Etapa 6: liniile gri din bonul care se încarcă ocupă lățimea rămasă */
 .schelet-bon { flex: 1; }
 
-/* Rezumatul: un rând de cifre despărțite de linii, nu încă un rând de carduri */
-.proof {
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
-}
-.proof-inner {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px 40px;
-  padding-block: 22px;
-}
-.proof-stat { display: flex; align-items: baseline; gap: 8px; }
-.proof-stat strong {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-}
-.proof-stat > span { font-size: 0.92rem; color: var(--muted); } /* doar eticheta; nu și liniuța „—” din <strong> (Etapa 6) */
-.proof-sep { width: 1px; height: 28px; background: var(--line); }
 /* cifra nouă urcă la locul ei când valoarea se schimbă (elementul are key = valoarea) */
 .tick { display: inline-block; animation: tick 0.25s ease-out; }
 @keyframes tick {
@@ -414,81 +437,135 @@ svg { flex-shrink: 0; }
 }
 .section-meta { font-size: 0.92rem; color: var(--muted); }
 
-/* Categoriile: pastile cu iconiță + text + număr, ca filele unui meniu */
-.categories {
+/* „Ce poftești azi?”: „Toate” + câte un card cu fotografie pentru fiecare categorie */
+.categorii-section { margin-bottom: 48px; }
+.categorii-carduri {
   list-style: none;
-  margin: 0 0 20px;
+  margin: 0;
   padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 0.7fr repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
-.categories li {
+/* cardul e un buton: textul stă jos, peste fotografie */
+.categorie-card {
+  position: relative;
+  isolation: isolate;       /* fotografia și umbra (z-index negativ) rămân în card */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: 100%;
+  height: 128px;
+  padding: 14px 16px;
+  font: inherit;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--on-ink);
+  background: var(--ink);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+.categorie-card.skeleton { display: block; background: var(--skeleton); cursor: default; }
+.categorie-img {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease-out;
+}
+.categorie-card:hover .categorie-img { transform: scale(1.06); }
+/* umbra de jos: textul alb rămâne lizibil pe orice fotografie */
+.categorie-foto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(20, 10, 5, 0.9) 0%, rgba(20, 10, 5, 0.5) 55%, rgba(20, 10, 5, 0.12) 100%);
+}
+.categorie-nume {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  padding: 0 6px 0 14px;
-  font-size: 0.9rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
   font-weight: 600;
-  color: var(--muted);
-  background: var(--surface);
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
 }
-.categories li svg { color: var(--accent-text); }
-.cat-count {
-  min-width: 24px;
-  height: 24px;
-  padding: 0 7px;
-  display: grid;
-  place-items: center;
-  font-size: 0.76rem;
-  font-weight: 700;
+.categorie-numar { font-size: 0.84rem; font-weight: 500; }
+/* „Toate”: fără fotografie, pe fundal cremă; iconița urcă în colțul de sus */
+.categorie-toate {
   color: var(--text);
   background: var(--bg-soft);
-  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  transition: background 0.15s, border-color 0.15s;
 }
+.categorie-toate:hover { border-color: var(--subtle); }
+.categorie-toate .categorie-numar { color: var(--muted); }
+.categorie-iconita { margin-bottom: auto; color: var(--accent-text); }
+/* categoria aleasă: chenar teracotă gros (formă, nu doar culoare) + o linie albă subțire spre fotografie */
+.categorie-toate[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent-text); }
+.categorie-foto[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--accent);
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+}
+/* focus: contur plin, cu spațiu față de card (se vede și pe fundal cremă, și lângă fotografie) */
+.categorie-card:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
 
 /* Meniul: secțiune deasupra comenzilor; titlul se oprește sub antetul fix când derulăm la el */
 .menu-section { margin-bottom: 56px; }
 .menu-title { scroll-margin-top: calc(var(--header-h) + 24px); }
 
-/* Grila de preparate: 3 coloane pe desktop, una pe telefon */
+/* Grila de preparate: 3 coloane pe desktop, 2 pe tabletă, una pe telefon */
 .menu-grid {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 22px;
 }
 
-/* Cardul unui preparat: iconiță + „titlu ..... preț”, iar acțiunea jos, aliniată în toate cardurile */
+/* Cardul unui preparat: fotografia 4:3 sus, „titlu ..... preț” și restaurantul dedesubt;
+   butonul stă în aceeași celulă de grilă cu fotografia, deci se suprapune peste colțul ei */
 .menu-card {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  grid-template-rows: 1fr auto;
-  gap: 14px;
-  padding: 18px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  grid-template-areas: "foto" "info";
+  grid-template-rows: auto 1fr;
+  gap: 12px;
 }
-.menu-card .thumb { color: var(--accent-text); background: var(--accent-soft); }
-.menu-card h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; }
-.menu-card .price { font-size: 1.05rem; }
-.menu-restaurant { margin-top: 4px; font-size: 0.9rem; font-weight: 500; color: var(--muted); }
+.menu-foto {
+  grid-area: foto;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--skeleton);   /* locul fotografiei, până sosește */
+  border-radius: var(--radius-lg);
+}
+/* preparat fără fotografie: iconița categoriei, în aceeași cutie */
+.menu-foto-gol { display: grid; place-items: center; color: var(--accent-text); background: var(--accent-soft); }
+.menu-info { grid-area: info; padding-inline: 2px; }
+.menu-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
+.menu-card .price { font-size: 1.05rem; color: var(--accent-text); }
+.menu-restaurant { margin-top: 2px; font-size: 0.9rem; font-weight: 500; color: var(--muted); }
 .menu-action {
-  grid-column: 1 / -1;
+  grid-area: foto;
+  align-self: end;
+  justify-self: end;
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  min-height: 46px;
+  margin: 12px;
 }
 
-/* „Adaugă”: pastilă conturată în teracotă (5.2:1 pe alb, 4.5:1 pe fundalul de hover; mult peste în tema întunecată) */
+/* „Adaugă”: pastilă plină peste fotografie (teracotă pe alb 5.2:1; la hover alb pe teracotă 5.2:1) */
 .btn-add {
   display: inline-flex;
   align-items: center;
@@ -499,13 +576,22 @@ svg { flex-shrink: 0; }
   font-size: 0.92rem;
   font-weight: 600;
   color: var(--accent-text);
-  background: transparent;
-  border: 1.5px solid currentColor;
+  background: var(--surface);
+  border: none;
   border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(20, 10, 5, 0.3);
   cursor: pointer;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
-.btn-add:hover { background: var(--accent-soft); }
+.btn-add:hover { color: #ffffff; background: var(--accent); }
+/* selectorul din card are fundal plin, ca să se citească peste fotografie (cel din coș rămâne la fel) */
+.menu-action .stepper { background: var(--surface); border-color: transparent; box-shadow: 0 6px 18px rgba(20, 10, 5, 0.3); }
+/* focus peste fotografie: inel alb între două inele închise, vizibil pe orice culoare */
+.menu-action :focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px rgba(20, 10, 5, 0.85);
+}
 
 /* Selectorul de cantitate „− 2 +”: butoane rotunde de 44px într-o pastilă */
 .stepper {
@@ -536,6 +622,107 @@ svg { flex-shrink: 0; }
   font-weight: 700;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+/* Rezumatul „Comenzile tale”: plăci de mărimi diferite (bento), toate calculate din listă */
+.bento {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+.tile {
+  position: relative;
+  isolation: isolate;       /* strălucirea plăcii mari stă sub text, nu peste el */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  background: linear-gradient(160deg, var(--surface) 0%, var(--bg-soft) 100%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+.tile-text { display: flex; flex-direction: column; }
+.tile-valoare {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.2vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.tile-eticheta { font-size: 0.92rem; color: var(--muted); }
+/* placa mare: totalul sus, categoriile jos, pe două rânduri ale grilei */
+.tile-mare { grid-row: span 2; justify-content: space-between; }
+.tile-mare .tile-valoare { font-size: clamp(2.2rem, 4.4vw, 3.2rem); }
+/* strălucirea teracotă din colț, doar decor */
+.tile-mare::after {
+  content: "";
+  position: absolute;
+  top: -70px;
+  right: -70px;
+  z-index: -1;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 20%, transparent), transparent);
+  pointer-events: none;
+}
+/* placa lată: tipurile de livrare, pe două coloane */
+.tile-lata { grid-column: span 2; }
+/* pastilele cu categorii: iconiță + nume + număr */
+.bento-chips,
+.bento-livrari {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bento-chips li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 6px 0 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+}
+.bento-chips svg { color: var(--accent-text); }
+/* numărul de comenzi din pastilă, într-un cerc */
+.cat-count {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  display: grid;
+  place-items: center;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text);
+  background: var(--bg-soft);
+  border-radius: 999px;
+}
+/* etichetele de livrare, puțin mai mari decât cele de pe rânduri */
+.bento-livrari .badge { height: 30px; padding: 0 12px; font-size: 0.85rem; }
+/* bara „livrate”: doar decor (textul „3 din 6” spune același lucru) */
+.bento-bara {
+  display: block;
+  height: 8px;
+  overflow: hidden;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}
+.bento-bara > span {
+  display: block;
+  height: 100%;
+  background: var(--brand);
+  border-radius: inherit;
+  transition: width 0.4s ease-out;
 }
 
 /* 4.6 Lista: rânduri ca într-un meniu tipărit, într-un singur panou */
@@ -578,6 +765,8 @@ svg { flex-shrink: 0; }
   border-bottom: 1px solid var(--line);
 }
 .group-divider + .item-card { border-top: none; }
+/* „Pe drum” e de obicei primul rând: colțurile de sus urmează panoul */
+.group-divider:first-child { border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg); }
 
 /* iconița categoriei, în culoarea tipului de livrare */
 .thumb {
@@ -591,6 +780,8 @@ svg { flex-shrink: 0; }
 .card-standard .thumb { color: var(--muted); background: var(--bg-soft); }
 .card-express  .thumb { color: var(--accent-text); background: var(--accent-soft); }
 .card-ridicare .thumb { color: var(--brand); background: var(--brand-soft); }
+/* miniatura cu fotografie: decupată pătrat; fundalul se vede doar până sosește imaginea */
+.thumb-foto { object-fit: cover; background: var(--skeleton); }
 
 /* titlu ..... preț, cu linie punctată între ele */
 .card-top {
@@ -697,6 +888,7 @@ svg { flex-shrink: 0; }
 
 /* 4.8 Comandă livrată: titlu tăiat, iconiță stinsă, bifa verde */
 .item-card.done .thumb { opacity: 0.45; }
+.item-card.done .thumb-foto { filter: grayscale(0.6); }  /* fotografia comenzii încheiate, stinsă */
 /* linia care taie titlul e un fundal care crește de la stânga la dreapta (se poate anima, text-decoration nu) */
 .title-text {
   background: linear-gradient(currentColor, currentColor) no-repeat 0 58% / 0 1.5px;
@@ -807,8 +999,10 @@ svg { flex-shrink: 0; }
 .schelet-text { display: flex; flex-direction: column; justify-content: center; gap: 10px; }
 /* în zona espresso de sus scheletul e o linie albă translucidă, nu crem */
 .hero { --skeleton: rgba(255, 255, 255, 0.1); --skeleton-shine: rgba(255, 255, 255, 0.08); }
-/* linia din zona de sus are lungimea textului „6 comenzi, dintre care 2 pe drum” */
-.skeleton-hero { width: 280px; max-width: 100%; height: 18px; margin-top: 6px; }
+/* linia din zona de sus are lungimea textului „9 produse din 3 restaurante.” */
+.skeleton-hero { width: 260px; max-width: 100%; height: 18px; margin-top: 6px; }
+/* supratitlul: linie subțire, cât numele restaurantelor */
+.skeleton-eyebrow { width: 300px; max-width: 100%; height: 12px; }
 
 /* Dialogul de confirmare a ștergerii (în loc de confirm() din browser) */
 .dialog {
@@ -1089,7 +1283,17 @@ svg { flex-shrink: 0; }
 
 /* Subsolul: doar ©, discret */
 .app-footer { border-top: 1px solid var(--line); }
-.footer-inner { padding-block: 28px; font-size: 0.88rem; color: var(--muted); }
+.footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-block: 28px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.footer-inner a { text-underline-offset: 3px; }
+.footer-inner a:hover { color: var(--text); }
 
 /* 5. Focus vizibil la navigarea cu Tab */
 :focus-visible {
@@ -1115,11 +1319,19 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   .skeleton::after { display: none; }
 }
 
+/* Tabletă: meniul pe două coloane */
+@media (max-width: 1024px) {
+  .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* 4.9 Ecrane medii: adresa iese din antet, bonul trece sub titlu */
 @media (max-width: 860px) {
   .address-pill { display: none; }
+  .hero { min-height: calc(var(--header-h) + 480px); }
   .hero-inner { grid-template-columns: 1fr; gap: 32px; }
   .receipt { max-width: 360px; transform: none; }
+  /* textul ocupă toată lățimea: umbra se întinde uniform, mai închisă spre bon */
+  .hero::before { background: linear-gradient(180deg, rgba(20, 10, 5, 0.6) 0%, rgba(20, 10, 5, 0.68) 45%, rgba(20, 10, 5, 0.9) 100%); }
 }
 
 /* 4.9 Ecrane înguste (la final, ca să suprascrie regulile de mai sus) */
@@ -1146,22 +1358,35 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
     clip-path: inset(50%);
     white-space: nowrap;
   }
-  .hero { padding: 36px 0 44px; }
-  /* trei coloane egale: cifra sus, eticheta dedesubt */
-  .proof-inner { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-  .proof-sep { display: none; }
-  .proof-stat { flex-direction: column; gap: 0; }
-  .proof-stat strong { font-size: 1.3rem; }
-  .proof-stat > span { font-size: 0.82rem; line-height: 1.3; }
+  .hero { min-height: calc(var(--header-h) + 460px); padding: calc(var(--header-h) + 28px) 0 32px; }
+  /* fotografia ocupă doar partea de sus (480px sub antet) și se topește în espresso; bonul stă pe espresso, dedesubt */
+  .hero-foto,
+  .hero::before { bottom: auto; height: calc(var(--header-h) + 480px); }
+  .hero::before { background: linear-gradient(180deg, rgba(20, 10, 5, 0.6) 0%, rgba(20, 10, 5, 0.7) 55%, var(--ink) 100%); }
+  .display { font-size: clamp(2.2rem, 10.5vw, 2.8rem); }
+  .hero-sub { font-size: 1.02rem; }
+  .hero-inner { gap: 28px; }
   .main { padding-top: 36px; padding-bottom: 48px; }
-  .categories {
-    flex-wrap: nowrap;
+  /* categoriile: un rând care glisează orizontal și se oprește la fiecare card; padding-ul lasă loc conturului de focus */
+  .categorii-section { margin-bottom: 36px; }
+  .categorii-carduri {
+    display: flex;
     overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
     margin-inline: calc(-1 * var(--gutter));
-    padding-inline: var(--gutter);
+    padding: 6px var(--gutter) 10px;
     scrollbar-width: none;
   }
-  .categories li { flex-shrink: 0; }
+  .categorii-carduri li { flex: 0 0 42%; scroll-snap-align: start; }
+  .categorii-carduri li:first-child { flex-basis: 30%; }
+  .categorie-card { height: 104px; padding: 12px; }
+  .categorie-nume { font-size: 1.1rem; }
+  /* bento: două coloane; placa mare și cea lată ocupă tot rândul */
+  .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .tile { padding: 16px; }
+  .tile-mare,
+  .tile-lata { grid-column: 1 / -1; grid-row: auto; }
   .item-list { padding: 0 16px; }
   .item-card, .group-divider { margin-inline: -16px; padding-inline: 16px; }
   /* rândul se rupe: iconiță + text sus, acțiunile dedesubt, pe toată lățimea */
@@ -1180,8 +1405,7 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   .dialog-actions { flex-direction: column-reverse; }
   /* meniul: o coloană (titlul se oprește sub antet prin --header-h, redefinit mai sus) */
   .menu-section { margin-bottom: 40px; }
-  .menu-grid { grid-template-columns: 1fr; gap: 12px; }
-  .menu-card { padding: 16px; }
+  .menu-grid { grid-template-columns: 1fr; gap: 24px; }
   /* coșul ocupă tot ecranul */
   .drawer { width: 100%; border-left: none; border-radius: 0; }
   .drawer-head { padding-left: 16px; }
@@ -1215,10 +1439,13 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   }
   .address-pill, .search, .theme-toggle, .cart-pill,
   .receipt, .card-side, .dialog, .toast-region,
-  .menu-section, .drawer,
+  .menu-section, .drawer, .hero-foto, .hero-cta, .hero-bon,
+  .categorii-section, .bento-bara,
   .error .btn-primary, .empty .btn-secondary, .skeleton { display: none !important; }
-  .app-header { position: static; border-bottom: 2px solid #000000; }
-  .hero { padding: 24px 0 8px; }
+  .app-header { position: static; background: none; border-bottom: 2px solid #000000; }
+  .hero { min-height: 0; margin-top: 0; padding: 24px 0 8px; background: none; }
+  .hero::before { display: none; }
+  .hero-text { text-shadow: none; }
   .display { font-size: 1.8rem; max-width: none; }
   .hero-inner { display: block; }
   .item-card { grid-template-columns: auto minmax(0, 1fr); break-inside: avoid; }

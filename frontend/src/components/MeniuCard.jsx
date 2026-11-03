@@ -2,12 +2,14 @@ import { useEffect, useRef } from "react"; // useRef: referințe la butoane; use
 import { Plus } from "lucide-react"; // iconița plus de pe „Adaugă”
 import Stepper from "./Stepper.jsx"; // selectorul de cantitate
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
+import { imaginePreparat } from "../imagini.js"; // fotografia preparatului (sau null)
 import { formatLei } from "../format.js"; // formatarea prețului
 
-// Un preparat din meniu: iconiță, nume ..... preț, restaurant și butonul de adăugare.
+// Un preparat din meniu: fotografie, nume ..... preț, restaurant și butonul de adăugare peste fotografie.
 // Cât timp preparatul e în coș, butonul „Adaugă” e înlocuit de selectorul de cantitate.
 export default function MeniuCard({ produs, cantitate, onAdauga, onSchimba }) { // props: preparatul, cantitatea din coș (0 = nu e în coș) și callback-urile
-  const Iconita = ICONITE_CATEGORIE[produs.categorie]; // componenta iconiței categoriei
+  const Iconita = ICONITE_CATEGORIE[produs.categorie]; // componenta iconiței categoriei (când nu avem fotografie)
+  const imagine = imaginePreparat(produs.preparat); // „/img/....webp” sau null
   const adaugaRef = useRef(null); // butonul „Adaugă”
   const plusRef = useRef(null); // butonul „+” din selector
   // Butonul apăsat dispare la randare (Adaugă -> selector, sau selector -> Adaugă), iar focusul s-ar pierde.
@@ -32,7 +34,19 @@ export default function MeniuCard({ produs, cantitate, onAdauga, onSchimba }) { 
 
   return ( // întoarcem JSX
     <li className="menu-card">{/* un element al grilei de preparate */}
-      <span className="thumb" aria-hidden="true"><Iconita size={22} strokeWidth={1.75} /></span>{/* iconița categoriei */}
+      {imagine ? ( // avem fotografia preparatului
+        <img // fotografia, 4:3
+          className="menu-foto" // colțuri rotunjite, aceeași formă în toate cardurile
+          src={imagine} // ex. „/img/gyoza.webp”
+          alt="" // decorativă: numele preparatului e chiar dedesubt
+          width="720" // dimensiunile reale, ca browserul să rezerve locul înainte să sosească imaginea
+          height="540" // la fel
+          loading="lazy" // meniul e sub hero: se încarcă doar când ajunge aproape de ecran
+          decoding="async" // decodarea nu blochează desenarea paginii
+        />
+      ) : ( // preparat fără fotografie
+        <span className="menu-foto menu-foto-gol" aria-hidden="true"><Iconita size={40} strokeWidth={1.5} /></span>// iconița categoriei, în aceeași cutie 4:3
+      )}{/* sfârșitul randării condiționate */}
       <div className="menu-info">{/* textele preparatului */}
         <div className="card-top">{/* titlu ..... preț, ca pe un meniu tipărit */}
           <h3>{produs.preparat}</h3>{/* numele preparatului */}
@@ -41,7 +55,7 @@ export default function MeniuCard({ produs, cantitate, onAdauga, onSchimba }) { 
         </div>
         <p className="menu-restaurant">{produs.restaurant}</p>{/* restaurantul */}
       </div>
-      <div className="menu-action">{/* rândul cu butonul / selectorul */}
+      <div className="menu-action">{/* butonul / selectorul, așezat din CSS peste colțul fotografiei */}
         {cantitate > 0 ? ( // preparatul e deja în coș
           <Stepper preparat={produs.preparat} cantitate={cantitate} onSchimba={handleSchimba} plusRef={plusRef} /> // selectorul − cantitate +
         ) : ( // nu e în coș

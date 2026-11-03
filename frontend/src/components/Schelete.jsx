@@ -10,12 +10,11 @@ export function ScheletMeniu() { // fără props
     <ul className="menu-grid" aria-hidden="true">{/* ascuns pentru cititoarele de ecran */}
       {CARDURI_MENIU.map((id) => ( // un card gri pentru fiecare cheie
         <li key={id} className="menu-card">{/* aceeași cutie ca un preparat */}
-          <span className="thumb skeleton" />{/* locul iconiței */}
+          <span className="menu-foto skeleton" />{/* locul fotografiei, tot 4:3 */}
           <div className="menu-info schelet-text">{/* locul numelui și al restaurantului */}
             <span className="skeleton skeleton-line" />{/* numele */}
             <span className="skeleton skeleton-line skeleton-short" />{/* restaurantul */}
           </div>
-          <div className="menu-action"><span className="skeleton skeleton-pill" /></div>{/* locul butonului „Adaugă” */}
         </li>
       ))}{/* sfârșitul map-ului */}
     </ul>

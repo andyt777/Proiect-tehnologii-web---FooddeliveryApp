@@ -1,7 +1,7 @@
 import { Fish, Hamburger, Pizza } from "lucide-react"; // iconițe SVG ca și componente React
 
-// Categoriile, cu câte o iconiță SVG (aceeași în chips și pe card)
-export const CATEGORII = [ // listă exportată, folosită de App pentru „chips”-urile de categorii
+// Categoriile, cu câte o iconiță SVG (aceeași pe cardurile de categorii, în rezumat, pe bon și acolo unde lipsește o fotografie)
+export const CATEGORII = [ // listă exportată, folosită de cardurile „Ce poftești azi?” și de rezumatul comenzilor
   { nume: "Pizza", Icon: Pizza }, // Icon e chiar componenta (nu un string), deci se poate randa ca <cat.Icon />
   { nume: "Burgers", Icon: Hamburger }, // aceeași structură pentru fiecare categorie
   { nume: "Asian", Icon: Fish }, // numele trebuie să coincidă cu câmpul `categorie` din comenzi
