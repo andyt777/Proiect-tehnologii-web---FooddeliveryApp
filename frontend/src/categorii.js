@@ -8,3 +8,8 @@ export const CATEGORII = [ // listă exportată, folosită de App pentru „chip
 ]; // sfârșitul listei
 
 export const ICONITE_CATEGORIE = Object.fromEntries(CATEGORII.map((c) => [c.nume, c.Icon])); // transformă lista în obiect { Pizza: Pizza, ... } pentru căutare rapidă după nume
+
+// Filtrul de categorie al meniului: null („Toate”) potrivește orice preparat
+export function potrivesteCategoria(produs, categorie) { // produs = preparat din meniu; categorie = nume sau null
+  return categorie == null || produs.categorie === categorie; // == null prinde și undefined
+} // sfârșitul funcției
