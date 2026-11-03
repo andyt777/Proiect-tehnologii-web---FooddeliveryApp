@@ -52,6 +52,67 @@ with a "Încearcă din nou" button. `npm test` runs the unit tests (no server ne
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
 
+## Redesign: cinematic hero, photo menu, bento
+
+Done after stage 6, on the `redesign/cinematic` branch (restore point: tag `pre-redesign`). The goal was a
+2026 food-delivery look (Glovo / Wolt level) without losing anything stages 1–6 require. Spec and plan:
+`docs/superpowers/specs/`.
+
+- header: sticky, translucent espresso with a backdrop blur (solid espresso where `backdrop-filter`
+  is not supported); same controls as before
+- hero: a full-width photo (`<picture>`, an 828px portrait file up to 640px wide, a 1600px one above,
+  preloaded from `index.html` with the same media rules, `fetchpriority="high"`) under a dark gradient,
+  so the white text stays AA. Eyebrow = the restaurants found in the menu, subtitle = "9 produse din
+  3 restaurante.", a "Vezi meniul" button that scrolls to the menu and focuses its title (the same
+  `mergiLaMeniu()` as "Vezi meniul" in the empty cart)
+- the receipt (`BonComanda`) is unchanged (tilted paper, zig-zag edge, same states); it now sits on the
+  photo, with a `drop-shadow` on a wrapper (a `box-shadow` would be cut by the zig-zag mask)
+- "Ce poftești azi?": "Toate" + one photo card per category, each with "N preparate" counted from the
+  menu. They are `aria-pressed` toggle buttons; clicking the active one again (or "Toate") clears the
+  filter. The category filter works together with the search (`potrivesteCategoria` in `src/categorii.js`);
+  the meta says "N din M produse" and the empty state names the search and/or the category, with a
+  button that clears both and focuses the search field
+- menu cards: a 4:3 photo (`loading="lazy"`, explicit `width` / `height`), "Adaugă" over the photo,
+  replaced by the "− 2 +" stepper while the dish is in the cart (same focus moves as before). A dish
+  without a photo falls back to its category icon
+- "Comenzile tale": the old summary strip and the category pills became a bento grid
+  (`RezumatBento`): total spent with per-category counts, orders on the way, "X din Y" delivered with a
+  decorative progress bar, and counts per delivery type with the existing badge colours. While loading
+  the tiles show "—" (plus a screen-reader text), never "0 lei"
+- orders: one list, with a "Pe drum · N" divider before the first order on the way and "Livrate · N"
+  before the first delivered one (each shown whenever its group is not empty, so a list with only
+  delivered orders still says what it is); photo thumbnails, falling back to the category icon
+- responsive: phone ≤ 640px (photo ~480px under the header, receipt below the title, categories as a
+  horizontal scroll-snap row, one menu column, bento in two columns), tablet 641–1024px (two menu
+  columns), desktop (three)
+
+Decisions:
+- no change to `db.json` (or `api.js`, `cos.js`, `cautare.js`, `format.js`, `livrare.js`): photos are
+  matched by dish name in `src/imagini.js`, so the data model and its tests stay as stage 6 left them
+- every number on screen is derived from `comenzi` / `meniu` (`src/rezumat.js`). The old "cheltuiți luna
+  asta" became "cheltuiți în total": the orders have no dates, so "this month" could not be computed
+- photos are local WebP files in `frontend/public/img/` (no hotlinking, no extra requests to a CDN),
+  each one showing the dish it is attached to; credits are below
+- tests: `tests/imagini.test.js` (every menu dish has a photo and the file exists), `tests/rezumat.test.js`
+  (totals on `db.json`, empty list gives zeros), `tests/categorii.test.js`
+
+## Fotografii
+
+Photo credits. All photos are from Unsplash (Unsplash License), resized and converted to WebP.
+Category cards reuse dish photos: Pizza → `pizza-diavola`, Burgers → `burger-vita`, Asian → `sushi-platou`.
+
+| File | Dish | Photographer | Unsplash page |
+| ---- | ---- | ------------ | ------------- |
+| pizza-margherita.webp, hero-*.webp | Pizza Margherita | Aurélien Lemasson-Théobald | https://unsplash.com/photos/x00CzBt4Dfk |
+| pizza-diavola.webp | Pizza Diavola | Alan Hardman | https://unsplash.com/photos/SU1LFoeEUkk |
+| pizza-quattro-formaggi.webp | Pizza Quattro Formaggi | Alexey Demidov | https://unsplash.com/photos/MVhg4ecfKBA |
+| burger-vita.webp | Burger de vită cu cartofi | Jonathan Borba | https://unsplash.com/photos/8l8Yl2ruUsg |
+| burger-pui.webp | Burger cu pui crocant | Tomi Saputra | https://unsplash.com/photos/RjmgHpZPY9w |
+| burger-vegetarian.webp | Burger vegetarian | Grooveland Designs | https://unsplash.com/photos/Kjt-sJbgy8I |
+| sushi-platou.webp | Platou sushi (12 buc.) | Riccardo Bergamini | https://unsplash.com/photos/O2yNzXdqOu0 |
+| ramen-porc.webp | Ramen cu porc | Huyen Bui | https://unsplash.com/photos/NHEL1M1Cv-A |
+| gyoza.webp | Gyoza cu legume (6 buc.) | Mikey Frost | https://unsplash.com/photos/klTf2RN37Ts |
+
 ## Stage 6: data from a mock API
 
 The orders and the menu are no longer written in React code. They live in `frontend/db.json`
@@ -286,6 +347,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | menu, cart drawer and placing orders, unit tests and code review, cart |
 | Claude | short Romanian comments on every line of code, stage 6                    |
 | Claude | db.json, api.js, loading / error states, retry, timeout, search, tests, stage 6 |
+| Claude | redesign: photo hero, category filter, photo menu, bento summary, grouped orders, helper tests |
 
 Details per stage: see the ai-log/ folder.
 
