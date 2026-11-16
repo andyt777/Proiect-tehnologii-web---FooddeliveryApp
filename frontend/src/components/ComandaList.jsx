@@ -1,8 +1,9 @@
 import ComandaCard from "./ComandaCard.jsx"; // componenta pentru o singură comandă
+import styles from "./ComandaList.module.css"; // Etapa 8: stilurile listei (CSS Modules)
 
 // Primește lista și funcțiile și le transmite fiecărui card.
 // Ordinea afișată e derivată: întâi comenzile pe drum, apoi cele livrate, fiecare grup sub separatorul lui.
-export default function ComandaList({ comenzi, onToggle, onDelete }) { // props: lista și callback-urile din App
+export default function ComandaList({ comenzi, onToggle, onDelete }) { // props: lista și callback-urile din ComenziPage
   if (comenzi.length === 0) { // lista e goală
     return ( // afișăm starea „gol”
       <div className="empty">{/* containerul stării goale */}
@@ -19,7 +20,7 @@ export default function ComandaList({ comenzi, onToggle, onDelete }) { // props:
   const peDrum = comenzi.length - livrate; // restul sunt pe drum
 
   return ( // lista propriu-zisă
-    <ul className="item-list">{/* o singură listă; separatoarele sunt rânduri ale ei */}
+    <ul className={styles.list}>{/* o singură listă; separatoarele sunt rânduri ale ei */}
       {ordonate.map((comanda, i) => ( // pentru fiecare comandă randăm un rând
         <ComandaRand // componenta ajutătoare definită mai jos
           key={comanda.id} // key unic și stabil, ca React să știe ce element s-a mutat sau a dispărut
@@ -47,7 +48,7 @@ function ComandaRand({ separator, ...props }) { // scoatem `separator`, restul p
   return ( // întoarcem JSX
     <>{/* Fragment: grupează elemente fără să adauge un nod în DOM */}
       {separator && ( // separatorul apare doar înaintea primei comenzi din grup
-        <li className="group-divider" role="presentation" style={{ viewTransitionName: `separator-${separator.id}` }}>{/* role="presentation": nu e un element real al listei pentru cititoarele de ecran; nume unic per separator */}
+        <li className={styles.divider} role="presentation" style={{ viewTransitionName: `separator-${separator.id}` }}>{/* role="presentation": nu e un element real al listei pentru cititoarele de ecran; nume unic per separator */}
           {separator.text} · {separator.numar}{/* ex. „Pe drum · 3” */}
         </li>
       )}{/* sfârșitul randării condiționate */}
@@ -59,7 +60,7 @@ function ComandaRand({ separator, ...props }) { // scoatem `separator`, restul p
 // Ilustrația pentru lista goală: o farfurie goală, cu tacâmuri, în stilul iconițelor
 function FarfurieGoala() { // componentă fără props
   return ( // întoarcem un SVG
-    <svg className="empty-illus" width="120" height="96" viewBox="0 0 120 96" fill="none" aria-hidden="true">{/* decorativ */}
+    <svg className={styles.illus} width="120" height="96" viewBox="0 0 120 96" fill="none" aria-hidden="true">{/* decorativ */}
       <circle cx="60" cy="48" r="34" fill="var(--surface)" stroke="var(--line)" strokeWidth="2" />{/* farfuria; culorile vin din variabilele CSS ale temei */}
       <circle cx="60" cy="48" r="22" stroke="var(--line)" strokeWidth="2" strokeDasharray="4 5" />{/* marginea interioară, punctată */}
       <path d="M14 22v14a4 4 0 0 0 4 4v34M18 22v12M22 22v14a4 4 0 0 1-4 4" stroke="var(--subtle)" strokeWidth="2" strokeLinecap="round" />{/* furculița */}

@@ -1,0 +1,267 @@
+/* Etapa 8: stilurile paginii comenzilor (bara de căutare, zona de sus, grila formular + listă), mutate din App.css */
+
+/* Etapa 8: bara de sub antet, doar pe această pagină: adresa, căutarea și coșul (state-ul lor e aici, nu în Layout).
+   Aceleași culori și același blur ca antetul, deci arată ca al doilea rând al lui (ca bara de căutare din Uber Eats). */
+.bar {
+  position: sticky;         /* rămâne sus la derulare */
+  top: calc(var(--header-h) + 1px); /* chiar sub antet și sub bordura lui de 1px */
+  z-index: 9;               /* deasupra paginii, sub antet (10) */
+  color: var(--header-fg);  /* text bleumarin, ca în antet */
+  background: var(--header-bg); /* același bleu translucid ca antetul */
+  -webkit-backdrop-filter: blur(14px) saturate(1.4); /* același blur */
+  backdrop-filter: blur(14px) saturate(1.4); /* același blur */
+  border-bottom: 1px solid var(--header-border); /* linia de sub antet trece sub bară (--sus-h o include) */
+  view-transition-name: bara-cautare; /* rămâne deasupra rândurilor care se mută (grupul e în index.css) */
+}
+/* fără backdrop-filter: fundal plin, ca la antet */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .bar { background: var(--header-solid); } /* bleu plin (bleumarin plin în tema întunecată) */
+}
+.barInner {
+  height: var(--searchbar-h); /* înălțimea din index.css; --sus-h o adună cu antetul */
+  display: flex;            /* adresa, căutarea și coșul pe un rând */
+  align-items: center;      /* centrate pe verticală */
+  gap: 12px;                /* aceeași distanță ca în antet */
+}
+
+/* pastilele din bară: alb translucid peste bleu (aceleași valori ca butonul de temă din antet) */
+.addressPill,
+.search {
+  height: 44px;
+  color: var(--header-muted); /* text secundar bleumarin */
+  background: var(--header-pill); /* alb translucid */
+  border: 1px solid var(--header-pill-border); /* contur bleumarin transparent */
+  border-radius: var(--radius-sm);
+}
+.addressPill { /* Etapa 8: fostul .address-pill */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.addressPill svg { color: var(--header-accent); } /* iconița adresei, roz */
+
+.search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.search:focus-within { border-color: var(--header-accent); background: var(--header-pill-hover); } /* contur roz și fundal mai opac la focus */
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  font: inherit;
+  color: var(--header-fg); /* textul tastat, bleumarin */
+  background: transparent;
+  border: none;
+  outline: none;
+}
+.search input::placeholder { color: var(--header-muted); } /* indiciul, text secundar AA */
+
+/* Coșul: buton roz în bara de sus (alb pe #d02a73 = 4.9:1 în ambele teme) */
+.cartPill { /* Etapa 8: fostul .cart-pill */
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  font: inherit;
+  color: var(--on-accent);  /* iconița albă pe roz */
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.cartPill:hover { background: var(--accent-hover); }
+.cartCount { /* Etapa 8: fostul .cart-count */
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink);        /* numărul, bleumarin pe alb (11.8:1) */
+  background: #ffffff;
+  border: 2px solid var(--header-solid); /* conturul are culoarea antetului: insigna pare decupată din el */
+  border-radius: 999px;
+}
+/* insigna „sare” puțin când se schimbă numărul (elementul are key = numărul, deci animația repornește) */
+.bump { animation: bump 0.3s ease-out; }
+@keyframes bump {
+  40% { transform: scale(1.35); }
+}
+
+/* Zona de sus: fotografie pe toată lățimea, sub antetul și bara translucide; textul stă jos, pe partea întunecată */
+.hero {
+  position: relative;
+  isolation: isolate;       /* z-index-urile negative de mai jos rămân în hero, nu ajung sub pagină */
+  display: flex;
+  align-items: flex-end;
+  min-height: calc(var(--sus-h) + 540px); /* Etapa 8: --sus-h = antetul + bara de căutare */
+  /* urcă sub antet și sub bară (înălțimile lor + bordurile de 1px, toate în --sus-h), ca fotografia să înceapă din vârful paginii */
+  margin-top: calc(-1 * var(--sus-h)); /* Etapa 8: urcă și sub bara de căutare */
+  padding: calc(var(--sus-h) + 56px) 0 56px; /* Etapa 8: textul începe sub antet și sub bară */
+  overflow: hidden;
+  color: var(--on-ink);
+  background: var(--ink);   /* culoarea de sub fotografie, cât timp se încarcă */
+  /* în zona bleumarin de sus scheletul e o linie albă translucidă, nu bleu deschis */
+  --skeleton: rgba(255, 255, 255, 0.1);
+  --skeleton-shine: rgba(255, 255, 255, 0.08);
+}
+/* fotografia acoperă toată secțiunea, decupată după nevoie */
+.heroFoto,
+.heroFoto img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.heroFoto { z-index: -2; } /* Etapa 8: fostul .hero-foto */
+.heroFoto img { object-fit: cover; object-position: center 40%; }
+/* umbra bleumarin peste fotografie: mai densă jos și în stânga, unde stă textul alb. Bleumarinul e mai deschis
+   decât vechiul maro, deci opacitățile sunt puțin mai mari: sub text acoperirea e de cel puțin ~70%, iar alb pe
+   bleumarin 70% peste un pixel complet alb dă încă 4.8:1 (AA) */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(15, 58, 92, 0.78) 0%, rgba(15, 58, 92, 0.42) 45%, rgba(15, 58, 92, 0) 75%), /* stânga, sub titlu */
+    linear-gradient(180deg, rgba(15, 58, 92, 0.62) 0%, rgba(15, 58, 92, 0.45) 30%, rgba(15, 58, 92, 0.82) 65%, rgba(15, 58, 92, 0.95) 100%); /* sus sub antet și jos sub text */
+}
+/* o umbră fină sub litere, pentru zonele mai luminoase ale fotografiei */
+.heroText { text-shadow: 0 1px 14px rgba(11, 26, 43, 0.45); } /* Etapa 8: fostul .hero-text; umbră bleumarin închis */
+.eyebrow {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--on-ink);
+}
+.display {
+  max-width: 15ch;
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5.6vw, 4.2rem);
+  font-weight: 600;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  font-style: italic;       /* Fraunces italic */
+  text-wrap: balance;       /* rânduri de lungimi apropiate */
+}
+.display em { color: var(--accent-on-ink); } /* cuvântul evidențiat, roz gumă (titlu mare: 3:1 cerut, peste 3.9:1 chiar pe alb acoperit 80%) */
+/* subtitlul derivat din meniu: „9 produse din 3 restaurante.” */
+.heroSub { /* Etapa 8: fostul .hero-sub */
+  margin-top: 16px;
+  font-size: 1.12rem;
+  color: var(--on-ink);
+}
+/* „Vezi meniul”: butonul principal, fără umbra textului */
+/* Etapa 8: fostul .hero-cta. Avea și border-radius: 999px, dar .btn-primary (scris mai jos în App.css) îl suprascria, deci butonul
+   avea colțurile lui .btn-primary. Modulele vin acum după index.css; regula a fost scoasă, ca butonul să arate la fel ca înainte. */
+.heroCta { margin-top: 26px; text-shadow: none; } /* spațiul de deasupra și fără umbra textului din hero */
+/* conturul de focus alb se vede pe fotografie (cel roz, nu întotdeauna) */
+.hero :focus-visible { outline-color: #ffffff; }
+
+/* titlul în stânga, „bonul” următoarei comenzi în dreapta, aliniate jos */
+.heroInner { /* Etapa 8: fostul .hero-inner */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: end;
+  gap: 48px;
+}
+/* umbra bonului stă pe înveliș: drop-shadow urmează zimții, iar un box-shadow pe bon ar fi tăiat de mască */
+.heroBon { filter: drop-shadow(0 24px 36px rgba(8, 24, 42, 0.5)); } /* Etapa 8: fostul .hero-bon; umbră bleumarin foarte închis */
+/* linia din zona de sus are lungimea textului „9 produse din 3 restaurante.” */
+.skeletonHero { width: 260px; max-width: 100%; height: 18px; margin-top: 6px; } /* Etapa 8: fostul .skeleton-hero */
+/* supratitlul: linie subțire, cât numele restaurantelor */
+.skeletonEyebrow { width: 300px; max-width: 100%; height: 12px; } /* Etapa 8: fostul .skeleton-eyebrow */
+
+/* 4.3 Conținutul: lista e vedeta paginii */
+.continut { /* Etapa 8: fostul .main (<main> e acum în Layout) */
+  padding-top: 48px;
+  padding-bottom: 72px;
+}
+
+/* Etapa 7: în „Comenzile tale”, sub bento, formularul în stânga (1fr) și lista în dreapta (2fr) */
+.comenziGrid {
+  display: grid;            /* grilă pe două coloane */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); /* formularul ia o treime, lista două (minmax 0: textele lungi nu lățesc coloana) */
+  align-items: start;       /* panoul formularului nu se întinde cât lista */
+  gap: 24px;                /* spațiul dintre coloane */
+  margin-top: 24px;         /* despărțit de bento */
+}
+.comenziLista { min-width: 0; } /* lista se poate îngusta fără să iasă din coloană */
+/* Etapa 7: panoul formularului rămâne la vedere când derulăm lista lungă */
+.specialaPanel {
+  position: sticky;         /* rămâne sub antet cât derulăm lista */
+  top: calc(var(--sus-h) + 16px); /* Etapa 8: se oprește chiar sub antet și sub bara de căutare */
+}
+.panelTitlu {
+  font-family: var(--font-display); /* Fraunces */
+  font-size: 1.45rem;       /* titlul panoului, sub titlul secțiunii */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic, ca toate titlurile */
+}
+
+/* Etapa 7: eroarea unei bifări / ștergeri, deasupra listei (lista rămâne pe ecran); se adaugă peste clasa globală .error */
+.errorActiune {
+  align-items: center;      /* iconița, textul și X-ul pe același rând */
+  margin-bottom: 16px;      /* despărțită de listă */
+  padding: 12px 12px 12px 18px; /* mai compactă decât panoul mare de eroare */
+}
+.errorActiune > svg { margin-top: 0; } /* centrată pe rând, nu aliniată sus */
+.errorActiune p { flex: 1; } /* textul ocupă spațiul rămas; X-ul stă în dreapta */
+
+/* 4.9 Ecrane medii: adresa iese din bară, bonul trece sub titlu */
+@media (max-width: 860px) {
+  .addressPill { display: none; }
+  .hero { min-height: calc(var(--sus-h) + 480px); } /* Etapa 8: --sus-h în loc de --header-h */
+  .heroInner { grid-template-columns: 1fr; gap: 32px; }
+  /* Etapa 7: formularul deasupra listei, pe toată lățimea; nu mai stă lipit sus (ar acoperi lista) */
+  .comenziGrid { grid-template-columns: minmax(0, 1fr); } /* o singură coloană */
+  .specialaPanel { position: static; } /* fără sticky */
+  /* textul ocupă toată lățimea: umbra se întinde uniform, mai închisă spre bon */
+  .hero::before { background: linear-gradient(180deg, rgba(15, 58, 92, 0.7) 0%, rgba(15, 58, 92, 0.76) 45%, rgba(15, 58, 92, 0.92) 100%); } /* bleumarin de cel puțin 70%: alb AA peste orice fotografie */
+}
+
+/* 4.9 Ecrane înguste (la final, ca să suprascrie regulile de mai sus) */
+@media (max-width: 640px) {
+  .barInner { gap: 10px; } /* Etapa 8: căutarea și coșul, puțin mai apropiate */
+  .hero { min-height: calc(var(--sus-h) + 460px); padding: calc(var(--sus-h) + 28px) 0 32px; } /* Etapa 8: --sus-h în loc de --header-h */
+  /* fotografia ocupă doar partea de sus (480px sub antet și bară) și se topește în bleumarin; bonul stă pe bleumarin, dedesubt */
+  .heroFoto,
+  .hero::before { bottom: auto; height: calc(var(--sus-h) + 480px); } /* Etapa 8: --sus-h în loc de --header-h */
+  .hero::before { background: linear-gradient(180deg, rgba(15, 58, 92, 0.7) 0%, rgba(15, 58, 92, 0.78) 55%, var(--ink) 100%); } /* bleumarin de cel puțin 70%, apoi plin */
+  .display { font-size: clamp(2.2rem, 10.5vw, 2.8rem); }
+  .heroSub { font-size: 1.02rem; }
+  .heroInner { gap: 28px; }
+  .continut { padding-top: 36px; padding-bottom: 48px; }
+}
+
+/* Tipărire (Ctrl+P): lista ca o chitanță curată, pe alb, fără butoane */
+@media print {
+  .bar, .heroFoto, .heroCta, .heroBon, .specialaPanel, .errorActiune { display: none !important; } /* Etapa 8: bara întreagă (căutare, coș, adresă), ca înainte */
+  .hero { min-height: 0; margin-top: 0; padding: 24px 0 8px; background: none; }
+  .hero::before { display: none; }
+  .heroText { text-shadow: none; }
+  .display { font-size: 1.8rem; max-width: none; }
+  .heroInner { display: block; }
+  .continut { padding-top: 24px; }
+}

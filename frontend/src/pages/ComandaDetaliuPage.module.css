@@ -1,0 +1,145 @@
+/* Etapa 8: stilurile paginii unei comenzi (CSS Modules): fotografie mare, titlu expresiv, mult spațiu alb.
+   .error, .info, .badge, .price, .skeleton și .btn-primary sunt clase globale (index.css). */
+
+.pagina {
+  padding-top: 32px;        /* spațiu sub antet */
+  padding-bottom: 80px;     /* spațiu deasupra subsolului */
+}
+
+/* „← Înapoi la comenzi”: link discret, cu săgeată */
+.inapoi {
+  display: inline-flex;     /* săgeata lângă text */
+  align-items: center;      /* centrate pe verticală */
+  gap: 6px;                 /* spațiul dintre ele */
+  min-height: 44px;         /* zonă de clic confortabilă */
+  margin-bottom: 24px;      /* despărțit de conținut */
+  font-size: 0.95rem;       /* puțin mai mic decât textul */
+  font-weight: 600;         /* semibold */
+  color: var(--muted);      /* text secundar (7:1 pe alb) */
+  text-decoration: none;    /* fără subliniere */
+  border-radius: var(--radius-sm); /* conturul de focus urmează colțurile */
+  transition: color 0.15s;  /* schimbare lină la hover */
+}
+.inapoi:hover { color: var(--accent-text); } /* roz la hover */
+.inapoi svg { transition: transform 0.2s ease-out; } /* săgeata se mișcă lin */
+.inapoi:hover svg { transform: translateX(-3px); } /* săgeata „trage” spre stânga */
+
+/* explicația de sub mesajul de eroare */
+.indiciu { color: var(--muted); } /* text secundar */
+
+/* Detaliul: fotografia în stânga, textele în dreapta, aliniate sus */
+.detaliu {
+  display: grid;            /* două coloane */
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); /* fotografia puțin mai lată */
+  align-items: start;       /* textele încep sus, lângă fotografie */
+  gap: 56px;                /* mult spațiu între coloane */
+}
+.media { min-width: 0; }    /* coloana se poate îngusta */
+.foto {
+  display: block;           /* fără spațiul de sub imagine */
+  width: 100%;              /* toată coloana */
+  height: auto;             /* proporția vine din aspect-ratio */
+  aspect-ratio: 4 / 3;      /* aceeași formă ca fotografiile din meniu */
+  object-fit: cover;        /* decupată, nu deformată */
+  background: var(--skeleton); /* locul fotografiei, până sosește */
+  border-radius: var(--radius-lg); /* colțuri mari, ca pe carduri */
+  box-shadow: var(--shadow); /* umbra panourilor */
+}
+/* comandă fără fotografie: iconița categoriei, mare, pe roz deschis */
+.fotoGol {
+  display: grid;            /* iconița pe mijloc */
+  place-items: center;      /* centrată */
+  color: var(--accent-text); /* roz */
+  background: var(--accent-soft); /* roz foarte deschis */
+}
+
+.text { min-width: 0; padding-top: 8px; } /* coloana textelor, aliniată optic cu fotografia */
+/* supratitlul: categoria cu majuscule mici și eticheta „Comandă specială” */
+.eyebrow {
+  display: flex;            /* categoria și eticheta pe un rând */
+  flex-wrap: wrap;          /* se rup pe ecrane înguste */
+  align-items: center;      /* centrate pe verticală */
+  gap: 10px;                /* spațiul dintre ele */
+  margin-bottom: 14px;      /* despărțit de titlu */
+  font-size: 0.8rem;        /* mic */
+  font-weight: 700;         /* bold */
+  letter-spacing: 0.12em;   /* rărit, ca supratitlul din hero */
+  text-transform: uppercase; /* majuscule */
+  color: var(--muted);      /* text secundar */
+}
+.eyebrow :global(.badge) { letter-spacing: normal; text-transform: none; } /* eticheta rămâne scrisă normal */
+/* titlul: Fraunces italic, mare, ca titlul din hero */
+.titlu {
+  font-family: var(--font-display); /* Fraunces */
+  font-size: clamp(2.2rem, 4.6vw, 3.6rem); /* mare pe desktop, potrivit pe telefon */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic */
+  line-height: 1.04;        /* rânduri strânse, ca la titlul din hero */
+  letter-spacing: -0.025em; /* litere puțin mai apropiate */
+  text-wrap: balance;       /* rânduri de lungimi apropiate */
+  overflow-wrap: anywhere;  /* un nume foarte lung nu iese din coloană */
+}
+.restaurant { margin-top: 12px; font-size: 1.1rem; color: var(--muted); } /* „de la Sushi Kyo” */
+.pret { margin-top: 20px; } /* prețul, despărțit de titlu */
+.pret :global(.price) { font-size: 1.9rem; } /* prețul mare, Fraunces italic (clasa globală) */
+.pret :global(.price-asteptare) { font-size: 1.05rem; } /* „Preț la confirmare” rămâne text obișnuit */
+
+/* Câmpurile: termen în stânga, valoare în dreapta, despărțite de linii fine */
+.campuri {
+  margin: 32px 0 0;         /* despărțite de preț */
+  border-top: 1px solid var(--line); /* linia de deasupra primului rând */
+}
+.campuri > div {
+  display: grid;            /* termen | valoare */
+  grid-template-columns: 9.5rem minmax(0, 1fr); /* coloana termenilor, fixă */
+  align-items: center;      /* centrate pe verticală */
+  gap: 16px;                /* spațiul dintre ele */
+  padding-block: 14px;      /* rânduri aerisite */
+  border-bottom: 1px solid var(--line); /* linia de sub fiecare rând */
+}
+.campuri dt { font-size: 0.9rem; color: var(--muted); } /* termenul, text secundar */
+.campuri dd { margin: 0; font-weight: 500; } /* valoarea, puțin îngroșată */
+.livrare { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; } /* eticheta și timpul pe un rând */
+.livrare > span:last-child { font-weight: 400; color: var(--muted); } /* timpul estimat, text secundar */
+.categorie { display: flex; align-items: center; gap: 8px; } /* iconița lângă nume */
+.categorie svg { color: var(--accent-text); } /* iconița, roz */
+
+/* starea: pastilă cu iconiță (ceas sau bifă), ca bifa „Livrată” de pe card */
+.stare {
+  display: inline-flex;     /* iconița lângă text */
+  align-items: center;      /* centrate pe verticală */
+  gap: 6px;                 /* spațiul dintre ele */
+  height: 30px;             /* pastilă */
+  padding: 0 12px 0 10px;   /* spațiu lateral */
+  font-size: 0.88rem;       /* text mic */
+  font-weight: 600;         /* semibold */
+  border: 1.5px solid var(--line-strong); /* contur bleu, ca pastila de pe card */
+  border-radius: 999px;     /* pastilă */
+}
+.livrata {
+  color: var(--brand-text); /* bleu închis pe bleu (5.8:1; 6.9:1 în tema întunecată) */
+  background: var(--brand-soft); /* bleu deschis */
+  border-color: transparent; /* fără contur, ca pe cardul livrat */
+}
+
+/* scheletul titlului: o linie groasă, cât un titlu mare */
+.scheletTitlu { width: 85%; height: 40px; border-radius: var(--radius-sm); } /* vine după .skeleton-line (index.css e importat primul) */
+
+/* Ecrane medii: fotografia deasupra textelor */
+@media (max-width: 860px) {
+  .detaliu { grid-template-columns: minmax(0, 1fr); gap: 28px; } /* o singură coloană */
+  .text { padding-top: 0; } /* fără alinierea optică cu fotografia */
+}
+
+/* Ecrane înguste: mai puțin spațiu */
+@media (max-width: 640px) {
+  .pagina { padding-top: 20px; padding-bottom: 56px; } /* spațiu mai mic sus și jos */
+  .inapoi { margin-bottom: 12px; } /* linkul mai aproape de fotografie */
+  .campuri > div { grid-template-columns: 7.5rem minmax(0, 1fr); } /* coloana termenilor mai îngustă */
+}
+
+/* Tipărire: fără fotografie și fără linkul înapoi */
+@media print {
+  .inapoi, .media { display: none !important; } /* doar textele pe hârtie */
+  .detaliu { display: block; } /* o singură coloană */
+}

@@ -1,0 +1,31 @@
+/* Etapa 8: stilurile secțiunii „Meniu” (CSS Modules), mutate din App.css; grila e folosită și de scheletul meniului */
+
+/* Meniul: secțiune deasupra comenzilor; titlul se oprește sub antetul fix când derulăm la el */
+.section { margin-bottom: 56px; } /* Etapa 8: fostul .menu-section */
+.title { scroll-margin-top: calc(var(--sus-h) + 24px); } /* Etapa 8: fostul .menu-title; se oprește sub antet și sub bara de căutare */
+
+/* Grila de preparate: 3 coloane pe desktop, 2 pe tabletă, una pe telefon */
+.grid { /* Etapa 8: fostul .menu-grid */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px 22px;
+}
+
+/* Tabletă: meniul pe două coloane */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* 4.9 Ecrane înguste: meniul pe o coloană (titlul se oprește sub antet prin --sus-h, redefinit în index.css) */
+@media (max-width: 640px) {
+  .section { margin-bottom: 40px; }
+  .grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* Tipărire: fără meniu */
+@media print {
+  .section { display: none !important; }
+}

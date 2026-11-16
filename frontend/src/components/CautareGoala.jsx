@@ -1,11 +1,12 @@
 import { SearchX } from "lucide-react"; // iconița „căutare fără rezultat”
+import styles from "./CautareGoala.module.css"; // Etapa 8: stilul iconiței (CSS Modules)
 
 // Starea goală a căutării, folosită și de meniu, și de lista de comenzi.
-// Butonul golește căutarea (în meniu și categoria); App mută apoi focusul în câmpul de căutare (butonul dispare odată cu mesajul).
+// Butonul golește căutarea (în meniu și categoria); ComenziPage mută apoi focusul în câmpul de căutare (butonul dispare odată cu mesajul).
 export default function CautareGoala({ mesaj, onSterge, indiciu = "Verifică scrierea sau caută după numele restaurantului.", eticheta = "Șterge căutarea" }) { // props: textul principal, callback-ul de ștergere și (opțional) indiciul și textul butonului
   return ( // întoarcem JSX
     <div className="empty">{/* același stil ca lista goală */}
-      <span className="empty-icon" aria-hidden="true"><SearchX size={26} /></span>{/* iconiță decorativă */}
+      <span className={styles.icon} aria-hidden="true"><SearchX size={26} /></span>{/* iconiță decorativă */}
       <p>{mesaj}</p>{/* ex. „Niciun preparat pentru „sarmale”” */}
       <p className="empty-hint">{indiciu}</p>{/* indicația */}
       <button type="button" className="btn-secondary" onClick={onSterge}>{eticheta}</button>{/* arată din nou toată lista */}

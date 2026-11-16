@@ -53,6 +53,14 @@ export function fetchMeniu(timpMaxim) { // timpMaxim opțional (doar pentru test
   return cereLista("/meniu", timpMaxim); // promisiune cu lista de preparate
 } // sfârșitul funcției
 
+// Etapa 8: GET /comenzi/:id, o singură comandă (pagina de detaliu). json-server răspunde 404 pentru un id inexistent,
+// iar request aruncă atunci „Eroare server: 404”, afișat de pagină.
+export async function fetchComanda(id, timpMaxim) { // id-ul vine din adresă (useParams îl dă ca text); timpMaxim opțional (doar pentru teste)
+  const date = await request(`/comenzi/${encodeURIComponent(id)}`, {}, timpMaxim); // encodeURIComponent: „../meniu” din adresă nu poate schimba ruta
+  if (date === null || typeof date !== "object" || Array.isArray(date)) throw new Error("Răspuns neașteptat de la server"); // așteptăm un singur obiect, nu o listă sau un text
+  return date; // comanda, ca obiect
+} // sfârșitul funcției
+
 // Etapa 7: POST /comenzi. Serverul pune id-ul și întoarce comanda salvată; pe ecran ajunge obiectul întors.
 // Singura excepție de la „fără id”: „Anulează” retrimite comanda ștearsă cu id-ul ei vechi (json-server 0.17 îl păstrează).
 export function createComanda(comanda) { // primește comanda de salvat

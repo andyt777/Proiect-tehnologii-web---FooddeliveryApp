@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from "react"; // useRef: <dialog> și foc
 import { CircleAlert, ShoppingBag, Trash2, X } from "lucide-react"; // iconițe: avertisment, sacoșă, coș de gunoi, închidere
 import Stepper from "./Stepper.jsx"; // selectorul de cantitate
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
-import { numarProduse, totalCos } from "../cos.js"; // aceleași calcule ca în App, dintr-un singur loc
+import { numarProduse, totalCos } from "../cos.js"; // aceleași calcule ca în ComenziPage, dintr-un singur loc
 import { DURATE_LIVRARE, ETICHETE_LIVRARE } from "../livrare.js"; // textele pentru tipurile de livrare
 import { formatLei, formatProduse } from "../format.js"; // formatarea sumelor și a numărului de produse
+import styles from "./CosDrawer.module.css"; // Etapa 8: stilurile coșului (CSS Modules)
 
 const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE); // ["standard", "express", "ridicare"], în ordinea din livrare.js
 
 // Coșul: panou lateral construit pe <dialog> nativ (Esc și clicul pe fundal îl închid).
-// Primește liniile deja calculate de App; nu modifică singur coșul, doar anunță prin callback-uri.
-// Etapa 7: plasarea trimite comenzile la server; `eroare` (de la App) spune ce linii n-au ajuns și au rămas în coș.
+// Primește liniile deja calculate de ComenziPage; nu modifică singur coșul, doar anunță prin callback-uri.
+// Etapa 7: plasarea trimite comenzile la server; `eroare` (de la ComenziPage) spune ce linii n-au ajuns și au rămas în coș.
 export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose, onSchimba, onScoate, onPlaseaza, onVeziMeniul }) { // props: starea, datele și callback-urile; disponibil = meniul s-a încărcat
   const ref = useRef(null); // elementul <dialog>
   const inchideRef = useRef(null); // butonul X, primește focusul la deschidere
@@ -35,17 +36,17 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
   // înainte, ca utilizatorul de tastatură să nu rămână „nicăieri”.
   function handleSchimba(linie, delta) { // „−” / „+” pe o linie
     if (linie.cantitate + delta <= 0) titluRef.current.focus(); // linia va dispărea
-    onSchimba(linie.id, delta); // anunțăm App
+    onSchimba(linie.id, delta); // anunțăm ComenziPage
   } // sfârșitul funcției
 
   function handleScoate(id) { // coșul de gunoi de pe o linie
     titluRef.current.focus(); // linia va dispărea
-    onScoate(id); // anunțăm App
+    onScoate(id); // anunțăm ComenziPage
   } // sfârșitul funcției
 
   function handleVeziMeniul() { // butonul din coșul gol
     ref.current.close(); // închidem imediat; browserul readuce focusul pe butonul coșului...
-    onVeziMeniul(); // ...iar App îl mută apoi pe titlul meniului
+    onVeziMeniul(); // ...iar ComenziPage îl mută apoi pe titlul meniului
   } // sfârșitul funcției
 
   // Etapa 7: plasarea așteaptă serverul. Butonul rămâne focalizabil (aria-disabled, nu disabled), ca focusul
@@ -55,7 +56,7 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
     if (trimite) return; // o trimitere e deja în curs: fără comenzi duble
     setTrimite(true); // butonul arată „Se trimite…”
     try { // onPlaseaza nu aruncă: erorile ajung în prop-ul `eroare`
-      const toate = await onPlaseaza(livrare); // App trimite fiecare linie la server; true = toate au ajuns
+      const toate = await onPlaseaza(livrare); // ComenziPage trimite fiecare linie la server; true = toate au ajuns
       if (toate) setLivrare("standard"); // următoarea comandă pornește iar de la livrarea standard
     } finally { // oricum s-a terminat
       setTrimite(false); // butonul revine la normal
@@ -71,20 +72,20 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
   return ( // întoarcem JSX
     <dialog // elementul nativ pentru ferestre modale
       ref={ref} // legăm referința
-      className="drawer" // panou lateral (vezi App.css)
+      className={styles.drawer} // panou lateral (Etapa 8: vezi CosDrawer.module.css)
       aria-labelledby="cos-titlu" // numele dialogului = titlul
-      onClose={onClose} // Esc sau close(): anunțăm App
+      onClose={onClose} // Esc sau close(): anunțăm ComenziPage
       onPointerDown={(e) => (apasatPeFundal.current = e.target === e.currentTarget)} // reținem unde a început apăsarea
       onClick={(e) => apasatPeFundal.current && e.target === e.currentTarget && onClose()} // închidem doar dacă și apăsarea, și eliberarea sunt pe fundal (nu la o selecție de text trasă din panou)
     >
-      <div className="drawer-body">{/* conținutul ocupă toată înălțimea, deci clicurile din panou nu ajung la <dialog> */}
-        <div className="drawer-head">{/* titlul și X-ul */}
+      <div className={styles.body}>{/* conținutul ocupă toată înălțimea, deci clicurile din panou nu ajung la <dialog> */}
+        <div className={styles.head}>{/* titlul și X-ul */}
           <h2 id="cos-titlu" className="titlu-focus" ref={titluRef} tabIndex={-1}>Coșul tău</h2>{/* tabIndex -1: focus doar din cod; titlu-focus: fără contur la acest focus */}
           <button // butonul de închidere
             ref={inchideRef} // primește focusul la deschidere
             type="button" // buton simplu
             className="btn-close" // clasa pentru stiluri
-            onClick={onClose} // App pune `deschis` pe false
+            onClick={onClose} // ComenziPage pune `deschis` pe false
             aria-label="Închide coșul" // nume accesibil, butonul are doar iconiță
           >
             <X size={20} aria-hidden="true" />{/* iconiță decorativă */}
@@ -92,33 +93,33 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
         </div>
 
         {linii.length === 0 && !disponibil ? ( // meniul nu s-a încărcat: nu știm încă ce e în coș
-          <div className="drawer-empty">{/* aceeași așezare ca starea goală */}
-            <span className="drawer-empty-icon" aria-hidden="true"><ShoppingBag size={26} /></span>{/* iconiță decorativă */}
-            <p className="drawer-empty-title">Coșul nu e disponibil încă</p>{/* nu spunem „gol”: produsele salvate apar după încărcare */}
+          <div className={styles.gol}>{/* aceeași așezare ca starea goală */}
+            <span className={styles.golIcon} aria-hidden="true"><ShoppingBag size={26} /></span>{/* iconiță decorativă */}
+            <p className={styles.golTitlu}>Coșul nu e disponibil încă</p>{/* nu spunem „gol”: produsele salvate apar după încărcare */}
             <p>Produsele din coș apar după ce se încarcă meniul.</p>{/* explicația */}
           </div>
         ) : linii.length === 0 ? ( // coșul e gol
-          <div className="drawer-empty">{/* starea goală */}
-            <span className="drawer-empty-icon" aria-hidden="true"><ShoppingBag size={26} /></span>{/* iconiță decorativă */}
-            <p className="drawer-empty-title">Coșul e gol</p>{/* mesajul principal */}
+          <div className={styles.gol}>{/* starea goală */}
+            <span className={styles.golIcon} aria-hidden="true"><ShoppingBag size={26} /></span>{/* iconiță decorativă */}
+            <p className={styles.golTitlu}>Coșul e gol</p>{/* mesajul principal */}
             <p>Adaugă preparate din meniu și le găsești aici.</p>{/* indicația */}
             <button type="button" className="btn-primary" onClick={handleVeziMeniul}>Vezi meniul</button>{/* închide coșul și duce la meniu */}
           </div>
         ) : ( // coșul are produse
-          <form className="drawer-form" onSubmit={handleSubmit} onKeyDown={handleKeyDown}>{/* formular: se trimite doar din butonul „Plasează comanda” */}
-            <div className="drawer-scroll">{/* zona care se derulează */}
-              <ul className="cos-lista">{/* liniile coșului */}
+          <form className={styles.form} onSubmit={handleSubmit} onKeyDown={handleKeyDown}>{/* formular: se trimite doar din butonul „Plasează comanda” */}
+            <div className={styles.scroll}>{/* zona care se derulează */}
+              <ul className={styles.lista}>{/* liniile coșului */}
                 {linii.map((linie) => { // un rând pentru fiecare linie
                   const Iconita = ICONITE_CATEGORIE[linie.categorie]; // iconița categoriei
                   return ( // JSX-ul liniei
-                    <li key={linie.id} className="cos-linie">{/* id-ul preparatului e unic în coș */}
+                    <li key={linie.id} className={styles.linie}>{/* id-ul preparatului e unic în coș */}
                       <span className="thumb" aria-hidden="true"><Iconita size={20} strokeWidth={1.75} /></span>{/* iconița categoriei */}
-                      <div className="cos-info">{/* numele și detaliile */}
+                      <div className={styles.info}>{/* numele și detaliile */}
                         <h3>{linie.preparat}</h3>{/* numele preparatului */}
                         <p>{linie.restaurant} · {formatLei(linie.pret)} / buc.</p>{/* restaurantul și prețul unitar */}
                       </div>
-                      <span className="price cos-subtotal">{formatLei(linie.subtotal)}</span>{/* subtotalul liniei */}
-                      <div className="cos-actiuni">{/* selectorul și ștergerea */}
+                      <span className={`price ${styles.subtotal}`}>{formatLei(linie.subtotal)}</span>{/* subtotalul liniei */}
+                      <div className={styles.actiuni}>{/* selectorul și ștergerea */}
                         <Stepper preparat={linie.preparat} cantitate={linie.cantitate} onSchimba={(delta) => handleSchimba(linie, delta)} />{/* − cantitate + */}
                         <button // butonul de scoatere din coș
                           type="button" // nu trimite formularul
@@ -135,10 +136,10 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
                 })}{/* sfârșitul map-ului */}
               </ul>
 
-              <fieldset className="livrare-optiuni">{/* grupul de butoane radio */}
+              <fieldset className={styles.optiuni}>{/* grupul de butoane radio */}
                 <legend>Livrare</legend>{/* numele grupului, citit înaintea fiecărei opțiuni */}
                 {TIPURI_LIVRARE.map((tip) => ( // o opțiune pentru fiecare tip
-                  <label key={tip} className="livrare-optiune">{/* tot cardul e clicabil */}
+                  <label key={tip} className={styles.optiune}>{/* tot cardul e clicabil */}
                     <input // butonul radio, controlat de React
                       type="radio" // o singură opțiune activă
                       name="livrare" // același name = același grup (săgețile trec de la unul la altul)
@@ -146,7 +147,7 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
                       checked={livrare === tip} // bifat dacă e cel ales
                       onChange={() => setLivrare(tip)} // schimbăm alegerea
                     />
-                    <span className="livrare-text">{/* textele opțiunii */}
+                    <span className={styles.livrareText}>{/* textele opțiunii */}
                       <strong>{ETICHETE_LIVRARE[tip]}</strong>{/* ex. „Express” */}
                       <span>{DURATE_LIVRARE[tip]}</span>{/* ex. „Sosește în ~20 min” */}
                     </span>
@@ -155,12 +156,12 @@ export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose,
               </fieldset>
             </div>
 
-            <div className="drawer-foot">{/* rezumatul și butonul, mereu vizibile */}
-              <dl className="cos-rezumat">{/* listă de perechi termen / valoare */}
+            <div className={styles.foot}>{/* rezumatul și butonul, mereu vizibile */}
+              <dl className={styles.rezumat}>{/* listă de perechi termen / valoare */}
                 <div><dt>Produse</dt><dd>{formatProduse(produse)}</dd></div>{/* numărul de produse */}
-                <div className="cos-total"><dt>Total</dt><dd>{formatLei(total)}</dd></div>{/* totalul, fără taxe inventate */}
+                <div className={styles.total}><dt>Total</dt><dd>{formatLei(total)}</dd></div>{/* totalul, fără taxe inventate */}
               </dl>
-              {eroare && <p className="drawer-eroare" role="alert"><CircleAlert size={18} aria-hidden="true" />{eroare}</p>}{/* Etapa 7: liniile care n-au ajuns la server au rămas în coș */}
+              {eroare && <p className={styles.eroare} role="alert"><CircleAlert size={18} aria-hidden="true" />{eroare}</p>}{/* Etapa 7: liniile care n-au ajuns la server au rămas în coș */}
               <button type="submit" className="btn-primary" aria-disabled={trimite}>{trimite ? "Se trimite…" : `Plasează comanda · ${formatLei(total)}`}</button>{/* trimite formularul; aria-disabled cât se trimite */}
             </div>
           </form>

@@ -1,0 +1,126 @@
+/* Etapa 8: stilurile cardului unei comenzi (CSS Modules), mutate din App.css; .thumb, .price, .badge, .eta, .card-top, .dots și .btn-danger sunt clase globale */
+
+/* 4.6 Un rând din listă, ca într-un meniu tipărit */
+.card { /* Etapa 8: fostul .item-card */
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  /* rândul iese până la marginile panoului, ca fundalul de la hover să umple toată lățimea */
+  margin-inline: -24px;
+  padding: 20px 24px;
+  border-bottom: 1px dashed var(--line);
+  transition: background 0.15s;
+}
+.card:last-child { border-bottom: none; }
+.card:first-child { border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg); }
+.card:last-child { border-bottom-left-radius: var(--radius-lg); border-bottom-right-radius: var(--radius-lg); }
+.card:hover { background: color-mix(in srgb, var(--bg-soft) 55%, transparent); }
+
+/* iconița categoriei, în culoarea tipului de livrare (Etapa 8: clasa vine din styles[`livrare-${livrare}`]) */
+.livrare-standard :global(.thumb) { color: var(--muted); background: var(--bg-soft); }           /* standard: gri-albăstrui pe bleu deschis */
+.livrare-express  :global(.thumb) { color: var(--accent-text); background: var(--accent-soft); } /* express: roz pe roz deschis */
+.livrare-ridicare :global(.thumb) { color: var(--brand-text); background: var(--brand-soft); }   /* ridicare: bleu închis pe bleu */
+/* miniatura cu fotografie: decupată pătrat; fundalul se vede doar până sosește imaginea */
+.thumbFoto { object-fit: cover; background: var(--skeleton); } /* Etapa 8: fostul .thumb-foto */
+
+.card h3 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-style: italic;       /* Fraunces italic */
+  min-width: 0;             /* Etapa 8: titlul se poate îngusta în rând; tăierea cu „…” e acum pe link */
+}
+/* Etapa 8: titlul e link spre pagina de detaliu. Tăierea cu „…” stă pe link (nu pe h3), ca inelul de focus al linkului să nu fie decupat */
+.titleLink {
+  display: block;           /* ocupă tot titlul, ca „…” să funcționeze */
+  overflow: hidden;         /* textul prea lung e tăiat... */
+  text-overflow: ellipsis;  /* ...cu „…” la final */
+  white-space: nowrap;      /* pe un singur rând */
+  color: inherit;           /* culoarea titlului (stinsă la comenzile livrate) */
+  text-decoration: none;    /* fără subliniere: e titlul cardului */
+  border-radius: 4px;       /* inelul de focus are colțuri rotunjite */
+  transition: color 0.15s;  /* schimbare lină la hover */
+}
+.titleLink:hover { color: var(--accent-text); } /* la hover: roz, deci se vede că se poate deschide */
+
+.meta { /* Etapa 8: fostul .card-meta */
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+.restaurant { font-weight: 500; }
+
+/* acțiunile din dreapta: bifa „Livrată” și ștergerea */
+.side { display: flex; align-items: center; gap: 6px; } /* Etapa 8: fostul .card-side */
+
+/* Etapa 5: starea e un checkbox controlat */
+.status {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 14px 0 12px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1.5px solid var(--line-strong); /* contur bleu al pastilei */
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.status::after { content: ""; position: absolute; inset: -4px; }   /* zonă de atingere de 44px */
+.status:hover { border-color: var(--subtle); }
+.status input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* 4.8 Comandă livrată: titlu tăiat, iconiță stinsă, starea „Livrată” în bleu */
+.card.done :global(.thumb) { opacity: 0.45; }
+.card.done .thumbFoto { filter: grayscale(0.6); }  /* fotografia comenzii încheiate, stinsă */
+/* linia care taie titlul e un fundal care crește de la stânga la dreapta (se poate anima, text-decoration nu) */
+.titleText { /* Etapa 8: fostul .title-text */
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 58% / 0 1.5px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;      /* pe mai multe rânduri, fiecare rând e tăiat */
+  transition: background-size 0.3s ease-out, color 0.3s;
+}
+.card.done h3 { color: var(--muted); }
+.card.done .titleText { background-size: 100% 1.5px; }
+.card.done :global(.price) { color: var(--muted); }
+.card.done .status {
+  color: var(--brand-text); /* bleu închis pe bleu (5.8:1; 6.9:1 în tema întunecată) */
+  background: var(--brand-soft);
+  border-color: transparent;
+}
+.card.done .status input[type="checkbox"] { accent-color: var(--brand-text); } /* bifa în bleu închis (bleu deschis în tema întunecată) */
+
+/* 4.9 Ecrane înguste */
+@media (max-width: 640px) {
+  .card { margin-inline: -16px; padding-inline: 16px; } /* Etapa 8: rândul urmează padding-ul de 16px al listei */
+  /* rândul se rupe: iconiță + text sus, acțiunile dedesubt, pe toată lățimea */
+  .card {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 12px 14px;
+    padding-block: 18px;
+  }
+  .card h3 { font-size: 1.08rem; }
+  .titleLink { white-space: normal; } /* Etapa 8: pe telefon titlul se rupe pe mai multe rânduri (înainte era pe h3) */
+  .side { grid-column: 1 / -1; justify-content: space-between; }
+}
+
+/* Tipărire: rândul fără acțiuni */
+@media print {
+  .side { display: none !important; }
+  .card { grid-template-columns: auto minmax(0, 1fr); break-inside: avoid; }
+  .card:hover { background: none; }
+}

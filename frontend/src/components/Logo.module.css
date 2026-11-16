@@ -1,0 +1,2 @@
+/* Etapa 8: stilul semnului Savoro (CSS Modules) */
+.mark { flex-shrink: 0; } /* fostul .logo-mark: semnul nu se micșorează când antetul e îngust */

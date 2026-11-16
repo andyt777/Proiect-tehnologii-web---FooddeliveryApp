@@ -1,0 +1,37 @@
+/* Etapa 8: stilurile paginii 404 (CSS Modules); .panel și .btn-primary sunt clase globale */
+
+.pagina {
+  padding-top: 64px;        /* spațiu sub antet */
+  padding-bottom: 96px;     /* spațiu deasupra subsolului */
+}
+.card {
+  max-width: 560px;         /* panou îngust, centrat */
+  margin-inline: auto;      /* centrat pe orizontală */
+  padding: 48px 32px;       /* mult spațiu interior */
+  display: flex;            /* conținutul unul sub altul */
+  flex-direction: column;   /* pe verticală */
+  align-items: center;      /* centrat */
+  gap: 14px;                /* spațiul dintre elemente */
+  text-align: center;       /* textul centrat */
+}
+.cod {
+  font-family: var(--font-display); /* Fraunces */
+  font-size: clamp(4rem, 14vw, 6.5rem); /* foarte mare */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic */
+  line-height: 1;           /* fără spațiu în plus */
+  color: var(--accent-text); /* roz */
+}
+.titlu {
+  font-family: var(--font-display); /* Fraunces */
+  font-size: clamp(1.6rem, 3vw, 2rem); /* ca titlurile de secțiune */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic */
+}
+.text { max-width: 40ch; margin-bottom: 10px; color: var(--muted); } /* explicația, text secundar */
+
+/* Ecrane înguste: mai puțin spațiu */
+@media (max-width: 640px) {
+  .pagina { padding-top: 32px; padding-bottom: 56px; } /* spațiu mai mic sus și jos */
+  .card { padding: 36px 20px; } /* panoul mai compact */
+}

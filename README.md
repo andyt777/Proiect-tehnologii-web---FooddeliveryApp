@@ -49,10 +49,57 @@ cd frontend
 npm run dev
 ```
 
-Then open the address printed in terminal 2. Without `npm run api` the page shows an error
+Then open the address printed in terminal 2 (pages: `/`, `/comenzi/1`, `/despre`). Without `npm run api` the page shows an error
 with a "Încearcă din nou" button. `npm test` runs the unit tests (no server needed).
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
+
+## Stage 8: routing and detail page
+
+Four pages behind React Router (`react-router-dom` 7, `BrowserRouter` in `src/main.jsx`), plus component
+styles moved to CSS Modules. Navigation never reloads the document; only the API requests show in Network.
+
+| Route | Page | What it shows |
+| ----- | ---- | ------------- |
+| `/` | `pages/ComenziPage.jsx` | the whole stage 7 page: hero, categories, menu, bento, "Comandă specială" form, orders, cart, undo |
+| `/comenzi/:id` | `pages/ComandaDetaliuPage.jsx` | one order, fetched from the server by id |
+| `/despre` | `pages/DesprePage.jsx` | what Savoro is, the stack, the photo credits |
+| `*` | `pages/NotFoundPage.jsx` | the app's 404 page (`data-testid="not-found"`) |
+
+- `src/App.jsx` holds only the route map; every route is nested in `<Route element={<Layout />}>`
+- `components/Layout.jsx`: the shared header (logo linking to `/`, `<nav data-testid="nav">` with the
+  `NavLink`s "Comenzi" (`end`) and "Despre", marked automatically when active), the theme toggle (theme
+  state moved here, so it works on every page), `<main>` with `<Outlet />` and the footer (credits link to
+  `/despre#fotografii`). A new link scrolls to the top (or to the `#anchor`); Back / Forward keep the
+  browser's own scroll handling
+- search and the cart button stay with `ComenziPage`, where their state lives: on `/` they sit in a
+  sticky bar right under the header, in the same translucent style, so it reads as a second header row.
+  The hero, the menu title and the form panel line up under both through a `--sus-h` token
+  (header + bar), computed from `--header-h` and `--searchbar-h`
+- the card title stays `<h3 data-testid="item-title">` and now contains
+  `<Link to="/comenzi/:id" data-testid="item-link">`; all stage 7 test ids are on the same elements
+- the route uses the resource name from `tw.json`: `/comenzi/:id`. `api.js` gained `fetchComanda(id)`
+  through the common `request()` (id encoded, a non-object answer is rejected)
+- detail page: `useParams`, then the guide's effect with `.then / .catch / .finally` and an `ignore`
+  flag, depending on `[id]`. State starts as `loading = true`, `error = null`, so the effect never calls
+  `setState` synchronously (`react-hooks/set-state-in-effect`); the page renders an inner component with
+  `key={id}`, so moving to another id starts fresh. Test ids: `loading`, `error`, `detail`, `detail-title`.
+  It shows more than the card: a large photo (category icon for special orders), category, "Comandă
+  specială" tag, restaurant, price or "Preț la confirmare", status (Livrată / Pe drum), delivery type and
+  estimated time, the date it was placed (`creata`, `ro-RO` format via `formatData`) and the order number,
+  plus "Înapoi la comenzi". The title gets focus once loaded. `/comenzi/999` shows
+  "Comanda nu a putut fi încărcată: Eroare server: 404." with a way back, never an empty page
+- CSS Modules: `App.css` became `src/index.css` with only tokens, reset, base typography and the classes
+  shared by several components (`.wrap`, `.panel`, `.btn-*`, `.info`, `.error`, `.empty`, `.badge-*`,
+  `.price`, `.thumb`, skeletons, focus, view-transition groups, print tokens). Every component and page
+  with its own rules has `Name.module.css` next to it (`styles.name` in JSX; dynamic classes such as
+  `styles[`livrare-${livrare}`]`). `index.css` is imported before `App` so modules can override it.
+  The skeletons reuse the real components' modules, so they never drift apart
+- tests: `fetchComanda` (URL, encoding, 404, non-object answer, network error) in `tests/api.test.js`,
+  `formatData` in `tests/format.test.js`
+
+Note: refreshing a detail URL works with `npm run dev` / `npm run preview` because Vite serves
+`index.html` for every path; a plain static server needs that fallback configured.
 
 ## Stage 7: form and validation
 
@@ -297,7 +344,8 @@ moved into the main component; the list is still printed raw.
 `frontend/src/App.jsx` holds the `comenzi` array above the `App` function. The header
 values are computed from it: total orders, orders on the way (`filter`), delivered orders
 and money spent (`reduce`). The stage 1 styles are reused in `frontend/src/App.css`,
-with a single column until the form comes back in stage 7.
+with a single column until the form comes back in stage 7. Since stage 8 that file is `src/index.css`
+(global styles only) and every component has its own `.module.css`.
 
 ## Stage 2: data logic
 
@@ -409,6 +457,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | db.json, api.js, loading / error states, retry, timeout, search, tests, stage 6 |
 | Claude | redesign: photo hero, category filter, photo menu, bento summary, grouped orders, helper tests |
 | Claude | "Comandă specială" form, validation, request() and server-first add / toggle / delete / undo / cart, tw.json, tests, stage 7 |
+| Claude | React Router pages (layout, detail, about, 404), fetchComanda, CSS Modules split, tests, stage 8 |
 
 Details per stage: see the ai-log/ folder.
 
@@ -421,4 +470,5 @@ Details per stage: see the ai-log/ folder.
 - [x] Stage 5: local state and events
 - [x] Stage 6: loading data from a mock API
 - [x] Stage 7: form and validation
-- [ ] Stage 8: routing and detail page
+- [x] Stage 8: routing and detail page
+- [ ] Stage 9: own backend with Express

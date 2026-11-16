@@ -20,3 +20,12 @@ export function formatProduse(numar) { // primește numărul de produse
   if (numar === 1) return "1 produs"; // singularul
   return `${numar} ${prepozitiaDe(numar)}produse`; // ex. „3 produse”, „20 de produse”
 } // sfârșitul funcției
+
+// Etapa 8: data plasării unei comenzi (câmpul opțional `creata`, text ISO), în format românesc: „16 noiembrie 2026 la 12:00”.
+// null dacă lipsește sau nu e o dată validă, ca pagina să nu afișeze „Invalid Date”.
+export function formatData(iso) { // primește textul ISO salvat de formular sau de coș
+  if (typeof iso !== "string" || iso === "") return null; // lipsă (comenzile din db.json nu au `creata`)
+  const data = new Date(iso); // textul ISO transformat în dată
+  if (Number.isNaN(data.getTime())) return null; // text care nu e o dată
+  return data.toLocaleString("ro-RO", { dateStyle: "long", timeStyle: "short" }); // regulile românești, în fusul orar al browserului
+} // sfârșitul funcției

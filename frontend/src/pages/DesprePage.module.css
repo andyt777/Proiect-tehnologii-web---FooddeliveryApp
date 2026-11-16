@@ -1,0 +1,78 @@
+/* Etapa 8: stilurile paginii Despre (CSS Modules); .panel e clasa globală a panourilor */
+
+.pagina {
+  padding-top: 48px;        /* spațiu sub antet */
+  padding-bottom: 80px;     /* spațiu deasupra subsolului */
+}
+
+/* Prezentarea: supratitlu, titlu mare și text, cu mult spațiu alb */
+.intro { max-width: 62ch; margin-bottom: 48px; } /* rânduri de lungime comodă la citit */
+.eyebrow {
+  margin-bottom: 14px;      /* despărțit de titlu */
+  font-size: 0.8rem;        /* mic */
+  font-weight: 700;         /* bold */
+  letter-spacing: 0.12em;   /* rărit */
+  text-transform: uppercase; /* majuscule */
+  color: var(--muted);      /* text secundar */
+}
+.titlu {
+  font-family: var(--font-display); /* Fraunces */
+  font-size: clamp(2.4rem, 5.6vw, 4rem); /* ca titlul din hero */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic */
+  line-height: 1.04;        /* rânduri strânse */
+  letter-spacing: -0.025em; /* litere puțin mai apropiate */
+}
+.titlu em { color: var(--accent-text); } /* „Savoro”, roz (5.8:1 pe alb, 7.6:1 în tema întunecată) */
+.lead { margin-top: 20px; font-size: 1.2rem; line-height: 1.55; } /* descrierea, mai mare */
+.paragraf { margin-top: 14px; color: var(--muted); } /* textul secundar */
+
+/* Tehnologiile și fotografiile: două coloane pe ecranele late */
+.grila {
+  display: grid;            /* două coloane */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); /* tabelul fotografiilor e mai lat */
+  align-items: start;       /* panourile nu se întind unul după altul */
+  gap: 24px;                /* spațiul dintre ele */
+}
+.panelTitlu {
+  margin-bottom: 16px;      /* despărțit de conținut */
+  font-family: var(--font-display); /* Fraunces */
+  font-size: 1.45rem;       /* ca titlul panoului „Comandă specială” */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic */
+}
+
+/* lista tehnologiilor: numele îngroșat, rolul dedesubt */
+.stack { margin: 0; display: flex; flex-direction: column; gap: 14px; } /* rânduri una sub alta */
+.stack dt { font-weight: 600; } /* numele tehnologiei */
+.stack dd { margin: 2px 0 0; font-size: 0.92rem; color: var(--muted); } /* rolul ei */
+
+/* fotografiile: ancora din subsol se oprește sub antet */
+.fotografii { scroll-margin-top: calc(var(--header-h) + 16px); } /* pe această pagină nu e bară de căutare */
+.nota { margin-bottom: 12px; font-size: 0.92rem; color: var(--muted); } /* licența */
+.tabel { width: 100%; border-collapse: collapse; font-size: 0.92rem; } /* tabel pe toată lățimea panoului */
+.tabel th {
+  padding: 8px 12px 8px 0;  /* spațiu în celulă */
+  font-size: 0.76rem;       /* capul tabelului, mic */
+  font-weight: 700;         /* bold */
+  letter-spacing: 0.12em;   /* rărit */
+  text-transform: uppercase; /* majuscule */
+  text-align: left;         /* aliniat la stânga */
+  color: var(--muted);      /* text secundar */
+  border-bottom: 1px solid var(--line-strong); /* linia de sub cap */
+}
+.tabel td { padding: 10px 12px 10px 0; vertical-align: top; border-bottom: 1px dashed var(--line); } /* rânduri ca pe meniul tipărit */
+.tabel tr:last-child td { border-bottom: none; } /* fără linie sub ultimul rând */
+.tabel a { color: var(--accent-text); text-underline-offset: 3px; } /* linkurile, roz */
+
+/* Ecrane medii: panourile unul sub altul */
+@media (max-width: 860px) {
+  .grila { grid-template-columns: minmax(0, 1fr); } /* o singură coloană */
+}
+
+/* Ecrane înguste: mai puțin spațiu */
+@media (max-width: 640px) {
+  .pagina { padding-top: 32px; padding-bottom: 56px; } /* spațiu mai mic sus și jos */
+  .intro { margin-bottom: 32px; } /* mai aproape de panouri */
+  .lead { font-size: 1.08rem; } /* textul de deschidere, puțin mai mic */
+}

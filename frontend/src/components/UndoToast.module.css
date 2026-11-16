@@ -1,0 +1,57 @@
+/* Etapa 8: stilurile mesajelor de jos (CSS Modules), mutate din App.css */
+
+/* Mesajele de jos, pe mijloc: confirmarea comenzii și „Anulează”, unul sub altul */
+.region { /* Etapa 8: fostul .toast-region */
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  view-transition-name: toast; /* mesajul rămâne deasupra rândurilor care se mută (grupul e în index.css) */
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 8px 8px 18px;
+  font-size: 0.94rem;
+  font-weight: 500;
+  color: #ffffff;
+  background: var(--toast-bg);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px var(--shadow-float); /* umbră bleumarin (neagră în tema întunecată) */
+  animation: toast-in 0.2s ease-out;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(12px); }
+}
+.undo { /* Etapa 8: fostul .toast-undo */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 14px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--toast-action); /* roz gumă pe bleumarin (7:1 în ambele teme) */
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.undo:hover { background: rgba(255, 255, 255, 0.1); }
+/* confirmarea nu are buton, deci are spațiu egal pe ambele părți; bifa e bleu pe bleumarin */
+.ok { gap: 10px; padding: 12px 18px; } /* Etapa 8: fostul .toast-ok */
+.ok svg { color: var(--toast-ok); } /* bleu #89cff0 (6.8:1 în ambele teme) */
+
+/* Tipărire: fără mesaje */
+@media print {
+  .region { display: none !important; }
+}

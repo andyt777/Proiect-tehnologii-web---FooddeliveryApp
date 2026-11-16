@@ -1,0 +1,13 @@
+/* Etapa 8: stilul stării „niciun rezultat” (CSS Modules); .empty, .empty-hint și .btn-secondary sunt clase globale */
+
+/* căutare fără rezultate: iconiță în cerc, ca la coșul gol */
+.icon { /* Etapa 8: fostul .empty-icon */
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+  color: var(--accent-text);
+  background: var(--accent-soft);
+  border-radius: 50%;
+}

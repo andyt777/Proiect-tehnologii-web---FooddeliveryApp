@@ -1,7 +1,7 @@
 // Teste pentru formatările românești (src/format.js), rulate cu `node --test`
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatLei, formatComenzi, formatProduse } from "../src/format.js";
+import { formatData, formatLei, formatComenzi, formatProduse } from "../src/format.js";
 
 // --- formatLei ---
 // Valorile așteptate au fost verificate pe Node 24 (ICU complet): "ro-RO" folosește punct pentru mii și virgulă pentru zecimale
@@ -50,3 +50,19 @@ for (const [numar, , produse] of CAZURI) {
     assert.equal(formatProduse(numar), produse);
   });
 }
+
+// --- Etapa 8: formatData (data plasării, pe pagina de detaliu) ---
+
+test("formatData scrie o dată ISO validă în format românesc, cu luna în cuvinte", () => {
+  // ora depinde de fusul orar al mașinii, deci verificăm doar ziua, luna și anul (prânz UTC: aceeași zi în orice fus)
+  const text = formatData("2026-11-16T12:00:00.000Z");
+  assert.equal(typeof text, "string");
+  assert.match(text, /16 noiembrie 2026/);
+});
+
+test("formatData întoarce null pentru o valoare lipsă sau invalidă (nu „Invalid Date”)", () => {
+  for (const valoare of [undefined, null, "", "nu e o dată", 5, {}]) {
+    assert.equal(formatData(valoare), null);
+  }
+});
+

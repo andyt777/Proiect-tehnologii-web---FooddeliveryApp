@@ -1,0 +1,61 @@
+/* Etapa 8: stilurile cardului unui preparat (CSS Modules), mutate din App.css; folosite și de scheletul meniului */
+
+/* Cardul unui preparat: fotografia 4:3 sus, „titlu ..... preț” și restaurantul dedesubt;
+   butonul stă în aceeași celulă de grilă cu fotografia, deci se suprapune peste colțul ei */
+.card { /* Etapa 8: fostul .menu-card */
+  display: grid;
+  grid-template-areas: "foto" "info";
+  grid-template-rows: auto 1fr;
+  gap: 12px;
+}
+.foto { /* Etapa 8: fostul .menu-foto */
+  grid-area: foto;
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--skeleton);   /* locul fotografiei, până sosește */
+  border-radius: var(--radius-lg);
+}
+/* preparat fără fotografie: iconița categoriei, în aceeași cutie */
+.fotoGol { display: grid; place-items: center; color: var(--accent-text); background: var(--accent-soft); } /* Etapa 8: fostul .menu-foto-gol */
+.info { grid-area: info; padding-inline: 2px; } /* Etapa 8: fostul .menu-info */
+.card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; font-style: italic; } /* numele preparatului, Fraunces italic */
+.card :global(.price) { font-size: 1.05rem; color: var(--accent-text); } /* Etapa 8: .price e clasa globală */
+.restaurant { margin-top: 2px; font-size: 0.9rem; font-weight: 500; color: var(--muted); } /* Etapa 8: fostul .menu-restaurant */
+.action { /* Etapa 8: fostul .menu-action */
+  grid-area: foto;
+  align-self: end;
+  justify-self: end;
+  display: flex;
+  margin: 12px;
+}
+
+/* „Adaugă”: pastilă plină peste fotografie (roz #bd246b pe alb 5.8:1; la hover alb pe roz #d02a73 4.9:1) */
+.btnAdd { /* Etapa 8: fostul .btn-add */
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 18px 0 14px;
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--surface);
+  border: none;
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgba(11, 26, 43, 0.3); /* umbră bleumarin, ca pastila să se desprindă de fotografie */
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.btnAdd:hover { color: var(--on-accent); background: var(--accent); } /* alb pe roz la hover */
+/* selectorul din card are fundal plin, ca să se citească peste fotografie (cel din coș rămâne la fel); clasa ajunge pe selector prin prop-ul className */
+.action .stepper { background: var(--surface); border-color: transparent; box-shadow: 0 6px 18px rgba(11, 26, 43, 0.3); } /* aceeași umbră bleumarin */
+/* focus peste fotografie: inel alb între două inele închise, vizibil pe orice culoare */
+.action :focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px rgba(11, 26, 43, 0.85); /* inelul exterior, bleumarin foarte închis */
+}

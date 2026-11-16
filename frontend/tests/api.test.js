@@ -3,7 +3,7 @@
 // Sub Node, import.meta.env nu există; api.js folosește `import.meta.env?.VITE_API_URL`, deci cade pe adresa implicită.
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import { API_URL, TIMP_MAXIM_MS, createComanda, deleteComanda, fetchComenzi, fetchMeniu, request, updateComanda } from "../src/api.js";
+import { API_URL, TIMP_MAXIM_MS, createComanda, deleteComanda, fetchComanda, fetchComenzi, fetchMeniu, request, updateComanda } from "../src/api.js";
 
 const fetchOriginal = globalThis.fetch;
 afterEach(() => {
@@ -228,3 +228,41 @@ test("update și delete propagă erorile serverului (ex. 404 pentru o comandă d
   await assert.rejects(updateComanda(99, { livrata: true }), { message: "Eroare server: 404" });
   await assert.rejects(deleteComanda(99), { message: "Eroare server: 404" });
 });
+
+// --- Etapa 8: fetchComanda (pagina de detaliu) ---
+
+test("fetchComanda cere GET /comenzi/:id și întoarce obiectul comenzii", async () => {
+  const comanda = { id: 3, preparat: "Platou sushi (12 buc.)", livrata: false };
+  const apeluri = fetchInregistrat(raspuns(comanda));
+  assert.deepEqual(await fetchComanda("3"), comanda);
+  assert.equal(apeluri.length, 1);
+  assert.equal(apeluri[0].url, "http://localhost:3001/comenzi/3");
+  assert.equal(apeluri[0].optiuni.method, undefined);
+  assert.ok(apeluri[0].optiuni.signal instanceof AbortSignal);
+});
+
+test("fetchComanda codifică id-ul din adresă, deci nu poate schimba ruta", async () => {
+  const apeluri = fetchInregistrat(raspuns({ id: 1 }));
+  await fetchComanda("../meniu");
+  assert.equal(apeluri[0].url, "http://localhost:3001/comenzi/..%2Fmeniu");
+});
+
+test("fetchComanda aruncă „Eroare server: 404” pentru o comandă care nu există (ex. /comenzi/999)", async () => {
+  fetchInregistrat(raspuns({}, 404));
+  await assert.rejects(fetchComanda("999"), { message: "Eroare server: 404" });
+});
+
+test("fetchComanda aruncă „Răspuns neașteptat de la server” dacă răspunsul nu e un singur obiect", async () => {
+  for (const date of [[{ id: 1 }], null, "text", 5]) {
+    fetchInregistrat(raspuns(date));
+    await assert.rejects(fetchComanda("1"), { message: "Răspuns neașteptat de la server" });
+  }
+});
+
+test("fetchComanda traduce erorile de rețea, ca restul cererilor", async () => {
+  globalThis.fetch = async () => {
+    throw new TypeError("Failed to fetch");
+  };
+  await assert.rejects(fetchComanda("1"), { message: "Serverul nu poate fi contactat" });
+});
+

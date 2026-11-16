@@ -1,0 +1,139 @@
+/* Etapa 8: stilurile layout-ului comun (antet, navigație, subsol), mutate din App.css; clasele primesc nume unice la build */
+
+/* 4.2 Antetul: bară bleu translucidă cu text bleumarin (bleumarin translucid în tema întunecată), fix la derulare;
+   fotografia și pagina se văd estompate prin el */
+.header { /* Etapa 8: fostul .app-header */
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  color: var(--header-fg); /* text bleumarin pe bleu (închis pe deschis invers în tema întunecată) */
+  /* 86% opac: textul --header-muted rămâne AA orice ar fi în spate (calculul e lângă variabile) */
+  background: var(--header-bg); /* bleu translucid */
+  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  backdrop-filter: blur(14px) saturate(1.4);
+  border-bottom: 1px solid var(--header-border);
+  view-transition-name: antet; /* antetul rămâne deasupra rândurilor care se mută (grupul e în index.css) */
+}
+/* fără backdrop-filter, translucidul ar lăsa textul paginii să se citească prin antet: fundal plin */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .header { background: var(--header-solid); } /* bleu plin (bleumarin plin în tema întunecată) */
+}
+.inner { /* Etapa 8: fostul .header-inner */
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo { /* titlul aplicației, cu semnul Savoro */
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  font-style: italic;       /* Fraunces italic, ca titlurile */
+}
+/* Etapa 8: logo-ul e link spre pagina comenzilor; arată la fel ca înainte (fără subliniere) */
+.logoLink {
+  display: flex;            /* semnul și numele pe același rând */
+  align-items: center;      /* centrate pe verticală */
+  gap: 10px;                /* spațiul dintre semn și nume, ca înainte */
+  text-decoration: none;    /* fără subliniere */
+  border-radius: var(--radius-sm); /* conturul de focus urmează colțurile */
+}
+
+/* Etapa 8: navigația din antet: „Comenzi” și „Despre”, ca pastile în culorile antetului */
+.nav {
+  display: flex;            /* linkurile pe un rând */
+  align-items: center;      /* centrate pe verticală */
+  gap: 4px;                 /* puțin spațiu între ele */
+}
+.link {
+  display: inline-flex;     /* înălțime fixă, text centrat */
+  align-items: center;      /* textul centrat pe verticală */
+  height: 40px;             /* zonă de clic confortabilă */
+  padding: 0 14px;          /* spațiu lateral */
+  font-size: 0.92rem;       /* ca butonul de temă */
+  font-weight: 600;         /* semibold */
+  color: var(--header-muted); /* text secundar bleumarin (AA în cel mai rău caz) */
+  text-decoration: none;    /* fără subliniere */
+  border: 1px solid transparent; /* bordura există mereu, ca linkul activ să nu se lățească */
+  border-radius: var(--radius-sm); /* colțuri ca la celelalte pastile din antet */
+  transition: background 0.15s, color 0.15s; /* schimbare lină la hover */
+}
+.link:hover { color: var(--header-fg); background: var(--header-pill); } /* la hover: text plin și fundal alb translucid */
+/* pagina curentă (NavLink pune și aria-current="page"): pastilă cu contur, deci se vede și fără culori */
+.active {
+  color: var(--header-fg);  /* text bleumarin plin */
+  background: var(--header-pill-hover); /* alb aproape opac */
+  border-color: var(--header-pill-border); /* conturul pastilelor */
+}
+.active:hover { background: var(--header-pill-hover); } /* linkul activ nu se schimbă la hover */
+
+/* pastila de temă: alb translucid peste bara bleu (aceleași valori ca pastilele din bara de căutare) */
+.themeToggle { /* Etapa 8: fostul .theme-toggle; Etapa 5: butonul de comutare a temei */
+  height: 44px;
+  color: var(--header-fg);  /* textul butonului, bleumarin */
+  background: var(--header-pill); /* alb translucid */
+  border: 1px solid var(--header-pill-border); /* contur bleumarin transparent */
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;        /* Etapa 8: fără căutare în antet, butonul stă la dreapta */
+  padding: 0 14px;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.themeToggle svg { color: var(--header-accent); } /* iconița soare / lună, roz */
+.themeToggle:hover { background: var(--header-pill-hover); } /* pastila devine mai opacă */
+
+/* Etapa 8: locul paginilor (Outlet); ocupă înălțimea rămasă, ca subsolul să stea jos și pe paginile scurte */
+.main { flex: 1; }
+
+/* Subsolul: doar ©, discret */
+.footer { border-top: 1px solid var(--line); } /* Etapa 8: fostul .app-footer */
+.footerInner { /* Etapa 8: fostul .footer-inner */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  padding-block: 28px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+.footerInner a { text-underline-offset: 3px; }
+.footerInner a:hover { color: var(--text); }
+
+/* 4.9 Ecrane înguste: antetul pe un singur rând (logo, navigație, temă); căutarea e în bara de sub el */
+@media (max-width: 640px) {
+  .inner { gap: 8px; }      /* Etapa 8: mai puțin spațiu între elemente */
+  .link { padding: 0 10px; } /* Etapa 8: linkurile mai înguste, ca rândul să încapă pe 360px */
+  .themeToggle { width: 44px; padding: 0; justify-content: center; }
+  /* pe telefon rămâne doar iconița; textul e citit în continuare de cititoarele de ecran */
+  .themeLabel { /* Etapa 8: fostul .theme-label */
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* Etapa 8: pe ecranele foarte înguste rămâne doar semnul Savoro; numele e citit în continuare */
+@media (max-width: 370px) {
+  .logoText { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* ascuns vizual, ca .sr-only */
+}
+
+/* Tipărire: antetul ca un titlu simplu, fără butoane */
+@media print {
+  .themeToggle, .nav { display: none !important; } /* Etapa 8: fără temă și fără navigație pe hârtie */
+  .header { position: static; background: none; border-bottom: 2px solid #000000; }
+  .footer { border-top: 2px solid #000000; }
+}

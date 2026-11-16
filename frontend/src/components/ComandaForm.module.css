@@ -1,0 +1,44 @@
+/* Etapa 8: stilurile formularului „Comandă specială” (CSS Modules), mutate din App.css; .btn-primary e clasă globală */
+
+.form { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; } /* Etapa 8: fostul .speciala-form; câmpurile unul sub altul */
+.intro { font-size: 0.92rem; color: var(--muted); } /* Etapa 8: fostul .speciala-intro; explicația de sub titlu (7:1 pe alb) */
+.camp { display: flex; flex-direction: column; gap: 6px; } /* eticheta deasupra câmpului */
+.camp label { font-size: 0.9rem; font-weight: 600; } /* eticheta, scurtă și îngroșată */
+.camp input,
+.camp select {
+  width: 100%;              /* tot rândul */
+  min-height: 48px;         /* zonă de atingere confortabilă */
+  padding: 0 14px;          /* textul nu stă lipit de margine */
+  font: inherit;            /* același font ca pagina (inputurile nu-l moștenesc singure) */
+  color: var(--text);       /* text principal */
+  background: var(--surface); /* alb (panou închis în tema întunecată) */
+  border: 1.5px solid var(--line-strong); /* contur bleu, ca butoanele secundare */
+  border-radius: var(--radius-sm); /* colțuri rotunjite */
+  transition: border-color 0.15s; /* conturul se schimbă lin */
+}
+.camp input:hover,
+.camp select:hover { border-color: var(--subtle); } /* conturul mai închis la hover */
+.camp input:focus,
+.camp select:focus { border-color: var(--accent-text); } /* conturul roz la focus (plus inelul general de focus) */
+.camp input::placeholder { color: var(--muted); } /* exemplul din câmpul gol, lizibil (AA) */
+.campAjutor { font-size: 0.82rem; color: var(--muted); } /* Etapa 8: fostul .camp-ajutor; contorul de caractere */
+
+/* Etapa 7: câmpul greșit, marcat de aria-invalid (formă + culoare: contur gros roșu) */
+.camp [aria-invalid="true"] {
+  border-color: var(--danger); /* contur roșu */
+  box-shadow: 0 0 0 1px var(--danger); /* contur dublu: se vede și fără să deosebești culorile */
+}
+/* mesajul de validare, lângă formular (nu alert) */
+.eroare { /* Etapa 8: fostul .form-eroare */
+  padding: 10px 14px;       /* cutie mică */
+  font-size: 0.92rem;       /* text de mesaj */
+  font-weight: 500;         /* puțin îngroșat */
+  color: var(--text);       /* text principal pe roz deschis (peste 14:1) */
+  background: var(--error-bg); /* același roz ca panoul de eroare */
+  border: 1.5px solid var(--error-border); /* contur roz */
+  border-left-width: 4px;   /* bara din stânga: mesajul se vede și fără culoare */
+  border-radius: var(--radius-sm); /* colțuri rotunjite */
+}
+.ok { font-size: 0.9rem; font-weight: 500; color: var(--brand-text); } /* Etapa 8: fostul .form-ok; confirmarea trimiterii, bleu închis */
+.ok:empty { display: none; } /* regiunea există mereu (pentru anunț), dar nu ocupă loc când e goală */
+.form :global(.btn-primary) { width: 100%; } /* butonul pe toată lățimea panoului */

@@ -1,0 +1,108 @@
+/* Etapa 8: stilurile cardurilor de categorii (CSS Modules), mutate din App.css */
+
+/* „Ce poftești azi?”: „Toate” + câte un card cu fotografie pentru fiecare categorie */
+.section { margin-bottom: 48px; } /* Etapa 8: fostul .categorii-section */
+.carduri { /* Etapa 8: fostul .categorii-carduri */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 0.7fr repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+/* cardul e un buton: textul stă jos, peste fotografie */
+.card { /* Etapa 8: fostul .categorie-card */
+  position: relative;
+  isolation: isolate;       /* fotografia și umbra (z-index negativ) rămân în card */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  width: 100%;
+  height: 128px;
+  padding: 14px 16px;
+  font: inherit;
+  line-height: 1.3;
+  text-align: left;
+  color: var(--on-ink);
+  background: var(--ink);
+  border: none;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+}
+.card:global(.skeleton) { display: block; background: var(--skeleton); cursor: default; } /* Etapa 8: .skeleton e clasa globală */
+.img { /* Etapa 8: fostul .categorie-img */
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease-out;
+}
+.card:hover .img { transform: scale(1.06); }
+/* umbra de jos: textul alb rămâne lizibil pe orice fotografie */
+.foto::before { /* Etapa 8: fostul .categorie-foto */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(0deg, rgba(15, 58, 92, 0.92) 0%, rgba(15, 58, 92, 0.58) 55%, rgba(15, 58, 92, 0.15) 100%); /* bleumarin: sub text acoperirea e de cel puțin 70% (alb: 4.8:1 chiar și peste un pixel alb) */
+}
+.nume { /* Etapa 8: fostul .categorie-nume */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  font-style: italic;       /* Fraunces italic */
+}
+.numar { font-size: 0.84rem; font-weight: 500; } /* Etapa 8: fostul .categorie-numar */
+/* „Toate”: fără fotografie, pe fundal bleu deschis; iconița urcă în colțul de sus */
+.toate { /* Etapa 8: fostul .categorie-toate */
+  color: var(--text);
+  background: var(--bg-soft);
+  border: 1.5px solid var(--line-strong); /* contur bleu, vizibil pe pagina albă */
+  transition: background 0.15s, border-color 0.15s;
+}
+.toate:hover { border-color: var(--subtle); }
+.toate .numar { color: var(--muted); }
+.iconita { margin-bottom: auto; color: var(--accent-text); } /* Etapa 8: fostul .categorie-iconita */
+/* categoria aleasă: chenar roz gros (formă, nu doar culoare) + o linie albă subțire spre fotografie */
+.toate[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent-text); }
+.foto[aria-pressed="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--accent);
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9);
+}
+/* focus: contur plin, cu spațiu față de card (se vede și pe fundal alb, și lângă fotografie) */
+.card:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
+
+/* 4.9 Ecrane înguste */
+@media (max-width: 640px) {
+  /* categoriile: un rând care glisează orizontal și se oprește la fiecare card; padding-ul lasă loc conturului de focus */
+  .section { margin-bottom: 36px; }
+  .carduri {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    margin-inline: calc(-1 * var(--gutter));
+    padding: 6px var(--gutter) 10px;
+    scrollbar-width: none;
+  }
+  .carduri li { flex: 0 0 42%; scroll-snap-align: start; }
+  .carduri li:first-child { flex-basis: 30%; }
+  .card { height: 104px; padding: 12px; }
+  .nume { font-size: 1.1rem; }
+}
+
+/* Tipărire: fără categorii */
+@media print {
+  .section { display: none !important; }
+}

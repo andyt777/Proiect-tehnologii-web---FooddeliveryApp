@@ -3,13 +3,14 @@ import { Send } from "lucide-react"; // iconița butonului de trimitere
 import { PREPARAT_MAX, RESTAURANTE, TIPURI_LIVRARE } from "../constants.js"; // valorile fixe ale formularului
 import { ETICHETE_LIVRARE } from "../livrare.js"; // textele afișate pentru tipurile de livrare
 import { comandaSpecialaNoua, valideazaComandaSpeciala } from "../validare.js"; // validarea și obiectul trimis, funcții pure
+import styles from "./ComandaForm.module.css"; // Etapa 8: stilurile formularului (CSS Modules)
 
 const RESTAURANT_IMPLICIT = RESTAURANTE[0].nume; // „Pizzeria Napoli”, primul din listă
 const LIVRARE_IMPLICITA = "standard"; // ca în coș, livrarea pornește de la Standard
 
 // Etapa 7: „Comandă specială” — clientul cere unui restaurant un preparat care nu e în meniu.
 // Formular controlat: state-ul React e sursa de adevăr pentru fiecare câmp (value + onChange).
-// Nu apelează fetch: validează, trimite datele prin onAdd (primit de la App) și afișează eroarea, dacă apare.
+// Nu apelează fetch: validează, trimite datele prin onAdd (primit de la ComenziPage) și afișează eroarea, dacă apare.
 export default function ComandaForm({ onAdd, blocat = false }) { // props: funcția de adăugare și blocat = lista încă se încarcă
   const [preparat, setPreparat] = useState(""); // textul din câmpul „Preparat”
   const [restaurant, setRestaurant] = useState(RESTAURANT_IMPLICIT); // restaurantul ales
@@ -38,7 +39,7 @@ export default function ComandaForm({ onAdd, blocat = false }) { // props: func�
     setCampGresit(null); // niciun câmp marcat
     setTrimite(true); // butonul se dezactivează și arată „Se trimite…”: un dublu clic nu creează două comenzi
     try { // cererea poate eșua (server oprit, eroare HTTP, timeout)
-      await onAdd(comandaSpecialaNoua({ preparat, restaurant, livrare })); // App trimite la server și adaugă în listă ce s-a salvat
+      await onAdd(comandaSpecialaNoua({ preparat, restaurant, livrare })); // ComenziPage trimite la server și adaugă în listă ce s-a salvat
       setTrimisa(`Cererea pentru „${preparat.trim()}” a ajuns la ${restaurant}.`); // confirmarea, citită și de cititoarele de ecran
       setPreparat(""); // golim câmpurile doar după ce serverul a confirmat
       setRestaurant(RESTAURANT_IMPLICIT); // înapoi la valoarea implicită
@@ -62,9 +63,9 @@ export default function ComandaForm({ onAdd, blocat = false }) { // props: func�
   const descriere = (camp, extra) => [extra, campGresit === camp ? "speciala-eroare" : null].filter(Boolean).join(" ") || undefined; // aria-describedby: indicația câmpului și, dacă e cazul, mesajul de eroare
 
   return ( // întoarcem JSX
-    <form className="speciala-form" onSubmit={handleSubmit} noValidate data-testid="form" aria-describedby="speciala-intro">{/* noValidate: mesajele sunt cele din cod, în română */}
-      <p id="speciala-intro" className="speciala-intro">Ceri un preparat care nu e în meniu. Restaurantul îți confirmă prețul.</p>{/* ce face formularul */}
-      <div className="camp">{/* câmpul „Preparat” */}
+    <form className={styles.form} onSubmit={handleSubmit} noValidate data-testid="form" aria-describedby="speciala-intro">{/* noValidate: mesajele sunt cele din cod, în română */}
+      <p id="speciala-intro" className={styles.intro}>Ceri un preparat care nu e în meniu. Restaurantul îți confirmă prețul.</p>{/* ce face formularul */}
+      <div className={styles.camp}>{/* câmpul „Preparat” */}
         <label htmlFor="speciala-preparat">Preparat</label>{/* eticheta, legată prin htmlFor */}
         <input // câmp text controlat
           id="speciala-preparat" // legătura cu eticheta
@@ -79,9 +80,9 @@ export default function ComandaForm({ onAdd, blocat = false }) { // props: func�
           aria-describedby={descriere("preparat", "speciala-contor")} // contorul și eroarea, citite după etichetă
           data-testid="form-title" // reperul pentru verificarea automată
         />
-        <span id="speciala-contor" className="camp-ajutor">{preparat.length}/{PREPARAT_MAX} caractere</span>{/* contorul de caractere */}
+        <span id="speciala-contor" className={styles.campAjutor}>{preparat.length}/{PREPARAT_MAX} caractere</span>{/* contorul de caractere */}
       </div>
-      <div className="camp">{/* câmpul „Restaurant” */}
+      <div className={styles.camp}>{/* câmpul „Restaurant” */}
         <label htmlFor="speciala-restaurant">Restaurant</label>{/* eticheta */}
         <select // listă derulantă controlată
           id="speciala-restaurant" // legătura cu eticheta
@@ -97,7 +98,7 @@ export default function ComandaForm({ onAdd, blocat = false }) { // props: func�
           ))}{/* sfârșitul map-ului */}
         </select>
       </div>
-      <div className="camp">{/* câmpul „Livrare” */}
+      <div className={styles.camp}>{/* câmpul „Livrare” */}
         <label htmlFor="speciala-livrare">Livrare</label>{/* eticheta */}
         <select // listă derulantă controlată
           id="speciala-livrare" // legătura cu eticheta
@@ -114,9 +115,9 @@ export default function ComandaForm({ onAdd, blocat = false }) { // props: func�
         </select>
       </div>
       {eroare && ( // mesajul apare doar când există o eroare
-        <p id="speciala-eroare" className="form-eroare" role="alert" data-testid="form-error">{eroare}</p> // role="alert": anunțat imediat de cititoarele de ecran
+        <p id="speciala-eroare" className={styles.eroare} role="alert" data-testid="form-error">{eroare}</p> // role="alert": anunțat imediat de cititoarele de ecran
       )}{/* sfârșitul randării condiționate */}
-      <p className="form-ok" role="status">{trimisa}</p>{/* confirmarea; regiunea există mereu, ca textul nou să fie anunțat */}
+      <p className={styles.ok} role="status">{trimisa}</p>{/* confirmarea; regiunea există mereu, ca textul nou să fie anunțat */}
       <button type="submit" className="btn-primary" disabled={trimite || blocat} data-testid="form-submit">{/* dezactivat cât se trimite (și cât se încarcă lista) */}
         <Send size={18} aria-hidden="true" />{/* iconiță decorativă */}
         {trimite ? "Se trimite…" : "Trimite cererea"}{/* textul arată că se lucrează */}
