@@ -25,7 +25,7 @@ export default function CategoriiCarduri({ meniu, activa, onAlege, incarcare }) 
           <li>{/* cardul „Toate” */}
             <button // buton comutator
               type="button" // buton simplu
-              className="categorie-card categorie-toate" // fără fotografie, pe fundal cremă
+              className="categorie-card categorie-toate" // fără fotografie, pe fundal bleu deschis
               aria-pressed={activa === null} // apăsat când nu e aleasă nicio categorie
               onClick={() => onAlege(null)} // „Toate” anulează filtrul
             >

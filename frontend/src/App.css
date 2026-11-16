@@ -1,4 +1,5 @@
-/* 4.1 Variabile: cremă + espresso, accent teracotă, titluri cu serif (Fraunces) și text în Inter */
+/* 4.1 Variabile, paleta „Cer senin”: pagină albă, suprafețe bleu (#89cff0 ca decor), bleumarin pentru zona de sus,
+   roz gumă (#ffb3d4) pentru etichete și roz intens (#d02a73) pentru acțiuni; titluri în Fraunces italic, text în Inter */
 * { box-sizing: border-box; }
 
 /* Tema luminoasă e baza; cea întunecată e mai jos (Etapa 5) */
@@ -7,40 +8,58 @@
   color-scheme: light;
 
   /* culori */
-  --bg: #fffdf9;            /* fundalul paginii, cremă */
-  --bg-soft: #f8f1e7;       /* chips, fundaluri discrete */
+  --bg: #ffffff;            /* fundalul paginii, alb */
+  --bg-soft: #eaf6fd;       /* bleu foarte deschis: chips, fundaluri discrete */
+  --bg-softer: #f4fafe;     /* bleu abia vizibil: subsolul coșului */
   --surface: #ffffff;       /* panoul listei, dialogul */
-  --line: #eadfd3;          /* borduri și separatoare */
-  --text: #2a1a12;
-  --muted: #6f5f55;         /* text secundar (6:1 pe cremă) */
-  --subtle: #a8988c;        /* doar decor: linii punctate, iconițe stinse */
-  --ink: #2a1a12;           /* antetul și zona de sus, espresso */
-  --on-ink: #ffffff;
-  --on-ink-muted: #d6c8bb;
-  --accent: #c2410c;        /* teracota: butoane, bife, prețuri */
-  --accent-hover: #a8360a;
-  --accent-text: #c2410c;   /* teracota ca text mic (5:1 pe cremă) */
-  --accent-soft: #fbeee6;
-  --accent-on-ink: #f0a77f; /* accentul pe fundalul espresso */
-  --brand: #3f6a0b;         /* măsliniu: comandă livrată */
-  --brand-soft: #eef5e1;
-  --amber: #b45309;
-  --amber-soft: #fffbeb;
-  --danger: #dc2626;
-  --danger-soft: #fef2f2;
-  --header-border: rgba(255, 255, 255, 0.08);
-  --shadow-sm: 0 1px 2px rgba(42, 26, 18, 0.06);
-  --shadow: 0 1px 3px rgba(42, 26, 18, 0.06), 0 12px 32px rgba(42, 26, 18, 0.08);
-  --backdrop: rgba(42, 26, 18, 0.5);
-  --toast-bg: #2a1a12;
-  --error-bg: #fcefe6;      /* Etapa 6: panoul de eroare, teracotă foarte deschisă (textul --text pe el: 15:1) */
-  --error-border: #e8b394;  /* conturul panoului de eroare */
-  --skeleton: #f1e7db;      /* Etapa 6: formele gri de încărcare (doar decor, fără text) */
+  --line: #dceffa;          /* borduri și separatoare (doar decor) */
+  --line-strong: #bfe3f7;   /* conturul controalelor: pastile, butoane secundare, opțiuni */
+  --text: #172033;          /* textul principal (16:1 pe alb, 14.8:1 pe bleu) */
+  --muted: #4a5b70;         /* text secundar (7:1 pe alb, 6.3:1 pe bleu, 5.7:1 pe roz deschis) */
+  --subtle: #8fb3cc;        /* doar decor: linii punctate, iconițe stinse, contur la hover */
+  --ink: #0f3a5c;           /* bleumarin: zona de sus sub fotografie, cardurile cu fotografie */
+  --on-ink: #ffffff;        /* text alb pe bleumarin (11.8:1) */
+  --on-accent: #ffffff;     /* text alb pe butoanele pline, roz sau roșii (4.9:1 pe #d02a73) */
+  --accent: #d02a73;        /* roz intens: butoane, bife, stare activă */
+  --accent-hover: #b0205f;  /* rozul butonului la hover (alb pe el: 6.5:1) */
+  --accent-text: #bd246b;   /* roz ca text mic și focus: prețuri (5.8:1 pe alb, 5.3:1 pe bleu, 4.8:1 pe roz deschis) */
+  --accent-soft: #ffe1ef;   /* roz foarte deschis: fundalul opțiunii alese */
+  --accent-on-ink: #ffb3d4; /* roz gumă pe bleumarin (7.1:1) */
+  --highlight: #ffb3d4;     /* roz gumă: strălucire, decor; niciodată sub text alb */
+  --highlight-soft: #ffe1ef; /* fundalul etichetei „Express” */
+  --highlight-text: #a3195a; /* textul roz pe roz deschis (6.1:1) */
+  --brand: #89cff0;         /* bleu: decor și umpleri (bara „livrate”) */
+  --brand-text: #1a5e8a;    /* bleu închis ca text: „Livrată”, „Ridicare” (5.8:1 pe --brand-soft) */
+  --brand-soft: #d6eefb;    /* fundalul stării „Livrată” și al etichetei „Ridicare” */
+  --danger: #dc2626;        /* roșu: iconița de ștergere la hover */
+  --danger-soft: #fef2f2;   /* fundalul roșu deschis de sub iconița de ștergere */
+  --danger-strong: #b91c1c; /* butonul „Șterge” din dialog (alb pe el: 6.5:1) */
+  --danger-strong-hover: #991b1b; /* butonul „Șterge” la hover */
+  /* antetul: bară bleu translucidă cu text bleumarin */
+  --header-solid: #dff1fb;  /* culoarea plină a antetului (și conturul insignei coșului) */
+  --header-bg: color-mix(in srgb, var(--header-solid) 86%, transparent); /* 86%: textul rămâne AA chiar și cu fotografia întunecată în spate */
+  --header-fg: #0f3a5c;     /* bleumarin (7.4:1 în cel mai rău caz, cu negru în spate) */
+  --header-muted: #2f5677;  /* text secundar în antet (4.8:1 în cel mai rău caz) */
+  --header-accent: #bd246b; /* iconițele din antet (3.6:1 în cel mai rău caz, peste 3:1 cerut pentru iconițe) */
+  --header-pill: rgba(255, 255, 255, 0.6);    /* pastilele din antet: alb translucid peste bleu */
+  --header-pill-hover: rgba(255, 255, 255, 0.85); /* pastila la hover și căutarea cu focus */
+  --header-pill-border: rgba(15, 58, 92, 0.16);   /* conturul pastilelor, bleumarin transparent */
+  --header-border: rgba(15, 58, 92, 0.1);     /* linia de sub antet */
+  --shadow-sm: 0 1px 2px rgba(15, 58, 92, 0.06); /* umbră fină, nuanță bleumarin */
+  --shadow: 0 1px 3px rgba(15, 58, 92, 0.06), 0 12px 32px rgba(15, 58, 92, 0.08); /* umbra panourilor */
+  --shadow-float: rgba(11, 26, 43, 0.25); /* culoarea umbrelor mari: dialog, coș, mesaje */
+  --backdrop: rgba(11, 26, 43, 0.5); /* fundalul de sub dialoguri, bleumarin închis */
+  --toast-bg: #0f3a5c;      /* mesajele de jos, bleumarin (alb pe el: 11.8:1) */
+  --toast-action: #ffb3d4;  /* „Anulează” în mesaj: roz gumă pe bleumarin (7.1:1) */
+  --toast-ok: #89cff0;      /* bifa confirmării: bleu pe bleumarin (6.9:1) */
+  --error-bg: #fff0f6;      /* Etapa 6: panoul de eroare, roz foarte deschis (textul --text pe el: 15:1) */
+  --error-border: #f5a9c9;  /* conturul panoului de eroare */
+  --skeleton: #e3f1fa;      /* Etapa 6: formele bleu de încărcare (doar decor, fără text) */
   --skeleton-shine: rgba(255, 255, 255, 0.7); /* luciul care trece peste schelet */
 
   /* fonturi */
   --font-body: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif; /* folosit mereu cu font-style: italic (titluri, logo, prețuri) */
 
   /* dimensiuni comune: toate secțiunile se aliniază la aceeași lățime */
   --page: 1120px;           /* redesign: mai lat, pentru grila de fotografii */
@@ -55,60 +74,82 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --bg: #15100c;
-    --bg-soft: #221912;
-    --surface: #1c1510;
-    --line: #3a2d23;
-    --text: #f6eee6;
-    --muted: #c4b4a6;
-    --subtle: #7f6e61;
-    --ink: #221710;
-    --accent-text: #f0a77f;
-    --accent-soft: rgba(240, 167, 127, 0.12);
-    --brand: #a3d468;
-    --brand-soft: rgba(163, 212, 104, 0.12);
-    --amber: #f5b754;
-    --amber-soft: rgba(245, 183, 84, 0.12);
-    --danger: #f87171;
-    --danger-soft: rgba(248, 113, 113, 0.12);
-    --shadow-sm: none;
-    --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-    --backdrop: rgba(0, 0, 0, 0.6);
-    --toast-bg: #4a362a;
-    --error-bg: #2b1810;
-    --error-border: #8a4426;
-    --skeleton: #2c2119;
-    --skeleton-shine: rgba(255, 255, 255, 0.06);
+    --bg: #0b1a2b;            /* bleumarin foarte închis: fundalul paginii */
+    --bg-soft: #122638;       /* chips, fundaluri discrete */
+    --bg-softer: #0d1f33;     /* subsolul coșului */
+    --surface: #0f2236;       /* panoul listei, dialogul */
+    --line: #1f3a55;          /* borduri și separatoare (doar decor) */
+    --line-strong: #2a4d6e;   /* conturul controalelor */
+    --text: #eaf3fb;          /* textul principal (15.6:1 pe fundal) */
+    --muted: #a9bfd3;         /* text secundar (8.5:1 pe panou, 8.2:1 pe --bg-soft) */
+    --subtle: #5a7896;        /* doar decor și contur la hover */
+    --ink: #0d2640;           /* zona de sus sub fotografie (alb pe ea: 15:1) */
+    --accent-text: #ff8fc0;   /* roz deschis ca text (7.6:1 pe panou, 5.7:1 pe --accent-soft) */
+    --accent-soft: rgba(255, 143, 192, 0.14); /* roz transparent: opțiunea aleasă */
+    --highlight-soft: rgba(255, 179, 212, 0.14); /* fundalul etichetei „Express” */
+    --highlight-text: #ffb3d4; /* roz gumă ca text (7.2:1 pe --highlight-soft) */
+    --brand-text: #89cff0;    /* bleu ca text: „Livrată”, „Ridicare” (6.9:1 pe --brand-soft) */
+    --brand-soft: rgba(137, 207, 240, 0.14); /* bleu transparent */
+    --danger: #f87171;        /* roșu deschis, vizibil pe bleumarin (5:1 pe --danger-soft) */
+    --danger-soft: rgba(248, 113, 113, 0.12); /* fundalul iconiței de ștergere la hover */
+    --header-solid: #0f2236;  /* antetul rămâne închis în tema întunecată, nu o bară luminoasă */
+    --header-fg: #eaf3fb;     /* text deschis în antet (9.3:1 în cel mai rău caz, cu alb în spate) */
+    --header-muted: #a9bfd3;  /* text secundar în antet (5.5:1 în cel mai rău caz) */
+    --header-accent: #ff8fc0; /* iconițele din antet (5:1 în cel mai rău caz) */
+    --header-pill: rgba(255, 255, 255, 0.07);   /* pastilele: alb aproape transparent */
+    --header-pill-hover: rgba(255, 255, 255, 0.14); /* pastila la hover */
+    --header-pill-border: rgba(255, 255, 255, 0.1); /* conturul pastilelor */
+    --header-border: rgba(255, 255, 255, 0.08); /* linia de sub antet */
+    --shadow-sm: none;        /* pe fundal închis umbra fină nu se vede */
+    --shadow: 0 12px 32px rgba(0, 0, 0, 0.35); /* umbra panourilor */
+    --shadow-float: rgba(0, 0, 0, 0.45); /* umbrele mari, mai dense pe fundal închis */
+    --backdrop: rgba(0, 0, 0, 0.6); /* fundalul de sub dialoguri */
+    --toast-bg: #1d3a57;      /* mesajele de jos, bleumarin mai deschis decât pagina (alb pe el: 11.7:1) */
+    --error-bg: #2b1626;      /* panoul de eroare, prună închisă (textul pe el: 15:1) */
+    --error-border: #7a2f55;  /* conturul panoului de eroare */
+    --skeleton: #16304a;      /* formele de încărcare */
+    --skeleton-shine: rgba(255, 255, 255, 0.06); /* luciul, abia vizibil */
   }
 }
 
 /* Etapa 5: tema aleasă din buton are prioritate față de cea a sistemului */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #15100c;
-  --bg-soft: #221912;
-  --surface: #1c1510;
-  --line: #3a2d23;
-  --text: #f6eee6;
-  --muted: #c4b4a6;
-  --subtle: #7f6e61;
-  --ink: #221710;
-  --accent-text: #f0a77f;
-  --accent-soft: rgba(240, 167, 127, 0.12);
-  --brand: #a3d468;
-  --brand-soft: rgba(163, 212, 104, 0.12);
-  --amber: #f5b754;
-  --amber-soft: rgba(245, 183, 84, 0.12);
-  --danger: #f87171;
-  --danger-soft: rgba(248, 113, 113, 0.12);
-  --shadow-sm: none;
-  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
-  --backdrop: rgba(0, 0, 0, 0.6);
-  --toast-bg: #4a362a;
-  --error-bg: #2b1810;
-  --error-border: #8a4426;
-  --skeleton: #2c2119;
-  --skeleton-shine: rgba(255, 255, 255, 0.06);
+  --bg: #0b1a2b;            /* bleumarin foarte închis: fundalul paginii */
+  --bg-soft: #122638;       /* chips, fundaluri discrete */
+  --bg-softer: #0d1f33;     /* subsolul coșului */
+  --surface: #0f2236;       /* panoul listei, dialogul */
+  --line: #1f3a55;          /* borduri și separatoare (doar decor) */
+  --line-strong: #2a4d6e;   /* conturul controalelor */
+  --text: #eaf3fb;          /* textul principal (15.6:1 pe fundal) */
+  --muted: #a9bfd3;         /* text secundar (8.5:1 pe panou, 8.2:1 pe --bg-soft) */
+  --subtle: #5a7896;        /* doar decor și contur la hover */
+  --ink: #0d2640;           /* zona de sus sub fotografie (alb pe ea: 15:1) */
+  --accent-text: #ff8fc0;   /* roz deschis ca text (7.6:1 pe panou, 5.7:1 pe --accent-soft) */
+  --accent-soft: rgba(255, 143, 192, 0.14); /* roz transparent: opțiunea aleasă */
+  --highlight-soft: rgba(255, 179, 212, 0.14); /* fundalul etichetei „Express” */
+  --highlight-text: #ffb3d4; /* roz gumă ca text (7.2:1 pe --highlight-soft) */
+  --brand-text: #89cff0;    /* bleu ca text: „Livrată”, „Ridicare” (6.9:1 pe --brand-soft) */
+  --brand-soft: rgba(137, 207, 240, 0.14); /* bleu transparent */
+  --danger: #f87171;        /* roșu deschis, vizibil pe bleumarin (5:1 pe --danger-soft) */
+  --danger-soft: rgba(248, 113, 113, 0.12); /* fundalul iconiței de ștergere la hover */
+  --header-solid: #0f2236;  /* antetul rămâne închis în tema întunecată, nu o bară luminoasă */
+  --header-fg: #eaf3fb;     /* text deschis în antet (9.3:1 în cel mai rău caz, cu alb în spate) */
+  --header-muted: #a9bfd3;  /* text secundar în antet (5.5:1 în cel mai rău caz) */
+  --header-accent: #ff8fc0; /* iconițele din antet (5:1 în cel mai rău caz) */
+  --header-pill: rgba(255, 255, 255, 0.07);   /* pastilele: alb aproape transparent */
+  --header-pill-hover: rgba(255, 255, 255, 0.14); /* pastila la hover */
+  --header-pill-border: rgba(255, 255, 255, 0.1); /* conturul pastilelor */
+  --header-border: rgba(255, 255, 255, 0.08); /* linia de sub antet */
+  --shadow-sm: none;        /* pe fundal închis umbra fină nu se vede */
+  --shadow: 0 12px 32px rgba(0, 0, 0, 0.35); /* umbra panourilor */
+  --shadow-float: rgba(0, 0, 0, 0.45); /* umbrele mari, mai dense pe fundal închis */
+  --backdrop: rgba(0, 0, 0, 0.6); /* fundalul de sub dialoguri */
+  --toast-bg: #1d3a57;      /* mesajele de jos, bleumarin mai deschis decât pagina (alb pe el: 11.7:1) */
+  --error-bg: #2b1626;      /* panoul de eroare, prună închisă (textul pe el: 15:1) */
+  --error-border: #7a2f55;  /* conturul panoului de eroare */
+  --skeleton: #16304a;      /* formele de încărcare */
+  --skeleton-shine: rgba(255, 255, 255, 0.06); /* luciul, abia vizibil */
 }
 
 body {
@@ -148,21 +189,22 @@ svg { flex-shrink: 0; }
   white-space: nowrap;
 }
 
-/* 4.2 Antetul: espresso translucid în ambele teme, fix la derulare; fotografia și pagina se văd estompate prin el */
+/* 4.2 Antetul: bară bleu translucidă cu text bleumarin (bleumarin translucid în tema întunecată), fix la derulare;
+   fotografia și pagina se văd estompate prin el */
 .app-header {
   position: sticky;
   top: 0;
   z-index: 10;
-  color: var(--on-ink);
-  /* 86% espresso: textul --on-ink-muted rămâne peste 5:1 chiar și cu alb în spate */
-  background: color-mix(in srgb, var(--ink) 86%, transparent);
+  color: var(--header-fg); /* text bleumarin pe bleu (închis pe deschis invers în tema întunecată) */
+  /* 86% opac: textul --header-muted rămâne AA orice ar fi în spate (calculul e lângă variabile) */
+  background: var(--header-bg); /* bleu translucid */
   -webkit-backdrop-filter: blur(14px) saturate(1.4);
   backdrop-filter: blur(14px) saturate(1.4);
   border-bottom: 1px solid var(--header-border);
 }
 /* fără backdrop-filter, translucidul ar lăsa textul paginii să se citească prin antet: fundal plin */
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .app-header { background: var(--ink); }
+  .app-header { background: var(--header-solid); } /* bleu plin (bleumarin plin în tema întunecată) */
 }
 .header-inner {
   height: var(--header-h);
@@ -179,17 +221,18 @@ svg { flex-shrink: 0; }
   font-family: var(--font-display);
   font-size: 1.35rem;
   font-weight: 600;
+  font-style: italic;       /* Fraunces italic, ca titlurile */
 }
 .logo-mark { flex-shrink: 0; }
 
-/* pastilele din antet: fundal translucid peste espresso */
+/* pastilele din antet: alb translucid peste bara bleu */
 .address-pill,
 .search,
 .theme-toggle {
   height: 44px;
-  color: var(--on-ink-muted);
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--header-muted); /* text secundar bleumarin */
+  background: var(--header-pill); /* alb translucid */
+  border: 1px solid var(--header-pill-border); /* contur bleumarin transparent */
   border-radius: var(--radius-sm);
 }
 .address-pill {
@@ -201,7 +244,7 @@ svg { flex-shrink: 0; }
   font-weight: 500;
   white-space: nowrap;
 }
-.address-pill svg { color: var(--accent-on-ink); }
+.address-pill svg { color: var(--header-accent); } /* iconița adresei, roz */
 
 .search {
   flex: 1;
@@ -211,18 +254,18 @@ svg { flex-shrink: 0; }
   padding: 0 14px;
   transition: border-color 0.15s, background 0.15s;
 }
-.search:focus-within { border-color: var(--accent-on-ink); background: rgba(255, 255, 255, 0.1); }
+.search:focus-within { border-color: var(--header-accent); background: var(--header-pill-hover); } /* contur roz și fundal mai opac la focus */
 .search input {
   flex: 1;
   min-width: 0;
   height: 100%;
   font: inherit;
-  color: var(--on-ink);
+  color: var(--header-fg); /* textul tastat, bleumarin */
   background: transparent;
   border: none;
   outline: none;
 }
-.search input::placeholder { color: var(--on-ink-muted); }
+.search input::placeholder { color: var(--header-muted); } /* indiciul, text secundar AA */
 
 /* Etapa 5: butonul de comutare a temei */
 .theme-toggle {
@@ -234,15 +277,15 @@ svg { flex-shrink: 0; }
   font: inherit;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--on-ink);
+  color: var(--header-fg);  /* textul butonului, bleumarin */
   white-space: nowrap;
   cursor: pointer;
   transition: background 0.15s;
 }
-.theme-toggle svg { color: var(--accent-on-ink); }
-.theme-toggle:hover { background: rgba(255, 255, 255, 0.14); }
+.theme-toggle svg { color: var(--header-accent); } /* iconița soare / lună, roz */
+.theme-toggle:hover { background: var(--header-pill-hover); } /* pastila devine mai opacă */
 
-/* Coșul: buton teracotă în antet (alb pe #c2410c = 5.2:1 în ambele teme) */
+/* Coșul: buton roz în antet (alb pe #d02a73 = 4.9:1 în ambele teme) */
 .cart-pill {
   position: relative;
   display: grid;
@@ -252,7 +295,7 @@ svg { flex-shrink: 0; }
   height: 44px;
   padding: 0;
   font: inherit;
-  color: #ffffff;
+  color: var(--on-accent);  /* iconița albă pe roz */
   background: var(--accent);
   border: none;
   border-radius: var(--radius-sm);
@@ -271,9 +314,9 @@ svg { flex-shrink: 0; }
   place-items: center;
   font-size: 0.7rem;
   font-weight: 700;
-  color: var(--ink);
+  color: var(--ink);        /* numărul, bleumarin pe alb (11.8:1) */
   background: #ffffff;
-  border: 2px solid var(--ink);
+  border: 2px solid var(--header-solid); /* conturul are culoarea antetului: insigna pare decupată din el */
   border-radius: 999px;
 }
 /* insigna „sare” puțin când se schimbă numărul (elementul are key = numărul, deci animația repornește) */
@@ -306,18 +349,20 @@ svg { flex-shrink: 0; }
 }
 .hero-foto { z-index: -2; }
 .hero-foto img { object-fit: cover; object-position: center 40%; }
-/* umbra peste fotografie: întunecată jos și în stânga, unde stă textul alb (contrast AA) */
+/* umbra bleumarin peste fotografie: mai densă jos și în stânga, unde stă textul alb. Bleumarinul e mai deschis
+   decât vechiul maro, deci opacitățile sunt puțin mai mari: sub text acoperirea e de cel puțin ~70%, iar alb pe
+   bleumarin 70% peste un pixel complet alb dă încă 4.8:1 (AA) */
 .hero::before {
   content: "";
   position: absolute;
   inset: 0;
   z-index: -1;
   background:
-    linear-gradient(90deg, rgba(20, 10, 5, 0.72) 0%, rgba(20, 10, 5, 0.35) 45%, rgba(20, 10, 5, 0) 75%),
-    linear-gradient(180deg, rgba(20, 10, 5, 0.55) 0%, rgba(20, 10, 5, 0.3) 30%, rgba(20, 10, 5, 0.78) 65%, rgba(20, 10, 5, 0.94) 100%);
+    linear-gradient(90deg, rgba(15, 58, 92, 0.78) 0%, rgba(15, 58, 92, 0.42) 45%, rgba(15, 58, 92, 0) 75%), /* stânga, sub titlu */
+    linear-gradient(180deg, rgba(15, 58, 92, 0.62) 0%, rgba(15, 58, 92, 0.45) 30%, rgba(15, 58, 92, 0.82) 65%, rgba(15, 58, 92, 0.95) 100%); /* sus sub antet și jos sub text */
 }
 /* o umbră fină sub litere, pentru zonele mai luminoase ale fotografiei */
-.hero-text { text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35); }
+.hero-text { text-shadow: 0 1px 14px rgba(11, 26, 43, 0.45); } /* umbră bleumarin închis */
 .eyebrow {
   display: block;
   margin-bottom: 14px;
@@ -334,9 +379,10 @@ svg { flex-shrink: 0; }
   font-weight: 600;
   line-height: 1.04;
   letter-spacing: -0.025em;
+  font-style: italic;       /* Fraunces italic */
   text-wrap: balance;       /* rânduri de lungimi apropiate */
 }
-.display em { color: var(--accent-on-ink); }
+.display em { color: var(--accent-on-ink); } /* cuvântul evidențiat, roz gumă (titlu mare: 3:1 cerut, peste 3.9:1 chiar pe alb acoperit 80%) */
 /* subtitlul derivat din meniu: „9 produse din 3 restaurante.” */
 .hero-sub {
   margin-top: 16px;
@@ -345,7 +391,7 @@ svg { flex-shrink: 0; }
 }
 /* „Vezi meniul”: butonul principal, rotunjit, fără umbra textului */
 .hero-cta { margin-top: 26px; border-radius: 999px; text-shadow: none; }
-/* conturul de focus alb se vede pe fotografie (cel teracotă translucid, nu) */
+/* conturul de focus alb se vede pe fotografie (cel roz, nu întotdeauna) */
 .hero :focus-visible { outline-color: #ffffff; }
 
 /* titlul în stânga, „bonul” următoarei comenzi în dreapta, aliniate jos */
@@ -356,28 +402,28 @@ svg { flex-shrink: 0; }
   gap: 48px;
 }
 /* umbra bonului stă pe înveliș: drop-shadow urmează zimții, iar un box-shadow pe bon ar fi tăiat de mască */
-.hero-bon { filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.45)); }
+.hero-bon { filter: drop-shadow(0 24px 36px rgba(8, 24, 42, 0.5)); } /* umbră bleumarin foarte închis */
 
-/* Bonul: hârtie cremă (în ambele teme), cu marginea de jos zimțată */
+/* Bonul: hârtie albă (în ambele teme), cu marginea de jos zimțată */
 .receipt {
-  /* paleta luminoasă, ca textul și etichetele să rămână lizibile pe hârtie */
-  --text: #2a1a12;
-  --muted: #6f5f55;
-  --line: #eadfd3;
-  --bg-soft: #f8f1e7;
-  --accent-text: #c2410c;
-  --accent-soft: #fbeee6;
-  --brand: #3f6a0b;
-  --brand-soft: #eef5e1;
-  --skeleton: #f1e7db;
-  --skeleton-shine: rgba(255, 255, 255, 0.7);
+  /* paleta luminoasă „Cer senin”, ca textul și etichetele să rămână lizibile pe hârtie și în tema întunecată */
+  --text: #172033;          /* text principal (16:1 pe alb) */
+  --muted: #4a5b70;         /* text secundar (7:1 pe alb) */
+  --line: #bfe3f7;          /* linia punctată de deasupra totalului */
+  --bg-soft: #eaf6fd;       /* fundalul iconiței „Standard” */
+  --accent-text: #bd246b;   /* iconița „Express”, roz (4.8:1 pe roz deschis) */
+  --accent-soft: #ffe1ef;   /* fundalul iconiței „Express” */
+  --brand-text: #1a5e8a;    /* iconița „Ridicare” și bifa „gata”, bleu închis */
+  --brand-soft: #d6eefb;    /* fundalul iconiței „Ridicare” */
+  --skeleton: #e3f1fa;      /* formele de încărcare, bleu deschis */
+  --skeleton-shine: rgba(255, 255, 255, 0.7); /* luciul de pe schelet */
   --zimt: 8px;
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 22px 22px calc(22px + var(--zimt));
   color: var(--text);
-  background: #fffdf9;
+  background: #ffffff;      /* hârtia bonului, albă */
   border-radius: var(--radius) var(--radius) 0 0;
   transform: rotate(1.5deg);
   /* zimții: o mască din triunghiuri repetate pe marginea de jos */
@@ -391,7 +437,7 @@ svg { flex-shrink: 0; }
   color: var(--muted);
 }
 .receipt-dish { display: flex; align-items: center; gap: 12px; }
-.receipt-dish h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
+.receipt-dish h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; font-style: italic; } /* numele preparatului, Fraunces italic */
 .receipt-dish p { font-size: 0.9rem; color: var(--muted); }
 .receipt .eta { font-size: 0.9rem; color: var(--muted); }
 .receipt-total {
@@ -403,12 +449,12 @@ svg { flex-shrink: 0; }
   color: var(--muted);
   border-top: 1.5px dashed var(--line);
 }
-.receipt-total strong { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; color: var(--text); }
+.receipt-total strong { font-family: var(--font-display); font-size: 1.25rem; font-weight: 600; font-style: italic; color: var(--text); } /* totalul, Fraunces italic */
 .receipt-done { flex-direction: row; align-items: center; font-weight: 600; }
-.receipt-done svg { color: var(--brand); }
-/* Etapa 6: bonul când serverul nu a răspuns: iconiță neutră, nu bifa verde de „gata” */
+.receipt-done svg { color: var(--brand-text); } /* bifa „gata”, bleu închis */
+/* Etapa 6: bonul când serverul nu a răspuns: iconiță neutră, nu bifa bleu de „gata” */
 .receipt-indisponibil svg { color: var(--muted); }
-/* Etapa 6: liniile gri din bonul care se încarcă ocupă lățimea rămasă */
+/* Etapa 6: liniile de schelet (bleu deschis) din bonul care se încarcă ocupă lățimea rămasă */
 .schelet-bon { flex: 1; }
 
 /* cifra nouă urcă la locul ei când valoarea se schimbă (elementul are key = valoarea) */
@@ -434,6 +480,7 @@ svg { flex-shrink: 0; }
   font-family: var(--font-display);
   font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 600;
+  font-style: italic;       /* Fraunces italic */
 }
 .section-meta { font-size: 0.92rem; color: var(--muted); }
 
@@ -485,7 +532,7 @@ svg { flex-shrink: 0; }
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: linear-gradient(0deg, rgba(20, 10, 5, 0.9) 0%, rgba(20, 10, 5, 0.5) 55%, rgba(20, 10, 5, 0.12) 100%);
+  background: linear-gradient(0deg, rgba(15, 58, 92, 0.92) 0%, rgba(15, 58, 92, 0.58) 55%, rgba(15, 58, 92, 0.15) 100%); /* bleumarin: sub text acoperirea e de cel puțin 70% (alb: 4.8:1 chiar și peste un pixel alb) */
 }
 .categorie-nume {
   display: flex;
@@ -494,19 +541,20 @@ svg { flex-shrink: 0; }
   font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
+  font-style: italic;       /* Fraunces italic */
 }
 .categorie-numar { font-size: 0.84rem; font-weight: 500; }
-/* „Toate”: fără fotografie, pe fundal cremă; iconița urcă în colțul de sus */
+/* „Toate”: fără fotografie, pe fundal bleu deschis; iconița urcă în colțul de sus */
 .categorie-toate {
   color: var(--text);
   background: var(--bg-soft);
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--line-strong); /* contur bleu, vizibil pe pagina albă */
   transition: background 0.15s, border-color 0.15s;
 }
 .categorie-toate:hover { border-color: var(--subtle); }
 .categorie-toate .categorie-numar { color: var(--muted); }
 .categorie-iconita { margin-bottom: auto; color: var(--accent-text); }
-/* categoria aleasă: chenar teracotă gros (formă, nu doar culoare) + o linie albă subțire spre fotografie */
+/* categoria aleasă: chenar roz gros (formă, nu doar culoare) + o linie albă subțire spre fotografie */
 .categorie-toate[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent-text); box-shadow: inset 0 0 0 1.5px var(--accent-text); }
 .categorie-foto[aria-pressed="true"]::after {
   content: "";
@@ -516,7 +564,7 @@ svg { flex-shrink: 0; }
   border-radius: inherit;
   box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.9);
 }
-/* focus: contur plin, cu spațiu față de card (se vede și pe fundal cremă, și lângă fotografie) */
+/* focus: contur plin, cu spațiu față de card (se vede și pe fundal alb, și lângă fotografie) */
 .categorie-card:focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
 
 /* Meniul: secțiune deasupra comenzilor; titlul se oprește sub antetul fix când derulăm la el */
@@ -554,7 +602,7 @@ svg { flex-shrink: 0; }
 /* preparat fără fotografie: iconița categoriei, în aceeași cutie */
 .menu-foto-gol { display: grid; place-items: center; color: var(--accent-text); background: var(--accent-soft); }
 .menu-info { grid-area: info; padding-inline: 2px; }
-.menu-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; }
+.menu-card h3 { font-family: var(--font-display); font-size: 1.15rem; font-weight: 600; font-style: italic; } /* numele preparatului, Fraunces italic */
 .menu-card .price { font-size: 1.05rem; color: var(--accent-text); }
 .menu-restaurant { margin-top: 2px; font-size: 0.9rem; font-weight: 500; color: var(--muted); }
 .menu-action {
@@ -565,7 +613,7 @@ svg { flex-shrink: 0; }
   margin: 12px;
 }
 
-/* „Adaugă”: pastilă plină peste fotografie (teracotă pe alb 5.2:1; la hover alb pe teracotă 5.2:1) */
+/* „Adaugă”: pastilă plină peste fotografie (roz #bd246b pe alb 5.8:1; la hover alb pe roz #d02a73 4.9:1) */
 .btn-add {
   display: inline-flex;
   align-items: center;
@@ -579,18 +627,18 @@ svg { flex-shrink: 0; }
   background: var(--surface);
   border: none;
   border-radius: 999px;
-  box-shadow: 0 6px 18px rgba(20, 10, 5, 0.3);
+  box-shadow: 0 6px 18px rgba(11, 26, 43, 0.3); /* umbră bleumarin, ca pastila să se desprindă de fotografie */
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
-.btn-add:hover { color: #ffffff; background: var(--accent); }
+.btn-add:hover { color: var(--on-accent); background: var(--accent); } /* alb pe roz la hover */
 /* selectorul din card are fundal plin, ca să se citească peste fotografie (cel din coș rămâne la fel) */
-.menu-action .stepper { background: var(--surface); border-color: transparent; box-shadow: 0 6px 18px rgba(20, 10, 5, 0.3); }
+.menu-action .stepper { background: var(--surface); border-color: transparent; box-shadow: 0 6px 18px rgba(11, 26, 43, 0.3); } /* aceeași umbră bleumarin */
 /* focus peste fotografie: inel alb între două inele închise, vizibil pe orice culoare */
 .menu-action :focus-visible {
   outline: 3px solid #ffffff;
   outline-offset: 2px;
-  box-shadow: 0 0 0 7px rgba(20, 10, 5, 0.85);
+  box-shadow: 0 0 0 7px rgba(11, 26, 43, 0.85); /* inelul exterior, bleumarin foarte închis */
 }
 
 /* Selectorul de cantitate „− 2 +”: butoane rotunde de 44px într-o pastilă */
@@ -599,7 +647,7 @@ svg { flex-shrink: 0; }
   align-items: center;
   gap: 2px;
   background: var(--bg-soft);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong); /* contur bleu al pastilei */
   border-radius: 999px;
 }
 .stepper-btn {
@@ -648,6 +696,7 @@ svg { flex-shrink: 0; }
   font-family: var(--font-display);
   font-size: clamp(1.8rem, 3.2vw, 2.4rem);
   font-weight: 600;
+  font-style: italic;       /* cifrele mari, Fraunces italic */
   line-height: 1.1;
   letter-spacing: -0.02em;
 }
@@ -655,7 +704,7 @@ svg { flex-shrink: 0; }
 /* placa mare: totalul sus, categoriile jos, pe două rânduri ale grilei */
 .tile-mare { grid-row: span 2; justify-content: space-between; }
 .tile-mare .tile-valoare { font-size: clamp(2.2rem, 4.4vw, 3.2rem); }
-/* strălucirea teracotă din colț, doar decor */
+/* strălucirea roz gumă din colț, doar decor */
 .tile-mare::after {
   content: "";
   position: absolute;
@@ -664,7 +713,7 @@ svg { flex-shrink: 0; }
   z-index: -1;
   width: 220px;
   height: 220px;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 20%, transparent), transparent);
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--highlight) 45%, transparent), transparent); /* roz gumă estompat */
   pointer-events: none;
 }
 /* placa lată: tipurile de livrare, pe două coloane */
@@ -689,7 +738,7 @@ svg { flex-shrink: 0; }
   font-weight: 600;
   color: var(--muted);
   background: var(--surface);
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--line-strong); /* contur bleu al pastilei */
   border-radius: 999px;
 }
 .bento-chips svg { color: var(--accent-text); }
@@ -720,7 +769,7 @@ svg { flex-shrink: 0; }
 .bento-bara > span {
   display: block;
   height: 100%;
-  background: var(--brand);
+  background: var(--brand); /* umplerea bleu #89cff0 */
   border-radius: inherit;
   transition: width 0.4s ease-out;
 }
@@ -777,9 +826,9 @@ svg { flex-shrink: 0; }
   border-radius: var(--radius);
   transition: opacity 0.2s;
 }
-.card-standard .thumb { color: var(--muted); background: var(--bg-soft); }
-.card-express  .thumb { color: var(--accent-text); background: var(--accent-soft); }
-.card-ridicare .thumb { color: var(--brand); background: var(--brand-soft); }
+.card-standard .thumb { color: var(--muted); background: var(--bg-soft); }           /* standard: gri-albăstrui pe bleu deschis */
+.card-express  .thumb { color: var(--accent-text); background: var(--accent-soft); } /* express: roz pe roz deschis */
+.card-ridicare .thumb { color: var(--brand-text); background: var(--brand-soft); }   /* ridicare: bleu închis pe bleu */
 /* miniatura cu fotografie: decupată pătrat; fundalul se vede doar până sosește imaginea */
 .thumb-foto { object-fit: cover; background: var(--skeleton); }
 
@@ -793,6 +842,7 @@ svg { flex-shrink: 0; }
   font-family: var(--font-display);
   font-size: 1.2rem;
   font-weight: 600;
+  font-style: italic;       /* Fraunces italic */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -807,6 +857,8 @@ svg { flex-shrink: 0; }
   font-family: var(--font-display);
   font-size: 1.15rem;
   font-weight: 600;
+  font-style: italic;       /* prețurile, Fraunces italic */
+  color: var(--accent-text); /* roz (5.8:1 pe alb, 7.6:1 pe panoul întunecat) */
   white-space: nowrap;
 }
 
@@ -835,9 +887,9 @@ svg { flex-shrink: 0; }
   border-radius: 999px;
 }
 .badge .dot { width: 6px; height: 6px; background: currentColor; border-radius: 50%; }
-.badge-standard { color: var(--muted); background: var(--bg-soft); }
-.badge-express  { color: var(--amber); background: var(--amber-soft); }
-.badge-ridicare { color: var(--brand); background: var(--brand-soft); }
+.badge-standard { color: var(--muted); background: var(--bg-soft); }                   /* gri-albăstrui pe bleu (6.3:1) */
+.badge-express  { color: var(--highlight-text); background: var(--highlight-soft); } /* roz închis pe roz gumă deschis (6.1:1) */
+.badge-ridicare { color: var(--brand-text); background: var(--brand-soft); }         /* bleu închis pe bleu (5.8:1) */
 
 /* acțiunile din dreapta: bifa „Livrată” și ștergerea */
 .card-side { display: flex; align-items: center; gap: 6px; }
@@ -853,7 +905,7 @@ svg { flex-shrink: 0; }
   font-size: 0.88rem;
   font-weight: 600;
   white-space: nowrap;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--line-strong); /* contur bleu al pastilei */
   border-radius: 999px;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -886,7 +938,7 @@ svg { flex-shrink: 0; }
 .btn-danger::after { content: ""; position: absolute; inset: -2px; }
 .btn-danger:hover { color: var(--danger); background: var(--danger-soft); }
 
-/* 4.8 Comandă livrată: titlu tăiat, iconiță stinsă, bifa verde */
+/* 4.8 Comandă livrată: titlu tăiat, iconiță stinsă, starea „Livrată” în bleu */
 .item-card.done .thumb { opacity: 0.45; }
 .item-card.done .thumb-foto { filter: grayscale(0.6); }  /* fotografia comenzii încheiate, stinsă */
 /* linia care taie titlul e un fundal care crește de la stânga la dreapta (se poate anima, text-decoration nu) */
@@ -900,11 +952,11 @@ svg { flex-shrink: 0; }
 .item-card.done .title-text { background-size: 100% 1.5px; }
 .item-card.done .price { color: var(--muted); }
 .item-card.done .status {
-  color: var(--brand);
+  color: var(--brand-text); /* bleu închis pe bleu (5.8:1; 6.9:1 în tema întunecată) */
   background: var(--brand-soft);
   border-color: transparent;
 }
-.item-card.done .status input[type="checkbox"] { accent-color: var(--brand); }
+.item-card.done .status input[type="checkbox"] { accent-color: var(--brand-text); } /* bifa în bleu închis (bleu deschis în tema întunecată) */
 
 /* Mesaj pentru lista goală (din Etapa 4), cu iconiță și explicație */
 .empty {
@@ -936,7 +988,7 @@ svg { flex-shrink: 0; }
 /* „Șterge căutarea”, puțin despărțit de text */
 .empty .btn-secondary { margin-top: 14px; }
 
-/* Etapa 6: mesajul „Se încarcă…” de deasupra scheletelor (--muted: 6:1 pe cremă, 9:1 în tema întunecată) */
+/* Etapa 6: mesajul „Se încarcă…” de deasupra scheletelor (--muted: 7:1 pe alb, 9.3:1 în tema întunecată) */
 .info {
   margin-bottom: 16px;
   font-size: 0.95rem;
@@ -944,7 +996,7 @@ svg { flex-shrink: 0; }
   color: var(--muted);
 }
 
-/* Etapa 6: panoul de eroare, în paleta Savoro (teracotă), nu roz; textul e --text, deci contrastul e de peste 14:1 în ambele teme */
+/* Etapa 6: panoul de eroare, în paleta Savoro (roz foarte deschis, prună în tema întunecată); textul e --text, deci contrastul e de peste 14:1 în ambele teme */
 .error {
   display: flex;
   align-items: flex-start;
@@ -968,7 +1020,7 @@ svg { flex-shrink: 0; }
   border-radius: 6px;
 }
 
-/* Etapa 6: scheletele de încărcare: forme în culoarea --skeleton, peste care trece un luciu */
+/* Etapa 6: scheletele de încărcare: forme în culoarea --skeleton (bleu deschis), peste care trece un luciu */
 .skeleton {
   position: relative;
   overflow: hidden;
@@ -987,9 +1039,9 @@ svg { flex-shrink: 0; }
 @keyframes shimmer {
   to { transform: translateX(100%); }
 }
-/* iconița gri are prioritate față de culorile pe categorii / livrare */
+/* iconița de schelet are prioritate față de culorile pe categorii / livrare */
 .thumb.skeleton { background: var(--skeleton); }
-/* o linie de text gri */
+/* o linie de text în așteptare, bleu deschis */
 .skeleton-line { display: block; width: 72%; height: 14px; border-radius: 999px; }
 /* linia mai scurtă (restaurantul) */
 .skeleton-short { width: 44%; }
@@ -997,7 +1049,7 @@ svg { flex-shrink: 0; }
 .skeleton-pill { display: block; width: 104px; height: 44px; border-radius: 999px; }
 /* liniile de text, una sub alta, centrate pe verticală */
 .schelet-text { display: flex; flex-direction: column; justify-content: center; gap: 10px; }
-/* în zona espresso de sus scheletul e o linie albă translucidă, nu crem */
+/* în zona bleumarin de sus scheletul e o linie albă translucidă, nu bleu deschis */
 .hero { --skeleton: rgba(255, 255, 255, 0.1); --skeleton-shine: rgba(255, 255, 255, 0.08); }
 /* linia din zona de sus are lungimea textului „9 produse din 3 restaurante.” */
 .skeleton-hero { width: 260px; max-width: 100%; height: 18px; margin-top: 6px; }
@@ -1012,7 +1064,7 @@ svg { flex-shrink: 0; }
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 24px 64px var(--shadow-float); /* umbră bleumarin (neagră în tema întunecată) */
 }
 .dialog[open] { animation: dialog-in 0.18s ease-out; }
 .dialog::backdrop { background: var(--backdrop); backdrop-filter: blur(2px); }
@@ -1030,7 +1082,7 @@ svg { flex-shrink: 0; }
   background: var(--danger-soft);
   border-radius: 50%;
 }
-.dialog h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; }
+.dialog h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; font-style: italic; } /* titlul dialogului, Fraunces italic */
 .dialog p { color: var(--muted); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
 .btn-secondary,
@@ -1044,10 +1096,10 @@ svg { flex-shrink: 0; }
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
 }
-.btn-secondary { color: var(--text); background: var(--surface); border: 1.5px solid var(--line); }
+.btn-secondary { color: var(--text); background: var(--surface); border: 1.5px solid var(--line-strong); } /* contur bleu */
 .btn-secondary:hover { border-color: var(--subtle); }
-.btn-confirm { color: #ffffff; background: #b91c1c; border: 1.5px solid #b91c1c; }
-.btn-confirm:hover { background: #991b1b; border-color: #991b1b; }
+.btn-confirm { color: var(--on-accent); background: var(--danger-strong); border: 1.5px solid var(--danger-strong); } /* alb pe roșu (6.5:1) */
+.btn-confirm:hover { background: var(--danger-strong-hover); border-color: var(--danger-strong-hover); } /* roșu mai închis la hover */
 
 /* Coșul: panou lateral pe <dialog>, lipit de marginea din dreapta, pe toată înălțimea */
 .drawer {
@@ -1063,7 +1115,7 @@ svg { flex-shrink: 0; }
   border: none;
   border-left: 1px solid var(--line);
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-  box-shadow: -24px 0 64px rgba(0, 0, 0, 0.25);
+  box-shadow: -24px 0 64px var(--shadow-float); /* umbră bleumarin spre stânga */
 }
 .drawer[open] { animation: drawer-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .drawer::backdrop { background: var(--backdrop); backdrop-filter: blur(2px); }
@@ -1081,7 +1133,7 @@ svg { flex-shrink: 0; }
   padding: 14px 14px 14px 24px;
   border-bottom: 1px solid var(--line);
 }
-.drawer-head h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; }
+.drawer-head h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; font-style: italic; } /* „Coșul tău”, Fraunces italic */
 .drawer-form { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .drawer-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 24px 24px; }
 .drawer-foot {
@@ -1089,7 +1141,7 @@ svg { flex-shrink: 0; }
   flex-direction: column;
   gap: 14px;
   padding: 16px 24px 24px;
-  background: var(--bg);
+  background: var(--bg-softer); /* bleu abia vizibil: se desparte de lista albă de deasupra */
   border-top: 1px solid var(--line);
 }
 
@@ -1109,7 +1161,7 @@ svg { flex-shrink: 0; }
 }
 .btn-close:hover { color: var(--text); background: var(--bg-soft); }
 
-/* Butonul principal (plasare, „Vezi meniul”): alb pe teracotă, 5.2:1 în ambele teme */
+/* Butonul principal (plasare, „Vezi meniul”): alb pe roz #d02a73, 4.9:1 în ambele teme (6.5:1 la hover) */
 .btn-primary {
   display: inline-flex;
   align-items: center;
@@ -1119,7 +1171,7 @@ svg { flex-shrink: 0; }
   padding: 0 20px;
   font: inherit;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--on-accent);  /* text alb pe roz */
   background: var(--accent);
   border: none;
   border-radius: var(--radius-sm);
@@ -1150,12 +1202,12 @@ svg { flex-shrink: 0; }
   background: var(--accent-soft);
 }
 .cos-info { grid-area: info; }
-.cos-info h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; }
+.cos-info h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; font-style: italic; } /* numele produsului din coș, Fraunces italic */
 .cos-info p { margin-top: 2px; font-size: 0.86rem; color: var(--muted); }
 .cos-subtotal { grid-area: pret; font-size: 1.05rem; }
 .cos-actiuni { grid-area: actiuni; display: flex; align-items: center; justify-content: space-between; }
 
-/* Alegerea livrării: butoane radio afișate ca niște carduri; cel ales are contur și fundal teracotă */
+/* Alegerea livrării: butoane radio afișate ca niște carduri; cel ales are contur roz și fundal roz deschis */
 .livrare-optiuni { min-width: 0; margin: 22px 0 0; padding: 0; border: none; }
 .livrare-optiuni legend {
   padding: 0;
@@ -1172,7 +1224,7 @@ svg { flex-shrink: 0; }
   min-height: 56px;
   margin-top: 8px;
   padding: 10px 14px;
-  border: 1.5px solid var(--line);
+  border: 1.5px solid var(--line-strong); /* contur bleu al opțiunii */
   border-radius: var(--radius);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
@@ -1196,7 +1248,7 @@ svg { flex-shrink: 0; }
 .cos-rezumat dt { font-size: 0.92rem; color: var(--muted); }
 .cos-rezumat dd { margin: 0; font-weight: 600; }
 .cos-total dt { font-weight: 600; color: var(--text); }
-.cos-total dd { font-family: var(--font-display); font-size: 1.4rem; }
+.cos-total dd { font-family: var(--font-display); font-size: 1.4rem; font-style: italic; } /* totalul coșului, Fraunces italic */
 
 /* Coșul gol: iconiță, mesaj și drumul înapoi spre meniu */
 .drawer-empty {
@@ -1220,7 +1272,7 @@ svg { flex-shrink: 0; }
   background: var(--accent-soft);
   border-radius: 50%;
 }
-.drawer-empty-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text); }
+.drawer-empty-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; font-style: italic; color: var(--text); } /* „Coșul e gol”, Fraunces italic */
 .drawer-empty .btn-primary { margin-top: 14px; }
 
 /* Mesajele de jos, pe mijloc: confirmarea comenzii și „Anulează”, unul sub altul */
@@ -1249,7 +1301,7 @@ svg { flex-shrink: 0; }
   background: var(--toast-bg);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 32px var(--shadow-float); /* umbră bleumarin (neagră în tema întunecată) */
   animation: toast-in 0.2s ease-out;
 }
 @keyframes toast-in {
@@ -1263,16 +1315,16 @@ svg { flex-shrink: 0; }
   padding: 0 14px;
   font: inherit;
   font-weight: 600;
-  color: #f0a77f;
+  color: var(--toast-action); /* roz gumă pe bleumarin (7:1 în ambele teme) */
   background: transparent;
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
 }
 .toast-undo:hover { background: rgba(255, 255, 255, 0.1); }
-/* confirmarea nu are buton, deci are spațiu egal pe ambele părți; bifa e verdele din tema întunecată */
+/* confirmarea nu are buton, deci are spațiu egal pe ambele părți; bifa e bleu pe bleumarin */
 .toast-ok { gap: 10px; padding: 12px 18px; }
-.toast-ok svg { color: #a3d468; }
+.toast-ok svg { color: var(--toast-ok); } /* bleu #89cff0 (6.8:1 în ambele teme) */
 
 /* View transitions: rândurile alunecă la noile poziții, tema se schimbă cu o trecere lină */
 ::view-transition-group(*) { animation-duration: 0.25s; }
@@ -1295,9 +1347,9 @@ svg { flex-shrink: 0; }
 .footer-inner a { text-underline-offset: 3px; }
 .footer-inner a:hover { color: var(--text); }
 
-/* 5. Focus vizibil la navigarea cu Tab */
+/* 5. Focus vizibil la navigarea cu Tab: inel roz plin (5.8:1 pe alb, 3.6:1 în antet, 7.6:1 în tema întunecată) */
 :focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  outline: 3px solid var(--accent-text); /* plin, nu translucid: rozul translucid ar fi sub 3:1 pe alb */
   outline-offset: 2px;
 }
 /* doar cele două titluri care primesc focus din cod (Meniu, Coșul tău) renunță la contur: nu sunt controale.
@@ -1315,7 +1367,7 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
     animation: none !important;
     transition: none !important;
   }
-  /* Etapa 6: scheletele rămân forme gri statice, fără luciu */
+  /* Etapa 6: scheletele rămân forme statice bleu deschis, fără luciu */
   .skeleton::after { display: none; }
 }
 
@@ -1331,7 +1383,7 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   .hero-inner { grid-template-columns: 1fr; gap: 32px; }
   .receipt { max-width: 360px; transform: none; }
   /* textul ocupă toată lățimea: umbra se întinde uniform, mai închisă spre bon */
-  .hero::before { background: linear-gradient(180deg, rgba(20, 10, 5, 0.6) 0%, rgba(20, 10, 5, 0.68) 45%, rgba(20, 10, 5, 0.9) 100%); }
+  .hero::before { background: linear-gradient(180deg, rgba(15, 58, 92, 0.7) 0%, rgba(15, 58, 92, 0.76) 45%, rgba(15, 58, 92, 0.92) 100%); } /* bleumarin de cel puțin 70%: alb AA peste orice fotografie */
 }
 
 /* 4.9 Ecrane înguste (la final, ca să suprascrie regulile de mai sus) */
@@ -1359,10 +1411,10 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
     white-space: nowrap;
   }
   .hero { min-height: calc(var(--header-h) + 460px); padding: calc(var(--header-h) + 28px) 0 32px; }
-  /* fotografia ocupă doar partea de sus (480px sub antet) și se topește în espresso; bonul stă pe espresso, dedesubt */
+  /* fotografia ocupă doar partea de sus (480px sub antet) și se topește în bleumarin; bonul stă pe bleumarin, dedesubt */
   .hero-foto,
   .hero::before { bottom: auto; height: calc(var(--header-h) + 480px); }
-  .hero::before { background: linear-gradient(180deg, rgba(20, 10, 5, 0.6) 0%, rgba(20, 10, 5, 0.7) 55%, var(--ink) 100%); }
+  .hero::before { background: linear-gradient(180deg, rgba(15, 58, 92, 0.7) 0%, rgba(15, 58, 92, 0.78) 55%, var(--ink) 100%); } /* bleumarin de cel puțin 70%, apoi plin */
   .display { font-size: clamp(2.2rem, 10.5vw, 2.8rem); }
   .hero-sub { font-size: 1.02rem; }
   .hero-inner { gap: 28px; }
@@ -1427,14 +1479,16 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
     --subtle: #888888;
     --ink: #ffffff;
     --on-ink: #000000;
-    --on-ink-muted: #444444;
+    --header-fg: #000000;     /* antetul tipărit: text negru */
+    --header-muted: #444444;  /* text secundar gri închis */
+    --header-accent: #000000; /* iconițele, negre */
     --accent-on-ink: #000000;
-    --accent-text: #c2410c;
-    --accent-soft: #fbeee6;
-    --brand: #3f6a0b;
-    --brand-soft: #eef5e1;
-    --amber: #b45309;
-    --amber-soft: #fffbeb;
+    --accent-text: #bd246b;   /* prețurile rămân roz (5.8:1 pe alb) */
+    --accent-soft: #ffe1ef;   /* roz foarte deschis */
+    --highlight-text: #a3195a; /* eticheta „Express” (6.1:1 pe roz deschis) */
+    --highlight-soft: #ffe1ef; /* fundalul etichetei „Express” */
+    --brand-text: #1a5e8a;    /* „Livrată” și „Ridicare”, bleu închis */
+    --brand-soft: #d6eefb;    /* fundalul lor, bleu */
     --shadow-sm: none;
   }
   .address-pill, .search, .theme-toggle, .cart-pill,
