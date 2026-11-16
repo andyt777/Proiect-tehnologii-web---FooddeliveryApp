@@ -1,19 +1,23 @@
-import { CircleCheck, Clock, Trash2 } from "lucide-react"; // iconițe: bifă, ceas, coș de gunoi
+import { CircleCheck, Clock, Sparkles, Trash2, Utensils } from "lucide-react"; // iconițe: bifă, ceas, steluțe (comandă specială), coș de gunoi, tacâmuri (categorie necunoscută)
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
 import { imagineComanda } from "../imagini.js"; // fotografia preparatului comandat (sau null)
 import { DURATE_LIVRARE, ETICHETE_LIVRARE } from "../livrare.js"; // texte pentru tipul și durata livrării
 import { formatLei } from "../format.js"; // formatarea prețului
+import { arePret } from "../rezumat.js"; // Etapa 7: comanda specială are pret: null până la confirmare
 
 // O singură comandă din listă, primită prin props: un rând ca într-un meniu tipărit.
+// Etapa 7: atributele data-testid (tabelul 7.3) sunt pe <li>, titlu, checkbox și butonul de ștergere.
 export default function ComandaCard({ comanda, onToggle, onDelete }) { // destructurăm props: datele comenzii și cele două callback-uri
-  const Iconita = ICONITE_CATEGORIE[comanda.categorie]; // alegem iconița după categorie (când nu avem fotografie)
-  const imagine = imagineComanda(comanda); // fotografia preparatului, a categoriei sau null
+  const Iconita = ICONITE_CATEGORIE[comanda.categorie] ?? Utensils; // alegem iconița după categorie (tacâmuri dacă e necunoscută)
+  const imagine = comanda.speciala ? null : imagineComanda(comanda); // Etapa 7: preparatul cerut special nu are fotografie proprie; nu arătăm alt preparat în locul lui
 
   return ( // întoarcem JSX
     <li // fiecare card e un element de listă
       className={`item-card card-${comanda.livrare}${comanda.livrata ? " done" : ""}`} // clase dinamice: tipul livrării + „done” dacă e livrată
       // numele leagă rândul de el însuși între două randări, ca să alunece la noua poziție
       style={{ viewTransitionName: `comanda-${comanda.id}` }} // nume unic per comandă pentru View Transitions
+      data-testid="item" // Etapa 7: reperul cardului pentru verificarea automată
+      data-id={comanda.id} // id-ul de la server: după reîncărcare, verificarea găsește exact această comandă
     >
       {imagine ? ( // avem o fotografie
         <img className="thumb thumb-foto" src={imagine} alt="" width="48" height="48" loading="lazy" decoding="async" />// miniatura, decorativă: numele e în titlu
@@ -23,9 +27,13 @@ export default function ComandaCard({ comanda, onToggle, onDelete }) { // destru
       <div className="card-main">{/* partea principală a cardului */}
         <div className="card-top">{/* rândul de sus: titlu ..... preț */}
           {/* span-ul poartă linia care taie titlul, desenată treptat la bifare */}
-          <h3><span className="title-text">{comanda.preparat}</span></h3>{/* numele preparatului */}
+          <h3 data-testid="item-title"><span className="title-text">{comanda.preparat}</span></h3>{/* numele preparatului; data-testid = titlul cardului */}
           <span className="dots" aria-hidden="true" />{/* punctele dintre titlu și preț, ca în meniu */}
-          <span className="price">{formatLei(comanda.pret)}</span>{/* prețul formatat */}
+          {arePret(comanda) ? ( // prețul e cunoscut
+            <span className="price">{formatLei(comanda.pret)}</span> // prețul formatat
+          ) : ( // Etapa 7: comanda specială, prețul îl stabilește restaurantul
+            <span className="price price-asteptare">Preț la confirmare</span> // fără preț inventat
+          )}{/* sfârșitul randării condiționate */}
         </div>
         <p className="card-meta">{/* rândul cu detalii */}
           <span className="restaurant">{comanda.restaurant}</span>{/* numele restaurantului */}
@@ -33,6 +41,9 @@ export default function ComandaCard({ comanda, onToggle, onDelete }) { // destru
             <span className="dot" aria-hidden="true" />{/* bulina colorată */}
             {ETICHETE_LIVRARE[comanda.livrare]}{/* textul etichetei, ex. „Express” */}
           </span>
+          {comanda.speciala && ( // Etapa 7: comanda făcută din formular
+            <span className="badge badge-speciala"><Sparkles size={12} aria-hidden="true" />Comandă specială</span> // eticheta „Comandă specială”
+          )}{/* sfârșitul randării condiționate */}
           <span className="eta">{/* starea / timpul estimat */}
             {comanda.livrata ? <CircleCheck size={14} aria-hidden="true" /> : <Clock size={14} aria-hidden="true" />}{/* bifă dacă e livrată, altfel ceas */}
             {comanda.livrata ? "Comandă încheiată" : DURATE_LIVRARE[comanda.livrare]}{/* textul corespunzător stării */}
@@ -43,16 +54,19 @@ export default function ComandaCard({ comanda, onToggle, onDelete }) { // destru
         <label className="status">{/* label-ul face tot textul clicabil pentru checkbox */}
           <input // checkbox controlat de React
             type="checkbox" // tipul inputului
-            checked={comanda.livrata} // valoarea vine din state (componentă controlată)
-            onChange={() => onToggle(comanda.id)} // la schimbare, anunțăm App, care actualizează state-ul
+            checked={comanda.livrata} // valoarea vine din state (componentă controlată); Etapa 7: se schimbă abia după răspunsul serverului
+            onChange={() => onToggle(comanda.id)} // la schimbare, anunțăm App, care trimite PATCH și apoi actualizează state-ul
+            data-testid="item-toggle" // Etapa 7: reperul bifei pentru verificarea automată
           />
           Livrată<span className="sr-only">: {comanda.preparat}</span>{/* textul ascuns vizual le spune cititoarelor de ecran despre ce comandă e vorba */}
         </label>
         <button // butonul de ștergere
+          type="button" // buton simplu
           className="btn-danger" // stil de acțiune periculoasă
-          onClick={() => onDelete(comanda.id)} // nu șterge direct: App deschide întâi dialogul de confirmare
+          onClick={() => onDelete(comanda.id)} // Etapa 7: șterge direct (DELETE la server); greșeala se repară cu „Anulează” din mesajul de jos
           aria-label={`Șterge ${comanda.preparat}`} // nume accesibil, fiindcă butonul are doar iconiță
           title="Șterge comanda" // tooltip la hover
+          data-testid="item-delete" // Etapa 7: reperul butonului de ștergere
         >
           <Trash2 size={18} aria-hidden="true" />{/* iconița coș de gunoi */}
         </button>

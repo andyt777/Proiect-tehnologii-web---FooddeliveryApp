@@ -1,17 +1,17 @@
 import { useEffect, useRef, useState } from "react"; // hook-urile React: useState pentru date care se schimbă, useEffect pentru efecte secundare, useRef pentru titlul meniului
-import { ArrowDown, CircleAlert, MapPin, Moon, RotateCw, Search, ShoppingBag, Sun } from "lucide-react"; // iconițele din header, din hero și din mesajul de eroare
+import { ArrowDown, CircleAlert, MapPin, Moon, RotateCw, Search, ShoppingBag, Sun, X } from "lucide-react"; // iconițele din header, din hero și din mesajele de eroare
 import BonComanda from "./components/BonComanda.jsx"; // „bonul” din zona hero
 import CategoriiCarduri from "./components/CategoriiCarduri.jsx"; // cardurile „Ce poftești azi?”
 import CautareGoala from "./components/CautareGoala.jsx"; // starea „niciun rezultat” a căutării
+import ComandaForm from "./components/ComandaForm.jsx"; // Etapa 7: formularul „Comandă specială”
 import ComandaList from "./components/ComandaList.jsx"; // lista de comenzi
-import ConfirmDialog from "./components/ConfirmDialog.jsx"; // dialogul de confirmare a ștergerii
 import CosDrawer from "./components/CosDrawer.jsx"; // panoul lateral al coșului
 import Logo from "./components/Logo.jsx"; // logo-ul Savoro
 import Meniu from "./components/Meniu.jsx"; // grila de preparate
 import RezumatBento from "./components/RezumatBento.jsx"; // plăcile cu cifrele comenzilor
 import { ScheletComenzi } from "./components/Schelete.jsx"; // rândurile gri afișate cât se încarcă comenzile
 import UndoToast from "./components/UndoToast.jsx"; // mesajul cu „Anulează” și confirmarea comenzii
-import { fetchComenzi, fetchMeniu } from "./api.js"; // Etapa 6: datele vin de la server, prin singurul fișier cu fetch
+import { createComanda, deleteComanda, fetchComenzi, fetchMeniu, updateComanda } from "./api.js"; // Etapa 6–7: citire, adăugare, modificare și ștergere, prin singurul fișier cu fetch
 import { potrivesteCategoria } from "./categorii.js"; // filtrul de categorie al meniului
 import { normalizeaza, potrivesteCautarea } from "./cautare.js"; // filtrarea după textul din câmpul de căutare
 import { adaugaInCos, citesteCos, cosInComenzi, liniiCos, numarProduse, pastreazaDinMeniu, schimbaCantitate, scoateDinCos, totalCos } from "./cos.js"; // logica pură a coșului
@@ -49,8 +49,9 @@ export default function App() { // componenta principală; deține tot state-ul
   const [error, setError] = useState(null); // mesajul erorii (null = nicio eroare)
   const [reincercari, setReincercari] = useState(0); // crește la „Încearcă din nou”; efectul de încărcare depinde de el
   const [tema, setTema] = useState(temaInitiala); // pasăm funcția (nu rezultatul): React o apelează doar la prima randare
-  // id-ul comenzii care așteaptă confirmarea ștergerii (null = dialog închis)
-  const [deSters, setDeSters] = useState(null); // state pentru dialogul de confirmare
+  // Etapa 7: eroarea unei acțiuni pe o comandă deja afișată (bifare, ștergere, anulare); lista rămâne pe ecran
+  const [eroareActiune, setEroareActiune] = useState(null); // mesajul (null = nicio eroare)
+  const [eroareCos, setEroareCos] = useState(null); // Etapa 7: liniile din coș care n-au ajuns la server (null = nicio eroare)
   // ultima comandă ștearsă și locul ei în listă, pentru „Anulează” (null = mesaj ascuns)
   const [ultimaStearsa, setUltimaStearsa] = useState(null); // state pentru toast-ul de undo
   const [cos, setCos] = useState(cosInitial); // liniile coșului: [{ produsId, cantitate }]; inițializare leneșă, ca la temă
@@ -62,6 +63,9 @@ export default function App() { // componenta principală; deține tot state-ul
   const meniuTitluRef = useRef(null); // titlul secțiunii „Meniu”, ca să-i putem da focus din coșul gol și din hero
   const cautareRef = useRef(null); // câmpul de căutare, primește focusul după „Șterge căutarea”
   const focusDupaReincercare = useRef(false); // true între clicul pe „Încearcă din nou” și randarea stării de încărcare (ref, nu state: nu trebuie să redeseneze nimic)
+  const comenziTitluRef = useRef(null); // Etapa 7: titlul „Comenzile tale”, primește focusul când butonul apăsat dispare (ștergere, anulare)
+  const focusPeComenzi = useRef(false); // Etapa 7: true între o ștergere / anulare reușită și randarea listei noi
+  const inLucru = useRef(new Set()); // Etapa 7: id-urile comenzilor cu o cerere în curs; un al doilea clic pe aceeași comandă e ignorat
 
   // Etapa 6: încărcarea datelor de la server, după prima randare (și din nou la fiecare „Încearcă din nou”)
   useEffect(() => { // efect secundar: sincronizăm state-ul cu serverul
@@ -88,6 +92,7 @@ export default function App() { // componenta principală; deține tot state-ul
   function handleReincearca() { // apelată de butonul din mesajul de eroare
     focusDupaReincercare.current = true; // butonul apăsat va dispărea; efectul de mai jos mută focusul
     setError(null); // ascundem eroarea veche
+    setEroareActiune(null); // și pe cea a unei acțiuni dinainte
     setLoading(true); // arătăm din nou „Se încarcă…” cât timp așteptăm
     setReincercari((n) => n + 1); // dependența efectului se schimbă, deci efectul rulează din nou
   } // sfârșitul funcției
@@ -123,29 +128,83 @@ export default function App() { // componenta principală; deține tot state-ul
     } // sfârșitul try/catch
   }, [cos]); // doar când se schimbă coșul
 
-  // Actualizare imutabilă: listă nouă, obiect nou pentru comanda schimbată (în Etapa 6 rămâne doar local, se pierde la refresh)
-  function handleToggleLivrata(id) { // primește id-ul comenzii bifate
-    cuTranzitie(() => // animăm schimbarea
-      setComenzi((prev) => // forma cu funcție: primim valoarea cea mai recentă a state-ului
-        prev.map((c) => (c.id === id ? { ...c, livrata: !c.livrata } : c)) // copie a comenzii cu `livrata` inversat; restul rămân la fel
-      ) // sfârșitul setComenzi
-    ); // sfârșitul cuTranzitie
+  // După o ștergere sau o anulare, butonul apăsat dispare; ducem focusul pe titlul „Comenzile tale”,
+  // ca utilizatorul de tastatură să nu ajungă la începutul paginii (preventScroll: pagina nu sare)
+  useEffect(() => { // rulează după fiecare randare în care lista s-a schimbat
+    if (!focusPeComenzi.current) return; // doar după o ștergere / anulare
+    focusPeComenzi.current = false; // o singură dată
+    comenziTitluRef.current?.focus({ preventScroll: true }); // titlul are tabIndex -1
+  }, [comenzi]); // dependența: lista de comenzi
+
+  // Etapa 7: o cerere pe o comandă, cel mult una o dată; întoarce false dacă era deja una în curs
+  function incepe(id) { // marchează comanda ca ocupată
+    if (inLucru.current.has(id)) return false; // dublu clic: a doua cerere nu mai pleacă
+    inLucru.current.add(id); // comanda e acum ocupată
+    return true; // putem trimite cererea
   } // sfârșitul funcției
 
-  function handleDelete(id) { // apelată când utilizatorul confirmă ștergerea
+  // Etapa 7: întâi serverul, apoi state-ul. Pe ecran ajunge comanda salvată (cu id-ul de la server).
+  // Nu prindem eroarea aici: ajunge înapoi în formular, care o afișează lângă câmpuri.
+  async function handleAdd(comanda) { // primește comanda construită de formular (fără id)
+    setUltimaStearsa(null); // închidem „Anulează”: comanda nouă poate primi id-ul celei șterse, iar readucerea ar eșua
+    const salvata = await createComanda(comanda); // POST /comenzi; serverul întoarce comanda cu id
+    setEroareActiune(null); // serverul răspunde din nou, deci eroarea veche nu mai e de actualitate
+    cuTranzitie(() => setComenzi((prev) => [...prev, salvata])); // listă nouă, cu obiectul de la server la final
+  } // sfârșitul funcției
+
+  // Etapa 7: bifarea pleacă întâi la server (PATCH doar cu câmpul schimbat), apoi înlocuim comanda cu cea întoarsă
+  async function handleToggleLivrata(id) { // primește id-ul comenzii bifate
+    const comanda = comenzi.find((c) => c.id === id); // starea ei curentă: PATCH trimite doar valoarea inversă
+    if (!comanda || !incepe(id)) return; // comandă necunoscută sau cerere deja în curs
+    try { // cererea poate eșua
+      const actualizata = await updateComanda(id, { livrata: !comanda.livrata }); // PATCH /comenzi/:id
+      setEroareActiune(null); // a mers: ascundem o eroare veche
+      cuTranzitie(() => // animăm schimbarea
+        setComenzi((prev) => prev.map((c) => (c.id === id ? actualizata : c))) // în listă intră obiectul de la server, nu o copie făcută local
+      ); // sfârșitul cuTranzitie
+    } catch (err) { // serverul n-a salvat: bifa rămâne cum era
+      setEroareActiune(`Nu am putut schimba starea comenzii „${comanda.preparat}”: ${err.message}.`); // mesajul apare deasupra listei, care rămâne pe ecran
+    } finally { // oricum s-a terminat
+      inLucru.current.delete(id); // comanda nu mai e ocupată
+    } // sfârșitul try/catch/finally
+  } // sfârșitul funcției
+
+  // Etapa 7: ștergerea e directă (fără dialog): DELETE la server, apoi scoatem comanda din listă.
+  // Greșelile se repară cu „Anulează” din mesajul de jos, timp de 5 secunde.
+  async function handleDelete(id) { // primește id-ul comenzii
     const index = comenzi.findIndex((c) => c.id === id); // poziția comenzii în lista completă, ca s-o putem pune la loc
-    setDeSters(null); // închidem dialogul
-    setUltimaStearsa({ comanda: comenzi[index], index }); // memorăm comanda și poziția pentru undo
-    cuTranzitie(() => setComenzi((prev) => prev.filter((c) => c.id !== id))); // listă nouă, fără comanda ștearsă
+    if (index === -1 || !incepe(id)) return; // comandă necunoscută sau cerere deja în curs
+    const comanda = comenzi[index]; // obiectul întreg, pentru „Anulează”
+    try { // cererea poate eșua
+      await deleteComanda(id); // DELETE /comenzi/:id
+      setEroareActiune(null); // a mers: ascundem o eroare veche
+      setUltimaStearsa({ comanda, index }); // memorăm comanda și poziția pentru undo
+      focusPeComenzi.current = true; // butonul de ștergere dispare odată cu rândul
+      cuTranzitie(() => setComenzi((prev) => prev.filter((c) => c.id !== id))); // listă nouă, fără comanda ștearsă
+    } catch (err) { // serverul n-a șters: comanda rămâne în listă
+      setEroareActiune(`Nu am putut șterge comanda „${comanda.preparat}”: ${err.message}.`); // mesajul de deasupra listei
+    } finally { // oricum s-a terminat
+      inLucru.current.delete(id); // comanda nu mai e ocupată
+    } // sfârșitul try/catch/finally
   } // sfârșitul funcției
 
-  // „Anulează”: comanda revine pe locul ei, tot într-o listă nouă
-  function handleUndo() { // apelată de butonul din toast
+  // „Anulează”: comanda ștearsă se trimite din nou, cu id-ul ei vechi (json-server 0.17 îl păstrează),
+  // apoi revine pe locul ei din listă, ca obiectul întors de server
+  async function handleUndo() { // apelată de butonul din toast
+    if (!ultimaStearsa) return; // mesajul tocmai a dispărut
     const { comanda, index } = ultimaStearsa; // destructurăm ce am salvat la ștergere
-    setUltimaStearsa(null); // ascundem toast-ul
-    cuTranzitie(() => // animăm reapariția
-      setComenzi((prev) => [...prev.slice(0, index), comanda, ...prev.slice(index)]) // inserăm comanda între bucata dinainte și cea de după
-    ); // sfârșitul cuTranzitie
+    setUltimaStearsa(null); // ascundem toast-ul (și butonul, deci un al doilea clic nu mai e posibil)
+    try { // cererea poate eșua
+      const readusa = await createComanda(comanda); // POST /comenzi cu tot cu id
+      setEroareActiune(null); // a mers: ascundem o eroare veche
+      focusPeComenzi.current = true; // butonul „Anulează” a dispărut
+      cuTranzitie(() => // animăm reapariția
+        setComenzi((prev) => [...prev.slice(0, index), readusa, ...prev.slice(index)]) // inserăm comanda între bucata dinainte și cea de după
+      ); // sfârșitul cuTranzitie
+    } catch (err) { // serverul n-a salvat-o
+      setEroareActiune(`Nu am putut readuce comanda „${comanda.preparat}”: ${err.message}.`); // mesajul de deasupra listei
+      comenziTitluRef.current?.focus({ preventScroll: true }); // butonul „Anulează” a dispărut; lista nu se schimbă, deci mutăm focusul aici
+    } // sfârșitul try/catch
   } // sfârșitul funcției
 
   // Coșul: toate schimbările trec prin funcțiile pure din cos.js, cu forma setCos((prev) => ...)
@@ -161,14 +220,41 @@ export default function App() { // componenta principală; deține tot state-ul
     setCos((prev) => scoateDinCos(prev, produsId)); // listă nouă, fără linie
   } // sfârșitul funcției
 
-  // Plasarea: fiecare linie din coș devine o comandă nouă „pe drum”, apoi coșul se golește
-  function handlePlaseaza(livrare) { // primește tipul de livrare ales în coș
-    if (linii.length === 0) return; // nimic de plasat (butonul nici nu apare când coșul e gol)
-    setUltimaStearsa(null); // închidem „Anulează”: o comandă readusă după plasare ar putea primi același id ca una nouă
-    setCosDeschis(false); // închidem panoul
-    setConfirmare({ produse: produseInCos, total: totalDePlata }); // mesajul de confirmare, cu valorile de dinainte de golire
-    setCos([]); // golim coșul imediat, nu în animație: butonul coșului (care primește focusul) arată deja 0
-    cuTranzitie(() => setComenzi((prev) => cosInComenzi(linii, prev, livrare))); // doar lista de comenzi e animată; `linii` vine din randarea curentă, deci golirea de mai sus nu o afectează
+  // Etapa 7: plasarea trimite câte un POST pentru fiecare linie din coș. Promise.allSettled așteaptă toate cererile,
+  // chiar dacă unele eșuează: liniile salvate intră în listă și ies din coș, cele eșuate rămân în coș, cu un mesaj.
+  // Întoarce true dacă toate au ajuns (CosDrawer resetează atunci livrarea).
+  async function handlePlaseaza(livrare) { // primește tipul de livrare ales în coș
+    const deTrimis = linii; // liniile din randarea curentă (coșul se poate schimba cât așteptăm)
+    if (deTrimis.length === 0) return false; // nimic de plasat (butonul nici nu apare când coșul e gol)
+    setEroareCos(null); // ascundem eroarea unei încercări anterioare
+    setUltimaStearsa(null); // închidem „Anulează”: o comandă nouă poate primi id-ul celei șterse
+    const comenziNoi = cosInComenzi(deTrimis, livrare, new Date().toISOString()); // o comandă fără id pentru fiecare linie
+    const rezultate = await Promise.allSettled(comenziNoi.map((c) => createComanda(c))); // toate cererile pornesc deodată
+    const salvate = []; // comenzile întoarse de server
+    const liniiSalvate = []; // liniile din coș care le corespund
+    const erori = []; // motivele cererilor eșuate
+    rezultate.forEach((r, i) => { // același index ca în deTrimis
+      if (r.status === "fulfilled") { // serverul a salvat comanda
+        salvate.push(r.value); // obiectul cu id
+        liniiSalvate.push(deTrimis[i]); // linia din coș
+      } else { // cererea a eșuat
+        erori.push(r.reason); // eroarea din api.js
+      } // sfârșitul if/else
+    }); // sfârșitul forEach
+    if (salvate.length > 0) { // măcar o comandă a ajuns
+      setCos((prev) => liniiSalvate.reduce((cos, l) => schimbaCantitate(cos, l.id, -l.cantitate), prev)); // scădem exact cantitatea trimisă (la 0 linia dispare); nu în animație, ca numărul de pe buton să fie corect imediat
+      setConfirmare({ produse: numarProduse(liniiSalvate), total: totalCos(liniiSalvate) }); // mesajul de confirmare, doar pentru ce s-a salvat
+    } // sfârșitul if
+    if (erori.length > 0) { // unele linii n-au ajuns: panoul rămâne deschis
+      const motiv = erori[0]?.message ?? "eroare necunoscută"; // primul motiv e de obicei același pentru toate (ex. server oprit)
+      setEroareCos(salvate.length === 0 // nimic nu a ajuns
+        ? `Comanda nu a fost plasată: ${motiv}. Produsele au rămas în coș.` // totul a eșuat
+        : `Am plasat ${formatProduse(numarProduse(liniiSalvate))}, dar restul nu: ${motiv}. Ce nu s-a trimis a rămas în coș.`); // a mers doar o parte
+    } else { // toate au ajuns
+      setCosDeschis(false); // închidem panoul (browserul duce focusul înapoi pe butonul coșului)
+    } // sfârșitul if/else
+    if (salvate.length > 0) cuTranzitie(() => setComenzi((prev) => [...prev, ...salvate])); // doar lista de comenzi e animată; în ea intră obiectele de la server
+    return erori.length === 0; // true = toate au ajuns
   } // sfârșitul funcției
 
   // Duce utilizatorul la meniu: focus pe titlu și derulare; folosită de butonul din hero și de coșul gol
@@ -220,10 +306,8 @@ export default function App() { // componenta principală; deține tot state-ul
   // Valori derivate: se recalculează la fiecare randare
   const gata = !loading && !error; // datele au sosit cu bine
   const stare = loading ? "incarcare" : error ? "eroare" : "gata"; // aceeași informație, ca text, pentru bon
-  const comandaDeSters = comenzi.find((c) => c.id === deSters) ?? null; // obiectul comenzii din dialog (sau null)
   const linii = liniiCos(cos, meniu); // coșul unit cu meniul: preparat, preț, cantitate, subtotal (gol cât meniul nu a sosit)
   const produseInCos = numarProduse(linii); // numărul de pe butonul coșului, doar din produsele care există în meniu
-  const totalDePlata = totalCos(linii); // totalul coșului
   const cautareActiva = normalizeaza(cautare) !== ""; // doar spațiile nu contează ca o căutare
   const textCautat = cautareActiva ? cautare.trim() : ""; // textul afișat în mesaje, fără spațiile de la margini
   const meniuAfisat = meniu.filter((p) => potrivesteCautarea(p, cautare) && potrivesteCategoria(p, categorieActiva)); // meniul filtrat de căutare și de categorie (tot meniul dacă nu e niciun filtru)
@@ -268,7 +352,7 @@ export default function App() { // componenta principală; deține tot state-ul
           <button // butonul coșului (comenzile pe drum rămân în rezumatul „Comenzile tale”)
             type="button" // buton simplu
             className="cart-pill" // clasa pentru stiluri
-            onClick={() => setCosDeschis(true)} // deschidem panoul
+            onClick={() => { setEroareCos(null); setCosDeschis(true); }} // deschidem panoul; Etapa 7: fără eroarea unei plasări vechi
             aria-haspopup="dialog" // anunță că butonul deschide un dialog
             aria-label={gata ? `Coș: ${formatProduse(produseInCos)}` : "Coș (indisponibil momentan)"} // ex. „Coș: 3 produse”; fără meniu nu știm încă ce e în coș, deci nu spunem „0 produse”
           >
@@ -310,7 +394,7 @@ export default function App() { // componenta principală; deține tot state-ul
           <div className="error">{/* panoul de eroare */}
             <CircleAlert size={22} aria-hidden="true" />{/* iconiță decorativă */}
             <div className="error-body">{/* textul și butonul */}
-              <p role="alert">Nu am putut încărca datele: {error}. Rulează <code>npm run api</code>?</p>{/* role="alert": cititorul de ecran îl anunță imediat */}
+              <p role="alert" data-testid="error">Nu am putut încărca datele: {error}. Rulează <code>npm run api</code>?</p>{/* role="alert": cititorul de ecran îl anunță imediat; Etapa 7: data-testid="error" */}
               <button type="button" className="btn-primary" onClick={handleReincearca}>{/* reîncearcă fără reîncărcarea paginii */}
                 <RotateCw size={18} aria-hidden="true" />{/* iconiță decorativă */}
                 Încearcă din nou{/* textul butonului */}
@@ -339,44 +423,57 @@ export default function App() { // componenta principală; deține tot state-ul
             />
             <section className="orders-section" aria-labelledby="comenzi-titlu" aria-busy={loading}>{/* secțiunea comenzilor */}
               <div className="section-header">{/* titlul secțiunii */}
-                <h2 id="comenzi-titlu">Comenzile tale</h2>{/* textul titlului */}
+                <h2 id="comenzi-titlu" className="titlu-focus" ref={comenziTitluRef} tabIndex={-1}>Comenzile tale</h2>{/* textul titlului; Etapa 7: primește focusul din cod după ștergere / anulare */}
                 {gata && ( // numărul apare doar după încărcare
                   <span className="section-meta">{cautareActiva ? `${comenziAfisate.length} din ${formatComenzi(comenzi.length)}` : formatComenzi(comenzi.length)}</span> // la căutare: „1 din 6 comenzi”
                 )}{/* sfârșitul randării condiționate */}
               </div>
               <RezumatBento comenzi={comenzi} stare={stare} />{/* cifrele, din toată lista (nu din cea căutată) */}
-              {loading ? ( // comenzile nu au sosit încă
-                <>{/* mesajul și scheletele */}
-                  <p className="info" role="status">Se încarcă comenzile…</p>{/* role="status": textul e anunțat de cititoarele de ecran */}
-                  <ScheletComenzi />{/* rânduri gri, doar decor */}
-                </>
-              ) : ( // datele au sosit
-                <>{/* lista (sau mesajul fără rezultate) */}
-                  {cautareActiva && comenziAfisate.length === 0 && comenzi.length > 0 ? ( // căutarea nu a găsit nicio comandă
-                    <CautareGoala mesaj={`Nicio comandă pentru „${textCautat}”`} onSterge={handleStergeCautarea} />// mesaj + „Șterge căutarea”
-                  ) : ( // lista (sau mesajul „Nu ai nicio comandă.” dacă lista e chiar goală)
-                    <ComandaList // lista de comenzi
-                      comenzi={comenziAfisate} // datele coboară prin props (filtrate de căutare)
-                      onToggle={handleToggleLivrata} // evenimentele urcă prin callback-uri
-                      onDelete={setDeSters} // nu ștergem direct: doar marcăm comanda și se deschide dialogul
-                    />
+              <div className="comenzi-grid">{/* Etapa 7: formularul în stânga (1fr), lista în dreapta (2fr); una sub alta pe telefon */}
+                <section className="panel speciala-panel" aria-labelledby="speciala-titlu">{/* panoul formularului */}
+                  <h3 id="speciala-titlu" className="panel-titlu">Comandă specială</h3>{/* titlul panoului */}
+                  <ComandaForm onAdd={handleAdd} blocat={loading} />{/* App primește comanda validată și o trimite la server */}
+                </section>
+                <div className="comenzi-lista">{/* coloana listei */}
+                  {eroareActiune && ( // Etapa 7: o bifare / ștergere / anulare a eșuat; lista rămâne dedesubt
+                    <div className="error error-actiune">{/* același panou de eroare, mai compact */}
+                      <CircleAlert size={20} aria-hidden="true" />{/* iconiță decorativă */}
+                      <p role="alert" data-testid="error">{eroareActiune}</p>{/* mesajul erorii paginii */}
+                      <button type="button" className="btn-close" onClick={() => setEroareActiune(null)} aria-label="Închide mesajul de eroare">{/* utilizatorul îl poate ascunde */}
+                        <X size={18} aria-hidden="true" />{/* iconiță decorativă */}
+                      </button>
+                    </div>
                   )}{/* sfârșitul randării condiționate */}
-                </>
-              )}{/* sfârșitul randării condiționate */}
+                  {loading ? ( // comenzile nu au sosit încă
+                    <>{/* mesajul și scheletele */}
+                      <p className="info" role="status" data-testid="loading">Se încarcă comenzile…</p>{/* role="status": textul e anunțat de cititoarele de ecran; Etapa 7: data-testid="loading" */}
+                      <ScheletComenzi />{/* rânduri gri, doar decor */}
+                    </>
+                  ) : ( // datele au sosit; Etapa 7: lista rămâne pe ecran și când o acțiune eșuează (condiția e doar !loading)
+                    <>{/* lista (sau mesajul fără rezultate) */}
+                      {cautareActiva && comenziAfisate.length === 0 && comenzi.length > 0 ? ( // căutarea nu a găsit nicio comandă
+                        <CautareGoala mesaj={`Nicio comandă pentru „${textCautat}”`} onSterge={handleStergeCautarea} />// mesaj + „Șterge căutarea”
+                      ) : ( // lista (sau mesajul „Nu ai nicio comandă.” dacă lista e chiar goală)
+                        <ComandaList // lista de comenzi
+                          comenzi={comenziAfisate} // datele coboară prin props (filtrate de căutare)
+                          onToggle={handleToggleLivrata} // evenimentele urcă prin callback-uri
+                          onDelete={handleDelete} // Etapa 7: ștergere directă, la server; „Anulează” o poate readuce
+                        />
+                      )}{/* sfârșitul randării condiționate */}
+                    </>
+                  )}{/* sfârșitul randării condiționate */}
+                </div>
+              </div>
             </section>
           </>
         )}{/* sfârșitul celor trei stări */}
       </main>
 
-      <ConfirmDialog // dialogul de confirmare
-        comanda={comandaDeSters} // null = închis, obiect = deschis
-        onConfirm={handleDelete} // ștergerea efectivă
-        onCancel={() => setDeSters(null)} // renunțare: închidem dialogul
-      />
       <CosDrawer // panoul coșului
         deschis={cosDeschis} // false = închis
         linii={linii} // liniile calculate mai sus
         disponibil={gata} // false = meniul nu a sosit, deci nu spunem „Coșul e gol”
+        eroare={eroareCos} // Etapa 7: ce linii n-au ajuns la server (null = nicio eroare)
         onClose={() => setCosDeschis(false)} // X, Esc sau clic pe fundal
         onSchimba={handleSchimbaCantitate} // „−” / „+”
         onScoate={handleScoate} // coșul de gunoi

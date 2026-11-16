@@ -11,14 +11,16 @@ Since stage 6 the data lives in `frontend/db.json` (served by json-server), not 
 
 | Field      | In code (`db.json` → `comenzi`) | Type   | Notes                                    |
 | ---------- | ---------------------- | ------------ | ------------------------------------------------ |
-| id         | `id`                   | number       | unique, new id = max existing id + 1 (stage 2)   |
+| id         | `id`                   | number       | unique; since stage 7 set by json-server (max + 1) |
 | name       | `preparat`             | text         | the ordered dish, required, max 100 chars        |
 | delivered  | `livrata`              | boolean      | toggled from the list, default false             |
 | delivery   | `livrare`              | fixed values | Standard, Express, Pickup (`LIVRARI`)            |
 | category   | `categorie`            | relation     | Pizza, Burgers, Asian (`CATEGORII`)              |
 | user       | (not yet)              | relation     | the customer who placed the order (from week 11) |
 | restaurant | `restaurant`           | text         | extra field, where the order comes from          |
-| price      | `pret`                 | number       | extra field, in lei, must be positive            |
+| price      | `pret`                 | number / null | in lei, positive; `null` only for a special order (price set by the restaurant) |
+| special    | `speciala`             | boolean      | optional, stage 7: true for orders from the "Comandă specială" form |
+| created    | `creata`               | text (ISO)   | optional, stage 7: when the order was sent (form and cart) |
 
 Sample data used across all stages:
 
@@ -51,6 +53,49 @@ Then open the address printed in terminal 2. Without `npm run api` the page show
 with a "Încearcă din nou" button. `npm test` runs the unit tests (no server needed).
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
+
+## Stage 7: form and validation
+
+Orders can now be created from the page, and every change (add, toggle, delete, undo, placing the cart)
+goes to the API first; the list shows what the server returned, so everything survives a refresh.
+
+- **"Comandă specială"** (`src/components/ComandaForm.jsx`): the customer asks one of the three restaurants
+  for a dish that is not on the menu. It sits in "Comenzile tale", under the bento: form panel on the left
+  (1fr), orders on the right (2fr), stacked up to 860px wide. Controlled fields (`value` + `onChange`):
+  `preparat` (text, max 60 characters, with a counter), `restaurant` (select: Pizzeria Napoli, Burger Van,
+  Sushi Kyo) and `livrare` (select: Standard, Express, Ridicare personală). Option values are exactly what
+  is stored in `db.json`
+- validation in code (`noValidate`, never `alert`): `valideazaComandaSpeciala` in `src/validare.js` is a pure
+  function, so it is unit-tested. Dish required (after `trim`) and at most 60 characters; restaurant and
+  delivery must be one of the fixed values (`src/constants.js`). The message shows in the form
+  (`role="alert"`), the wrong field gets `aria-invalid="true"` (thick red border) and the focus, and no
+  request is sent
+- sending: `e.preventDefault()`, the button is disabled and says "Se trimite…", the fields are cleared only
+  after the server confirmed; on failure the text stays and the error from `api.js` shows in the form
+  (`handleAdd` does not catch it). The object sent has no id:
+  `{ preparat, restaurant, livrare, categorie, livrata: false, pret: null, speciala: true, creata }`.
+  `categorie` comes from the restaurant; there is no price field (customers do not set prices), so cards
+  and the receipt show "Preț la confirmare" and the totals ignore `null` ("+ 1 preț la confirmare")
+- `src/api.js`: one common `request(path, options)` (JSON header, `res.ok` check, 204 → `null`, the 8 s
+  timeout and the Romanian error messages from stage 6), plus `createComanda`, `updateComanda(id, changes)`
+  (PATCH) and `deleteComanda(id)`. `fetch` is still only in `api.js`
+- server first, then state:
+  - toggle "Livrată": PATCH `{ livrata }`, then the returned object replaces the old one
+  - delete: DELETE, then `filter`; the "Anulează" message (5 s) re-POSTs the deleted order with its old id
+    (json-server 0.17 keeps it) and puts the server's object back in its place. `ConfirmDialog` was removed
+    (see stage 5)
+  - cart: one POST per line with `Promise.allSettled`; saved lines join the list and leave the cart, failed
+    ones stay in the cart and the drawer says why
+  - a failed toggle / delete / undo shows an error above the list and the list stays visible
+    (the list condition is only `!loading`)
+- automated checker: `tw.json` in the repository root (`comenzi`, `preparat`, `livrata`, sample
+  `{ restaurant, livrare }`) and the `data-testid` attributes from table 7.3: `item` (with `data-id`),
+  `item-title`, `item-toggle`, `item-delete`, `empty`, `form`, `form-title`, `form-restaurant`,
+  `form-livrare`, `form-submit`, `form-error`, `loading`, `error`
+- tests: `tests/validare.test.js` (validation, restaurant → category, `tw.json`), new `request` / CRUD tests
+  in `tests/api.test.js`, `null` prices in `tests/rezumat.test.js`, `cosInComenzi` without ids in
+  `tests/cos.test.js`; `tests/db.test.js` accepts `pret: null` (only with `speciala`) and the optional
+  `speciala` / `creata` fields
 
 ## Redesign: cinematic hero, photo menu, bento
 
@@ -169,7 +214,7 @@ Added between stage 5 and stage 6 (commit "Cart: menu and cart drawer"):
 - the cart button in the header opens a side panel (`CosDrawer`, a native `<dialog>`): lines with
   quantity and subtotal, a delivery choice (Standard / Express / Ridicare personală), the total and
   "Plasează comanda"
-- placing the order turns every cart line into a new order "on the way" (new id = max id + 1),
+- placing the order turns every cart line into a new order "on the way" (since stage 7 a POST per line; the server sets the id),
   empties the cart and shows a confirmation for 5 seconds
 - the cart is kept in `localStorage` under the key `cos` and validated when read
   (`src/cos.js` holds the pure cart logic, tested in `tests/cos.test.js`)
@@ -191,8 +236,10 @@ which is what stage 6 and stage 10 fix.
 - the theme is a second state, `tema`, starting from the system setting; the button writes
   `data-theme` on `<html>` and the CSS swaps the color variables (light base, dark under
   `@media (prefers-color-scheme: dark) :root:not([data-theme="light"])` and `:root[data-theme="dark"]`)
-- deleting asks first, in our own `ConfirmDialog` (`<dialog>`, closes with Esc, a backdrop click or "Renunță"),
-  never with the browser's `confirm()`; the deletion itself is still `handleDelete` with `filter`
+- deleting asked first, in our own `ConfirmDialog` (`<dialog>`, closes with Esc, a backdrop click or "Renunță"),
+  never with the browser's `confirm()`; the deletion itself is still `handleDelete` with `filter`.
+  Replaced in stage 7: the automated checker clicks the delete button and expects the order to be gone,
+  so deleting is now immediate and the 5-second "Anulează" message covers mistakes
 
 ### Redesign
 
@@ -348,6 +395,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | short Romanian comments on every line of code, stage 6                    |
 | Claude | db.json, api.js, loading / error states, retry, timeout, search, tests, stage 6 |
 | Claude | redesign: photo hero, category filter, photo menu, bento summary, grouped orders, helper tests |
+| Claude | "Comandă specială" form, validation, request() and server-first add / toggle / delete / undo / cart, tw.json, tests, stage 7 |
 
 Details per stage: see the ai-log/ folder.
 
@@ -359,4 +407,5 @@ Details per stage: see the ai-log/ folder.
 - [x] Stage 4: components rendered from data
 - [x] Stage 5: local state and events
 - [x] Stage 6: loading data from a mock API
-- [ ] Stage 7: form and validation
+- [x] Stage 7: form and validation
+- [ ] Stage 8: routing and detail page

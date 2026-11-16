@@ -1,0 +1,6 @@
+{
+  "resource": "comenzi",
+  "title": "preparat",
+  "done": "livrata",
+  "sample": { "restaurant": "Pizzeria Napoli", "livrare": "standard" }
+}

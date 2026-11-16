@@ -5,10 +5,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { CATEGORII } from "../src/categorii.js"; // importul lucide-react funcționează și sub Node
 import { ETICHETE_LIVRARE } from "../src/livrare.js";
+import { categorieRestaurant } from "../src/constants.js";
 
 const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
 const NUME_CATEGORII = CATEGORII.map((c) => c.nume);
 const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE);
+const CAMPURI_OBLIGATORII = ["categorie", "id", "livrare", "livrata", "preparat", "pret", "restaurant"];
+const CAMPURI_OPTIONALE = ["creata", "speciala"]; // Etapa 7: comenzile din formular și din coș
 
 // „Pizza Diavola × 2” -> { baza: "Pizza Diavola", cantitate: 2 }; fără sufix, cantitatea e 1 (aceeași formă ca în cosInComenzi)
 function despartePreparat(preparat) {
@@ -38,7 +41,10 @@ test("comenzi are id-uri numerice întregi, pozitive și unice", () => {
 
 test("comenzi are toate câmpurile obligatorii, cu tipurile corecte", () => {
   for (const c of db.comenzi) {
-    assert.deepEqual(Object.keys(c).sort(), ["categorie", "id", "livrare", "livrata", "preparat", "pret", "restaurant"], `câmpuri greșite la ${c.id}`);
+    for (const camp of CAMPURI_OBLIGATORII) assert.ok(Object.hasOwn(c, camp), `lipsește ${camp} la ${c.id}`);
+    for (const camp of Object.keys(c)) assert.ok(CAMPURI_OBLIGATORII.includes(camp) || CAMPURI_OPTIONALE.includes(camp), `câmp necunoscut la ${c.id}: ${camp}`);
+    if (Object.hasOwn(c, "speciala")) assert.equal(typeof c.speciala, "boolean", `speciala la ${c.id}`);
+    if (Object.hasOwn(c, "creata")) assert.ok(typeof c.creata === "string" && !Number.isNaN(Date.parse(c.creata)), `creata la ${c.id}`);
     assert.equal(typeof c.livrata, "boolean", `livrata la ${c.id}`);
     assert.ok(typeof c.preparat === "string" && c.preparat.trim().length > 0 && c.preparat.length <= 100, `preparat la ${c.id}`);
     assert.ok(typeof c.restaurant === "string" && c.restaurant.trim().length > 0, `restaurant la ${c.id}`);
@@ -52,8 +58,11 @@ test("comenzi folosește doar tipuri de livrare și categorii cunoscute", () => 
   }
 });
 
-test("comenzi are prețuri întregi pozitive", () => {
-  for (const c of db.comenzi) assert.ok(Number.isInteger(c.pret) && c.pret > 0, `preț invalid la ${c.id}: ${c.pret}`);
+test("comenzi are prețuri întregi pozitive; doar o comandă specială poate avea pret: null (Etapa 7)", () => {
+  for (const c of db.comenzi) {
+    if (c.pret === null) assert.equal(c.speciala, true, `pret null la o comandă care nu e specială: ${c.id}`);
+    else assert.ok(Number.isInteger(c.pret) && c.pret > 0, `preț invalid la ${c.id}: ${c.pret}`);
+  }
 });
 
 test("comenzi sunt variate: ambele stări, toate tipurile de livrare, toate categoriile", () => {
@@ -92,8 +101,15 @@ test("meniu are câmpurile obligatorii, prețuri întregi pozitive și categorii
 
 // --- legătura comenzi <-> meniu ---
 
-test("fiecare comandă e un preparat din meniu, cu același restaurant, categorie și preț × cantitate", () => {
-  for (const c of db.comenzi) {
+test("o comandă specială are un restaurant cunoscut, cu categoria lui (Etapa 7)", () => {
+  for (const c of db.comenzi.filter((c) => c.speciala)) {
+    assert.ok(categorieRestaurant(c.restaurant), `restaurant necunoscut la ${c.id}: ${c.restaurant}`);
+    assert.equal(c.categorie, categorieRestaurant(c.restaurant), `categorie diferită la ${c.id}`);
+  }
+});
+
+test("fiecare comandă din meniu (nu cele speciale) e un preparat din meniu, cu același restaurant, categorie și preț × cantitate", () => {
+  for (const c of db.comenzi.filter((c) => !c.speciala)) {
     const { baza, cantitate } = despartePreparat(c.preparat);
     const produs = db.meniu.find((p) => p.preparat === baza);
     assert.ok(produs, `„${baza}” (comanda ${c.id}) nu există în meniu`);

@@ -1,7 +1,7 @@
 import { CATEGORII } from "../categorii.js"; // categoriile, cu iconițele lor
 import { ETICHETE_LIVRARE } from "../livrare.js"; // textele tipurilor de livrare
 import { formatLei } from "../format.js"; // „331 lei”
-import { rezumatComenzi } from "../rezumat.js"; // toate cifrele, calculate din listă
+import { formatFaraPret, rezumatComenzi } from "../rezumat.js"; // toate cifrele, calculate din listă; Etapa 7: textul pentru prețurile neconfirmate
 
 const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE); // ["standard", "express", "ridicare"], în ordinea din livrare.js
 
@@ -21,6 +21,7 @@ export default function RezumatBento({ comenzi, stare }) { // props: toată list
         <p className="tile-text">{/* cifra și eticheta, citite împreună */}
           <strong key={gata ? r.total : stare} className="tile-valoare tick">{gata ? formatLei(r.total) : faraValoare}</strong>{/* totalul cheltuit */}
           <span className="tile-eticheta">cheltuiți în total</span>{/* datele nu au date calendaristice, deci nu „luna asta” */}
+          {gata && r.faraPret > 0 && <span className="tile-nota">{formatFaraPret(r.faraPret)}</span>}{/* Etapa 7: comenzile speciale nu intră în total până nu au preț */}
         </p>
         <ul className="bento-chips" aria-label="Comenzi pe categorii">{/* câte comenzi are fiecare categorie */}
           {CATEGORII.map((cat) => ( // o pastilă pentru fiecare categorie

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react"; // useRef: <dialog> și focus; useState: livrarea aleasă; useEffect: deschidere/închidere
-import { ShoppingBag, Trash2, X } from "lucide-react"; // iconițe: sacoșă, coș de gunoi, închidere
+import { useEffect, useRef, useState } from "react"; // useRef: <dialog> și focus; useState: livrarea aleasă și trimiterea; useEffect: deschidere/închidere
+import { CircleAlert, ShoppingBag, Trash2, X } from "lucide-react"; // iconițe: avertisment, sacoșă, coș de gunoi, închidere
 import Stepper from "./Stepper.jsx"; // selectorul de cantitate
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
 import { numarProduse, totalCos } from "../cos.js"; // aceleași calcule ca în App, dintr-un singur loc
@@ -8,13 +8,15 @@ import { formatLei, formatProduse } from "../format.js"; // formatarea sumelor �
 
 const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE); // ["standard", "express", "ridicare"], în ordinea din livrare.js
 
-// Coșul: panou lateral construit pe <dialog> nativ, ca ConfirmDialog (Esc și clicul pe fundal îl închid).
+// Coșul: panou lateral construit pe <dialog> nativ (Esc și clicul pe fundal îl închid).
 // Primește liniile deja calculate de App; nu modifică singur coșul, doar anunță prin callback-uri.
-export default function CosDrawer({ deschis, linii, disponibil, onClose, onSchimba, onScoate, onPlaseaza, onVeziMeniul }) { // props: starea, datele și callback-urile; disponibil = meniul s-a încărcat
+// Etapa 7: plasarea trimite comenzile la server; `eroare` (de la App) spune ce linii n-au ajuns și au rămas în coș.
+export default function CosDrawer({ deschis, linii, disponibil, eroare, onClose, onSchimba, onScoate, onPlaseaza, onVeziMeniul }) { // props: starea, datele și callback-urile; disponibil = meniul s-a încărcat
   const ref = useRef(null); // elementul <dialog>
   const inchideRef = useRef(null); // butonul X, primește focusul la deschidere
   const titluRef = useRef(null); // titlul, primește focusul când o linie dispare
   const [livrare, setLivrare] = useState("standard"); // tipul de livrare ales; state local, contează doar aici până la plasare
+  const [trimite, setTrimite] = useState(false); // Etapa 7: true cât timp comenzile pleacă spre server
   const apasatPeFundal = useRef(false); // true doar dacă apăsarea mouse-ului a început chiar pe fundal
 
   useEffect(() => { // sincronizăm <dialog> cu prop-ul `deschis`
@@ -46,10 +48,18 @@ export default function CosDrawer({ deschis, linii, disponibil, onClose, onSchim
     onVeziMeniul(); // ...iar App îl mută apoi pe titlul meniului
   } // sfârșitul funcției
 
-  function handleSubmit(e) { // trimiterea formularului = plasarea comenzii
+  // Etapa 7: plasarea așteaptă serverul. Butonul rămâne focalizabil (aria-disabled, nu disabled), ca focusul
+  // să nu se piardă din panou; o a doua apăsare cât se trimite e ignorată aici.
+  async function handleSubmit(e) { // trimiterea formularului = plasarea comenzii
     e.preventDefault(); // fără reîncărcarea paginii
-    onPlaseaza(livrare); // App transformă coșul în comenzi
-    setLivrare("standard"); // următoarea comandă pornește iar de la livrarea standard
+    if (trimite) return; // o trimitere e deja în curs: fără comenzi duble
+    setTrimite(true); // butonul arată „Se trimite…”
+    try { // onPlaseaza nu aruncă: erorile ajung în prop-ul `eroare`
+      const toate = await onPlaseaza(livrare); // App trimite fiecare linie la server; true = toate au ajuns
+      if (toate) setLivrare("standard"); // următoarea comandă pornește iar de la livrarea standard
+    } finally { // oricum s-a terminat
+      setTrimite(false); // butonul revine la normal
+    } // sfârșitul try/finally
   } // sfârșitul funcției
 
   // Enter pe un buton radio ar trimite formularul (trimitere implicită) și ar plasa comanda din greșeală.
@@ -150,7 +160,8 @@ export default function CosDrawer({ deschis, linii, disponibil, onClose, onSchim
                 <div><dt>Produse</dt><dd>{formatProduse(produse)}</dd></div>{/* numărul de produse */}
                 <div className="cos-total"><dt>Total</dt><dd>{formatLei(total)}</dd></div>{/* totalul, fără taxe inventate */}
               </dl>
-              <button type="submit" className="btn-primary">Plasează comanda · {formatLei(total)}</button>{/* trimite formularul */}
+              {eroare && <p className="drawer-eroare" role="alert"><CircleAlert size={18} aria-hidden="true" />{eroare}</p>}{/* Etapa 7: liniile care n-au ajuns la server au rămas în coș */}
+              <button type="submit" className="btn-primary" aria-disabled={trimite}>{trimite ? "Se trimite…" : `Plasează comanda · ${formatLei(total)}`}</button>{/* trimite formularul; aria-disabled cât se trimite */}
             </div>
           </form>
         )}{/* sfârșitul randării condiționate */}

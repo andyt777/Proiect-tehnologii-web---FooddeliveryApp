@@ -1,7 +1,8 @@
-import { CircleAlert, CircleCheck, Clock } from "lucide-react"; // iconițe: avertisment, bifă și ceas
+import { CircleAlert, CircleCheck, Clock, Utensils } from "lucide-react"; // iconițe: avertisment, bifă, ceas și tacâmuri (categorie necunoscută)
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
 import { DURATE_LIVRARE } from "../livrare.js"; // textele cu timpul estimat
 import { formatLei } from "../format.js"; // formatarea sumelor în lei
+import { formatFaraPret, sumaPreturi } from "../rezumat.js"; // Etapa 7: suma ignoră prețurile încă neconfirmate (null)
 
 // „Bonul” din zona de sus: următoarea comandă care e pe drum, calculată din listă.
 // Etapa 6: `stare` e „incarcare”, „eroare” sau „gata”; până sosesc datele bonul nu pretinde „Nicio comandă încă”.
@@ -37,7 +38,7 @@ export default function BonComanda({ comenzi, stare }) { // primește toată lis
 
   const peDrum = comenzi.filter((c) => !c.livrata); // doar comenzile nelivrate
   const urmatoarea = peDrum[0]; // prima dintre ele (undefined dacă nu există)
-  const totalPeDrum = peDrum.reduce((suma, c) => suma + c.pret, 0); // suma prețurilor comenzilor pe drum
+  const { suma: totalPeDrum, faraPret } = sumaPreturi(peDrum); // Etapa 7: suma prețurilor cunoscute + câte comenzi speciale așteaptă prețul
 
   if (!urmatoarea) { // nu e nicio comandă pe drum
     return ( // afișăm varianta „gata”
@@ -48,7 +49,7 @@ export default function BonComanda({ comenzi, stare }) { // primește toată lis
     ); // sfârșitul JSX-ului pentru cazul gol
   } // sfârșitul ramurii if
 
-  const Iconita = ICONITE_CATEGORIE[urmatoarea.categorie]; // componenta iconiței; numele începe cu majusculă ca să poată fi folosită ca <Iconita />
+  const Iconita = ICONITE_CATEGORIE[urmatoarea.categorie] ?? Utensils; // componenta iconiței (tacâmuri pentru o categorie necunoscută); numele începe cu majusculă ca să poată fi folosită ca <Iconita />
 
   return ( // varianta normală a bonului
     <aside className="receipt" aria-label="Următoarea comandă">{/* containerul bonului */}
@@ -63,8 +64,9 @@ export default function BonComanda({ comenzi, stare }) { // primește toată lis
       <p className="eta"><Clock size={14} aria-hidden="true" />{DURATE_LIVRARE[urmatoarea.livrare]}</p>{/* timpul estimat */}
       <div className="receipt-total">{/* rândul de total */}
         <span>Total pe drum ({peDrum.length})</span>{/* câte comenzi sunt pe drum */}
-        <strong>{formatLei(totalPeDrum)}</strong>{/* suma lor, formatată */}
+        <strong>{faraPret === peDrum.length ? "Preț la confirmare" : formatLei(totalPeDrum)}</strong>{/* suma lor, formatată; Etapa 7: doar comenzi speciale = niciun preț cunoscut încă */}
       </div>
+      {faraPret > 0 && faraPret < peDrum.length && <p className="receipt-nota">{formatFaraPret(faraPret)}</p>}{/* Etapa 7: ex. „+ 1 preț la confirmare”, sub total */}
     </aside>
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei

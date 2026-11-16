@@ -33,8 +33,6 @@
   --brand-soft: #d6eefb;    /* fundalul stării „Livrată” și al etichetei „Ridicare” */
   --danger: #dc2626;        /* roșu: iconița de ștergere la hover */
   --danger-soft: #fef2f2;   /* fundalul roșu deschis de sub iconița de ștergere */
-  --danger-strong: #b91c1c; /* butonul „Șterge” din dialog (alb pe el: 6.5:1) */
-  --danger-strong-hover: #991b1b; /* butonul „Șterge” la hover */
   /* antetul: bară bleu translucidă cu text bleumarin */
   --header-solid: #dff1fb;  /* culoarea plină a antetului (și conturul insignei coșului) */
   --header-bg: color-mix(in srgb, var(--header-solid) 86%, transparent); /* 86%: textul rămâne AA chiar și cu fotografia întunecată în spate */
@@ -1056,37 +1054,8 @@ svg { flex-shrink: 0; }
 /* supratitlul: linie subțire, cât numele restaurantelor */
 .skeleton-eyebrow { width: 300px; max-width: 100%; height: 12px; }
 
-/* Dialogul de confirmare a ștergerii (în loc de confirm() din browser) */
-.dialog {
-  width: min(440px, calc(100% - 32px));
-  padding: 0;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 24px 64px var(--shadow-float); /* umbră bleumarin (neagră în tema întunecată) */
-}
-.dialog[open] { animation: dialog-in 0.18s ease-out; }
-.dialog::backdrop { background: var(--backdrop); backdrop-filter: blur(2px); }
-@keyframes dialog-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-}
-.dialog-body { display: flex; flex-direction: column; gap: 8px; padding: 28px; }
-.dialog-icon {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 52px;
-  margin-bottom: 8px;
-  color: var(--danger);
-  background: var(--danger-soft);
-  border-radius: 50%;
-}
-.dialog h2 { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; font-style: italic; } /* titlul dialogului, Fraunces italic */
-.dialog p { color: var(--muted); }
-.dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px; }
-.btn-secondary,
-.btn-confirm {
+/* Butonul secundar („Șterge căutarea”); Etapa 7: dialogul de confirmare a ștergerii a fost scos */
+.btn-secondary {
   height: 44px;
   padding: 0 18px;
   font: inherit;
@@ -1098,8 +1067,6 @@ svg { flex-shrink: 0; }
 }
 .btn-secondary { color: var(--text); background: var(--surface); border: 1.5px solid var(--line-strong); } /* contur bleu */
 .btn-secondary:hover { border-color: var(--subtle); }
-.btn-confirm { color: var(--on-accent); background: var(--danger-strong); border: 1.5px solid var(--danger-strong); } /* alb pe roșu (6.5:1) */
-.btn-confirm:hover { background: var(--danger-strong-hover); border-color: var(--danger-strong-hover); } /* roșu mai închis la hover */
 
 /* Coșul: panou lateral pe <dialog>, lipit de marginea din dreapta, pe toată înălțimea */
 .drawer {
@@ -1326,6 +1293,119 @@ svg { flex-shrink: 0; }
 .toast-ok { gap: 10px; padding: 12px 18px; }
 .toast-ok svg { color: var(--toast-ok); } /* bleu #89cff0 (6.8:1 în ambele teme) */
 
+/* Etapa 7: în „Comenzile tale”, sub bento, formularul în stânga (1fr) și lista în dreapta (2fr) */
+.comenzi-grid {
+  display: grid;            /* grilă pe două coloane */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); /* formularul ia o treime, lista două (minmax 0: textele lungi nu lățesc coloana) */
+  align-items: start;       /* panoul formularului nu se întinde cât lista */
+  gap: 24px;                /* spațiul dintre coloane */
+  margin-top: 24px;         /* despărțit de bento */
+}
+.comenzi-lista { min-width: 0; } /* lista se poate îngusta fără să iasă din coloană */
+
+/* Etapa 7: panoul formularului, bleu deschis, ca plăcile din bento; rămâne la vedere când derulăm lista lungă */
+.panel {
+  padding: 24px;            /* spațiu interior */
+  background: linear-gradient(160deg, var(--surface) 0%, var(--bg-soft) 100%); /* același degradeu ca plăcile bento */
+  border: 1px solid var(--line); /* contur discret */
+  border-radius: var(--radius-lg); /* colțuri rotunjite, ca lista */
+}
+.speciala-panel {
+  position: sticky;         /* rămâne sub antet cât derulăm lista */
+  top: calc(var(--header-h) + 16px); /* se oprește chiar sub antetul fix */
+}
+.panel-titlu {
+  font-family: var(--font-display); /* Fraunces */
+  font-size: 1.45rem;       /* titlul panoului, sub titlul secțiunii */
+  font-weight: 600;         /* semibold */
+  font-style: italic;       /* Fraunces italic, ca toate titlurile */
+}
+.speciala-form { display: flex; flex-direction: column; gap: 16px; margin-top: 8px; } /* câmpurile unul sub altul */
+.speciala-intro { font-size: 0.92rem; color: var(--muted); } /* explicația de sub titlu (7:1 pe alb) */
+.camp { display: flex; flex-direction: column; gap: 6px; } /* eticheta deasupra câmpului */
+.camp label { font-size: 0.9rem; font-weight: 600; } /* eticheta, scurtă și îngroșată */
+.camp input,
+.camp select {
+  width: 100%;              /* tot rândul */
+  min-height: 48px;         /* zonă de atingere confortabilă */
+  padding: 0 14px;          /* textul nu stă lipit de margine */
+  font: inherit;            /* același font ca pagina (inputurile nu-l moștenesc singure) */
+  color: var(--text);       /* text principal */
+  background: var(--surface); /* alb (panou închis în tema întunecată) */
+  border: 1.5px solid var(--line-strong); /* contur bleu, ca butoanele secundare */
+  border-radius: var(--radius-sm); /* colțuri rotunjite */
+  transition: border-color 0.15s; /* conturul se schimbă lin */
+}
+.camp input:hover,
+.camp select:hover { border-color: var(--subtle); } /* conturul mai închis la hover */
+.camp input:focus,
+.camp select:focus { border-color: var(--accent-text); } /* conturul roz la focus (plus inelul general de focus) */
+.camp input::placeholder { color: var(--muted); } /* exemplul din câmpul gol, lizibil (AA) */
+.camp-ajutor { font-size: 0.82rem; color: var(--muted); } /* contorul de caractere */
+
+/* Etapa 7: câmpul greșit, marcat de aria-invalid (formă + culoare: contur gros roșu) */
+.camp [aria-invalid="true"] {
+  border-color: var(--danger); /* contur roșu */
+  box-shadow: 0 0 0 1px var(--danger); /* contur dublu: se vede și fără să deosebești culorile */
+}
+/* mesajul de validare, lângă formular (nu alert) */
+.form-eroare {
+  padding: 10px 14px;       /* cutie mică */
+  font-size: 0.92rem;       /* text de mesaj */
+  font-weight: 500;         /* puțin îngroșat */
+  color: var(--text);       /* text principal pe roz deschis (peste 14:1) */
+  background: var(--error-bg); /* același roz ca panoul de eroare */
+  border: 1.5px solid var(--error-border); /* contur roz */
+  border-left-width: 4px;   /* bara din stânga: mesajul se vede și fără culoare */
+  border-radius: var(--radius-sm); /* colțuri rotunjite */
+}
+.form-ok { font-size: 0.9rem; font-weight: 500; color: var(--brand-text); } /* confirmarea trimiterii, bleu închis */
+.form-ok:empty { display: none; } /* regiunea există mereu (pentru anunț), dar nu ocupă loc când e goală */
+.speciala-form .btn-primary { width: 100%; } /* butonul pe toată lățimea panoului */
+
+/* Etapa 7: butoanele în timpul trimiterii: estompate și cu cursorul „interzis” (disabled în formular, aria-disabled în coș) */
+button:disabled,
+button[aria-disabled="true"] {
+  opacity: 0.6;             /* estompat */
+  cursor: not-allowed;      /* cursorul arată că nu se poate apăsa */
+}
+.btn-primary:disabled:hover,
+.btn-primary[aria-disabled="true"]:hover { background: var(--accent); } /* fără efectul de hover cât e blocat */
+
+/* Etapa 7: eroarea unei bifări / ștergeri, deasupra listei (lista rămâne pe ecran) */
+.error-actiune {
+  align-items: center;      /* iconița, textul și X-ul pe același rând */
+  margin-bottom: 16px;      /* despărțită de listă */
+  padding: 12px 12px 12px 18px; /* mai compactă decât panoul mare de eroare */
+}
+.error-actiune > svg { margin-top: 0; } /* centrată pe rând, nu aliniată sus */
+.error-actiune p { flex: 1; } /* textul ocupă spațiul rămas; X-ul stă în dreapta */
+
+/* Etapa 7: comanda specială — „Preț la confirmare” în loc de preț și eticheta „Comandă specială” */
+.price-asteptare {
+  font-family: var(--font-body); /* text obișnuit, nu cifră */
+  font-size: 0.88rem;       /* mai mic decât un preț */
+  font-style: normal;       /* drept */
+  color: var(--muted);      /* nu e o sumă, deci nu roz */
+}
+.badge-speciala { gap: 5px; color: var(--highlight-text); background: var(--accent-soft); } /* roz închis pe roz deschis (6.1:1) */
+.receipt-nota { margin-top: -6px; font-size: 0.85rem; color: var(--muted); text-align: right; } /* „+ 1 preț la confirmare”, sub totalul bonului */
+.tile-nota { margin-top: 4px; font-size: 0.85rem; color: var(--muted); } /* aceeași notă sub totalul din bento */
+
+/* Etapa 7: liniile din coș care n-au ajuns la server */
+.drawer-eroare {
+  display: flex;            /* iconița lângă text */
+  align-items: flex-start;  /* iconița aliniată cu primul rând */
+  gap: 10px;                /* spațiul dintre ele */
+  padding: 10px 14px;       /* cutie mică */
+  font-size: 0.9rem;        /* text de mesaj */
+  color: var(--text);       /* text principal pe roz deschis */
+  background: var(--error-bg); /* rozul panoului de eroare */
+  border: 1.5px solid var(--error-border); /* contur roz */
+  border-radius: var(--radius-sm); /* colțuri rotunjite */
+}
+.drawer-eroare svg { margin-top: 1px; color: var(--accent-text); } /* iconița de avertisment, roz */
+
 /* View transitions: rândurile alunecă la noile poziții, tema se schimbă cu o trecere lină */
 ::view-transition-group(*) { animation-duration: 0.25s; }
 /* antetul și mesajul rămân deasupra rândurilor care se mută */
@@ -1352,11 +1432,11 @@ svg { flex-shrink: 0; }
   outline: 3px solid var(--accent-text); /* plin, nu translucid: rozul translucid ar fi sub 3:1 pe alb */
   outline-offset: 2px;
 }
-/* doar cele două titluri care primesc focus din cod (Meniu, Coșul tău) renunță la contur: nu sunt controale.
+/* doar titlurile care primesc focus din cod (Meniu, Coșul tău, Etapa 7: Comenzile tale) renunță la contur: nu sunt controale.
    Clasă aleasă explicit, nu [tabindex="-1"], ca un element nou cu tabIndex -1 să nu-și piardă conturul fără să știm */
 .titlu-focus:focus { outline: none; }
 
-/* Cât e deschis un dialog modal (coșul sau confirmarea ștergerii), pagina din spate nu se mai derulează;
+/* Cât e deschis un dialog modal (coșul), pagina din spate nu se mai derulează;
    scrollbar-gutter păstrează locul barei de derulare, ca pagina să nu sară în lateral */
 html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
 
@@ -1382,6 +1462,9 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   .hero { min-height: calc(var(--header-h) + 480px); }
   .hero-inner { grid-template-columns: 1fr; gap: 32px; }
   .receipt { max-width: 360px; transform: none; }
+  /* Etapa 7: formularul deasupra listei, pe toată lățimea; nu mai stă lipit sus (ar acoperi lista) */
+  .comenzi-grid { grid-template-columns: minmax(0, 1fr); } /* o singură coloană */
+  .speciala-panel { position: static; } /* fără sticky */
   /* textul ocupă toată lățimea: umbra se întinde uniform, mai închisă spre bon */
   .hero::before { background: linear-gradient(180deg, rgba(15, 58, 92, 0.7) 0%, rgba(15, 58, 92, 0.76) 45%, rgba(15, 58, 92, 0.92) 100%); } /* bleumarin de cel puțin 70%: alb AA peste orice fotografie */
 }
@@ -1436,6 +1519,7 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   .categorie-nume { font-size: 1.1rem; }
   /* bento: două coloane; placa mare și cea lată ocupă tot rândul */
   .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .panel { padding: 18px; } /* Etapa 7: panoul formularului, mai compact pe telefon */
   .tile { padding: 16px; }
   .tile-mare,
   .tile-lata { grid-column: 1 / -1; grid-row: auto; }
@@ -1452,9 +1536,6 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
   .dots { display: none; }
   .card-top { justify-content: space-between; }
   .card-side { grid-column: 1 / -1; justify-content: space-between; }
-  .dialog-body { padding: 24px; }
-  /* butoanele unul sub altul, pe toată lățimea; acțiunea principală sus, la îndemâna degetului */
-  .dialog-actions { flex-direction: column-reverse; }
   /* meniul: o coloană (titlul se oprește sub antet prin --header-h, redefinit mai sus) */
   .menu-section { margin-bottom: 40px; }
   .menu-grid { grid-template-columns: 1fr; gap: 24px; }
@@ -1492,7 +1573,7 @@ html:has(dialog[open]) { overflow: hidden; scrollbar-gutter: stable; }
     --shadow-sm: none;
   }
   .address-pill, .search, .theme-toggle, .cart-pill,
-  .receipt, .card-side, .dialog, .toast-region,
+  .receipt, .card-side, .toast-region, .speciala-panel, .error-actiune, /* Etapa 7: fără formular și fără mesajul de eroare pe hârtie */
   .menu-section, .drawer, .hero-foto, .hero-cta, .hero-bon,
   .categorii-section, .bento-bara,
   .error .btn-primary, .empty .btn-secondary, .skeleton { display: none !important; }

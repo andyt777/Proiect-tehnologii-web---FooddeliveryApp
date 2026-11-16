@@ -39,8 +39,8 @@ test("fiecare preparat din db.json are o fotografie, iar fișierul există în p
   }
 });
 
-test("fiecare comandă din db.json are fotografia preparatului ei", () => {
-  for (const c of db.comenzi) assert.ok(imaginePreparat(c.preparat), `comanda ${c.id} nu are fotografie`);
+test("fiecare comandă din meniu (nu cele speciale, Etapa 7) din db.json are fotografia preparatului ei", () => {
+  for (const c of db.comenzi.filter((c) => !c.speciala)) assert.ok(imaginePreparat(c.preparat), `comanda ${c.id} nu are fotografie`);
 });
 
 // --- IMAGINI_CATEGORIE ---

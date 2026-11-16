@@ -3,7 +3,7 @@
 // Sub Node, import.meta.env nu există; api.js folosește `import.meta.env?.VITE_API_URL`, deci cade pe adresa implicită.
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import { API_URL, TIMP_MAXIM_MS, fetchComenzi, fetchMeniu } from "../src/api.js";
+import { API_URL, TIMP_MAXIM_MS, createComanda, deleteComanda, fetchComenzi, fetchMeniu, request, updateComanda } from "../src/api.js";
 
 const fetchOriginal = globalThis.fetch;
 afterEach(() => {
@@ -111,4 +111,120 @@ test("după un răspuns reușit, cronometrul e oprit (cererea nu mai e anulată)
   await fetchComenzi(30);
   await new Promise((r) => setTimeout(r, 60));
   assert.equal(semnal.aborted, false);
+});
+
+// --- Etapa 7: request, funcția comună ---
+
+// Înregistrează fiecare apel la fetch și răspunde cu `rezultat` (sau cu ce întoarce funcția primită)
+function fetchInregistrat(rezultat) {
+  const apeluri = [];
+  globalThis.fetch = async (url, optiuni) => {
+    apeluri.push({ url, optiuni });
+    return typeof rezultat === "function" ? rezultat(url, optiuni) : rezultat;
+  };
+  return apeluri;
+}
+
+test("request întoarce corpul JSON al unui răspuns reușit, pentru orice tip de valoare", async () => {
+  for (const corp of [{ id: 7 }, [1, 2], {}, "text", 0]) {
+    fetchInregistrat(raspuns(corp));
+    assert.deepEqual(await request("/orice"), corp);
+  }
+});
+
+test("request pune antetul JSON și semnalul de timeout, și păstrează metoda și corpul primite", async () => {
+  const apeluri = fetchInregistrat(raspuns({}));
+  await request("/comenzi", { method: "POST", body: "{}" });
+  const { url, optiuni } = apeluri[0];
+  assert.equal(url, "http://localhost:3001/comenzi");
+  assert.equal(optiuni.method, "POST");
+  assert.equal(optiuni.body, "{}");
+  assert.equal(optiuni.headers["Content-Type"], "application/json");
+  assert.ok(optiuni.signal instanceof AbortSignal);
+});
+
+test("request adaugă antetele apelantului peste antetul JSON", async () => {
+  const apeluri = fetchInregistrat(raspuns({}));
+  await request("/x", { headers: { Accept: "application/json", "Content-Type": "text/plain" } });
+  assert.deepEqual(apeluri[0].optiuni.headers, { "Content-Type": "text/plain", Accept: "application/json" });
+});
+
+test("request întoarce null la 204 No Content, fără să citească corpul", async () => {
+  let citit = false;
+  fetchInregistrat({ ok: true, status: 204, json: async () => { citit = true; throw new SyntaxError("Unexpected end of JSON input"); } });
+  assert.equal(await request("/comenzi/1", { method: "DELETE" }), null);
+  assert.equal(citit, false);
+});
+
+test("request aruncă „Eroare server: <cod>” când res.ok e false, fără să citească corpul", async () => {
+  for (const cod of [400, 404, 500, 503]) {
+    fetchInregistrat(raspuns({ eroare: "x" }, cod));
+    await assert.rejects(request("/comenzi/1"), { message: `Eroare server: ${cod}` });
+  }
+});
+
+test("request traduce eroarea de rețea în „Serverul nu poate fi contactat”", async () => {
+  globalThis.fetch = async () => {
+    throw new TypeError("Failed to fetch");
+  };
+  await assert.rejects(request("/comenzi", { method: "POST", body: "{}" }), { message: "Serverul nu poate fi contactat" });
+});
+
+test("request traduce timeout-ul și corpul invalid, ca fetchComenzi", async () => {
+  globalThis.fetch = (url, { signal }) => new Promise((resolve, reject) => signal.addEventListener("abort", () => reject(signal.reason)));
+  await assert.rejects(request("/comenzi", {}, 20), { message: "Serverul nu a răspuns în 0 secunde" });
+  globalThis.fetch = async () => ({ ok: true, status: 200, json: async () => JSON.parse("<html>") });
+  await assert.rejects(request("/comenzi"), { message: "Răspuns neașteptat de la server" });
+});
+
+// --- Etapa 7: createComanda / updateComanda / deleteComanda ---
+
+test("createComanda trimite POST /comenzi cu comanda ca JSON și întoarce obiectul de la server", async () => {
+  const comanda = { preparat: "Pizza cu trufe", restaurant: "Pizzeria Napoli", livrare: "standard", categorie: "Pizza", livrata: false, pret: null, speciala: true, creata: "2026-11-16T10:00:00.000Z" };
+  const apeluri = fetchInregistrat((url, optiuni) => raspuns({ ...JSON.parse(optiuni.body), id: 7 }, 201));
+  const salvata = await createComanda(comanda);
+  assert.equal(apeluri.length, 1);
+  assert.equal(apeluri[0].url, "http://localhost:3001/comenzi");
+  assert.equal(apeluri[0].optiuni.method, "POST");
+  assert.deepEqual(JSON.parse(apeluri[0].optiuni.body), comanda);
+  assert.deepEqual(salvata, { ...comanda, id: 7 });
+});
+
+test("createComanda nu adaugă id: trimite exact câmpurile primite (cu id doar dacă îl are deja, ca la „Anulează”)", async () => {
+  const apeluri = fetchInregistrat(raspuns({}, 201));
+  await createComanda({ preparat: "X" });
+  assert.equal("id" in JSON.parse(apeluri[0].optiuni.body), false);
+  await createComanda({ id: 3, preparat: "Y" });
+  assert.equal(JSON.parse(apeluri[1].optiuni.body).id, 3);
+});
+
+test("updateComanda trimite PATCH /comenzi/:id doar cu câmpurile schimbate", async () => {
+  const apeluri = fetchInregistrat(raspuns({ id: 3, livrata: true }));
+  const actualizata = await updateComanda(3, { livrata: true });
+  assert.equal(apeluri[0].url, "http://localhost:3001/comenzi/3");
+  assert.equal(apeluri[0].optiuni.method, "PATCH");
+  assert.deepEqual(JSON.parse(apeluri[0].optiuni.body), { livrata: true });
+  assert.deepEqual(actualizata, { id: 3, livrata: true });
+});
+
+test("deleteComanda trimite DELETE /comenzi/:id fără corp; 200 cu {} (json-server) și 204 (null) sunt ambele succes", async () => {
+  const apeluri = fetchInregistrat(raspuns({}));
+  assert.deepEqual(await deleteComanda(5), {});
+  assert.equal(apeluri[0].url, "http://localhost:3001/comenzi/5");
+  assert.equal(apeluri[0].optiuni.method, "DELETE");
+  assert.equal(apeluri[0].optiuni.body, undefined);
+  fetchInregistrat({ ok: true, status: 204, json: async () => null });
+  assert.equal(await deleteComanda(5), null);
+});
+
+test("id-ul e codificat în adresă, deci nu poate schimba ruta", async () => {
+  const apeluri = fetchInregistrat(raspuns({}));
+  await deleteComanda("../meniu");
+  assert.equal(apeluri[0].url, "http://localhost:3001/comenzi/..%2Fmeniu");
+});
+
+test("update și delete propagă erorile serverului (ex. 404 pentru o comandă deja ștearsă)", async () => {
+  fetchInregistrat(raspuns({}, 404));
+  await assert.rejects(updateComanda(99, { livrata: true }), { message: "Eroare server: 404" });
+  await assert.rejects(deleteComanda(99), { message: "Eroare server: 404" });
 });

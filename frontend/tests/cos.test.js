@@ -201,62 +201,54 @@ const linie = (id, cantitate) => {
   return { ...p, cantitate, subtotal: p.pret * cantitate };
 };
 
-test("cosInComenzi pornește id-urile de la 1 când nu există comenzi", () => {
-  const linii = deepFreeze([linie("a", 1), linie("b", 2)]);
-  const comenzi = deepFreeze([]);
-  const rezultat = cosInComenzi(linii, comenzi, "rapida");
-  assert.deepEqual(rezultat.map((c) => c.id), [1, 2]);
-  assert.notEqual(rezultat, comenzi);
+const CREATA = "2026-11-16T18:30:00.000Z";
+
+test("cosInComenzi nu inventează id-uri: serverul le pune la POST (Etapa 7)", () => {
+  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 2)]), "standard", CREATA);
+  assert.equal(rezultat.length, 2);
+  for (const c of rezultat) assert.equal("id" in c, false);
 });
 
-test("cosInComenzi continuă de la cel mai mare id + 1, consecutiv", () => {
-  const comenzi = deepFreeze([{ id: 1 }, { id: 2 }, { id: 3 }]);
-  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 1), linie("c", 1)]), comenzi, "x");
-  assert.deepEqual(rezultat.map((c) => c.id), [1, 2, 3, 4, 5, 6]);
-});
-
-test("cosInComenzi folosește maximul la id-uri necontigue și neordonate", () => {
-  const comenzi = deepFreeze([{ id: 7 }, { id: 2 }, { id: 15 }, { id: 4 }]);
-  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 1)]), comenzi, "x");
-  assert.deepEqual(rezultat.map((c) => c.id), [7, 2, 15, 4, 16, 17]);
-});
-
-test("cosInComenzi păstrează comenzile vechi la început, neschimbate", () => {
-  const comenzi = deepFreeze([{ id: 1, preparat: "Vechi", livrata: true }]);
-  const rezultat = cosInComenzi(deepFreeze([linie("a", 1)]), comenzi, "x");
-  assert.equal(rezultat[0], comenzi[0]);
-  assert.equal(comenzi.length, 1);
+test("cosInComenzi întoarce doar comenzile noi, în ordinea din coș", () => {
+  const rezultat = cosInComenzi(deepFreeze([linie("c", 1), linie("a", 1)]), "x", CREATA);
+  assert.deepEqual(rezultat.map((c) => c.preparat), ["Sushi C", "Pizza A"]);
 });
 
 test("cosInComenzi adaugă sufixul „ × N” doar când cantitatea e mai mare ca 1", () => {
-  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 2), linie("c", 20)]), deepFreeze([]), "x");
+  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 2), linie("c", 20)]), "x", CREATA);
   assert.deepEqual(rezultat.map((c) => c.preparat), ["Pizza A", "Burger B × 2", "Sushi C × 20"]);
 });
 
-test("cosInComenzi construiește comanda completă: pret = subtotal, livrata false, livrare transmisă", () => {
-  const rezultat = cosInComenzi(deepFreeze([linie("b", 3)]), deepFreeze([{ id: 9 }]), "standard");
-  assert.deepEqual(rezultat[1], {
-    id: 10,
+test("cosInComenzi construiește comanda completă: pret = subtotal, livrata false, livrare și creata transmise", () => {
+  const rezultat = cosInComenzi(deepFreeze([linie("b", 3)]), "standard", CREATA);
+  assert.deepEqual(rezultat, [{
     preparat: "Burger B × 3",
     livrata: false,
     livrare: "standard",
     categorie: "Burgers",
     restaurant: "R2",
     pret: 105,
-  });
+    creata: CREATA,
+  }]);
 });
 
-test("cosInComenzi transmite livrarea neschimbată pe fiecare comandă nouă", () => {
+test("cosInComenzi pune aceeași livrare și aceeași dată pe fiecare comandă nouă", () => {
   const livrare = deepFreeze({ tip: "rapida" });
-  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 1)]), deepFreeze([]), livrare);
-  for (const c of rezultat) assert.equal(c.livrare, livrare);
+  const rezultat = cosInComenzi(deepFreeze([linie("a", 1), linie("b", 1)]), livrare, CREATA);
+  for (const c of rezultat) {
+    assert.equal(c.livrare, livrare);
+    assert.equal(c.creata, CREATA);
+  }
 });
 
-test("cosInComenzi cu coș gol întoarce o copie a comenzilor existente", () => {
-  const comenzi = deepFreeze([{ id: 1 }]);
-  const rezultat = cosInComenzi(deepFreeze([]), comenzi, "x");
-  assert.deepEqual(rezultat, [{ id: 1 }]);
-  assert.notEqual(rezultat, comenzi);
+test("cosInComenzi cu coș gol întoarce o listă goală", () => {
+  assert.deepEqual(cosInComenzi(deepFreeze([]), "x", CREATA), []);
+});
+
+test("cosInComenzi nu modifică liniile primite", () => {
+  const linii = deepFreeze([linie("a", 2)]);
+  assert.doesNotThrow(() => cosInComenzi(linii, "x", CREATA));
+  assert.equal(linii[0].cantitate, 2);
 });
 
 // --- citesteCos ---

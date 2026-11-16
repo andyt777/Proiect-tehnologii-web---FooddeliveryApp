@@ -45,20 +45,19 @@ export function totalCos(linii) { // primește rezultatul lui liniiCos
   return linii.reduce((suma, l) => suma + l.subtotal, 0); // adunăm subtotalurile
 } // sfârșitul funcției
 
-// Plasarea comenzii: o comandă nouă pentru fiecare linie din coș, adăugată la lista existentă.
-// Id-ul urmează regula din README: cel mai mare id existent + 1 (pornim de la 1 dacă lista e goală).
-export function cosInComenzi(linii, comenzi, livrare) { // primește liniile coșului, comenzile curente și tipul de livrare
-  const maxId = comenzi.reduce((max, c) => Math.max(max, c.id), 0); // cel mai mare id existent (0 dacă nu există comenzi)
-  const noi = linii.map((l, i) => ({ // o comandă nouă pentru fiecare linie
-    id: maxId + 1 + i, // id-uri consecutive după cel mai mare
+// Plasarea comenzii: o comandă nouă pentru fiecare linie din coș, gata de trimis la server.
+// Etapa 7: fără id (îl pune serverul la POST) și fără lista veche: App adaugă în listă ce întoarce serverul.
+// `creata` vine de la apelant (data plasării, ca text ISO), ca funcția să rămână pură și ușor de testat.
+export function cosInComenzi(linii, livrare, creata) { // primește liniile coșului, tipul de livrare și data plasării
+  return linii.map((l) => ({ // o comandă nouă pentru fiecare linie, în ordinea din coș
     preparat: l.cantitate > 1 ? `${l.preparat} × ${l.cantitate}` : l.preparat, // ex. „Pizza Diavola × 2”
     livrata: false, // abia plasată, deci pe drum
     livrare, // tipul de livrare ales în coș
     categorie: l.categorie, // categoria preparatului
     restaurant: l.restaurant, // restaurantul preparatului
     pret: l.subtotal, // prețul comenzii = prețul unitar × cantitatea
+    creata, // momentul plasării, ex. „2026-11-16T18:30:00.000Z”
   })); // sfârșitul map-ului
-  return [...comenzi, ...noi]; // listă nouă: comenzile vechi, apoi cele noi
 } // sfârșitul funcției
 
 // Citește coșul salvat în localStorage. Textul vine din afara aplicației (poate fi modificat de oricine),

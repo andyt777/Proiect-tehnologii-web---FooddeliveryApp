@@ -7,8 +7,8 @@ export default function ComandaList({ comenzi, onToggle, onDelete }) { // props:
     return ( // afișăm starea „gol”
       <div className="empty">{/* containerul stării goale */}
         <FarfurieGoala />{/* ilustrația definită mai jos */}
-        <p>Nu ai nicio comandă.</p>{/* mesajul principal */}
-        <p className="empty-hint">Comenzile pe care le plasezi apar aici.</p>{/* mesajul secundar */}
+        <p data-testid="empty">Nu ai nicio comandă.</p>{/* mesajul principal; Etapa 7: data-testid="empty", doar când nu există nicio comandă */}
+        <p className="empty-hint">Comenzile din coș și cererile speciale apar aici.</p>{/* mesajul secundar; Etapa 7: și formularul adaugă comenzi */}
       </div>
     ); // sfârșitul JSX-ului pentru lista goală
   } // sfârșitul ramurii if
