@@ -17,5 +17,11 @@
     { "id": "p7", "preparat": "Platou sushi (12 buc.)", "restaurant": "Sushi Kyo", "categorie": "Asian", "pret": 65 },
     { "id": "p8", "preparat": "Ramen cu porc", "restaurant": "Sushi Kyo", "categorie": "Asian", "pret": 44 },
     { "id": "p9", "preparat": "Gyoza cu legume (6 buc.)", "restaurant": "Sushi Kyo", "categorie": "Asian", "pret": 28 }
-  ]
+  ],
+  "livratori": [
+    { "id": 1, "nume": "Andrei (livrator demo)", "online": false },
+    { "id": 2, "nume": "Ioana (livrator demo)", "online": false },
+    { "id": 3, "nume": "Mihai (livrator demo)", "online": false }
+  ],
+  "recenzii": []
 }

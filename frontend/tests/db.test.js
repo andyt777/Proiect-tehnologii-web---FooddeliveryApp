@@ -6,12 +6,15 @@ import { readFileSync } from "node:fs";
 import { CATEGORII } from "../src/categorii.js"; // importul lucide-react funcționează și sub Node
 import { ETICHETE_LIVRARE } from "../src/livrare.js";
 import { categorieRestaurant } from "../src/constants.js";
+import { METODE_PLATA, PASI_LIVRARE, STARI_COMANDA, STARI_PLATA, stareComanda } from "../src/stari.js";
 
 const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
 const NUME_CATEGORII = CATEGORII.map((c) => c.nume);
 const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE);
 const CAMPURI_OBLIGATORII = ["categorie", "id", "livrare", "livrata", "preparat", "pret", "restaurant"];
 const CAMPURI_OPTIONALE = ["creata", "speciala"]; // Etapa 7: comenzile din formular și din coș
+// Fluxul complet: câmpurile noi, opționale (comenzile vechi nu le au; aplicația pune valori implicite)
+const CAMPURI_FLUX = ["stare", "plata", "livrareStare", "livratorId", "timpPreparare", "istoric", "adresa", "contact", "programataLa", "cupon", "reducere", "motiv"];
 
 // „Pizza Diavola × 2” -> { baza: "Pizza Diavola", cantitate: 2 }; fără sufix, cantitatea e 1 (aceeași formă ca în cosInComenzi)
 function despartePreparat(preparat) {
@@ -21,10 +24,9 @@ function despartePreparat(preparat) {
 
 // --- structura ---
 
-test("db.json are exact resursele comenzi și meniu, ambele liste", () => {
-  assert.deepEqual(Object.keys(db).sort(), ["comenzi", "meniu"]);
-  assert.ok(Array.isArray(db.comenzi));
-  assert.ok(Array.isArray(db.meniu));
+test("db.json are exact resursele comenzi, livratori, meniu și recenzii, toate liste", () => {
+  assert.deepEqual(Object.keys(db).sort(), ["comenzi", "livratori", "meniu", "recenzii"]);
+  for (const resursa of Object.keys(db)) assert.ok(Array.isArray(db[resursa]), resursa);
 });
 
 // --- comenzi ---
@@ -42,7 +44,7 @@ test("comenzi are id-uri numerice întregi, pozitive și unice", () => {
 test("comenzi are toate câmpurile obligatorii, cu tipurile corecte", () => {
   for (const c of db.comenzi) {
     for (const camp of CAMPURI_OBLIGATORII) assert.ok(Object.hasOwn(c, camp), `lipsește ${camp} la ${c.id}`);
-    for (const camp of Object.keys(c)) assert.ok(CAMPURI_OBLIGATORII.includes(camp) || CAMPURI_OPTIONALE.includes(camp), `câmp necunoscut la ${c.id}: ${camp}`);
+    for (const camp of Object.keys(c)) assert.ok(CAMPURI_OBLIGATORII.includes(camp) || CAMPURI_OPTIONALE.includes(camp) || CAMPURI_FLUX.includes(camp), `câmp necunoscut la ${c.id}: ${camp}`);
     if (Object.hasOwn(c, "speciala")) assert.equal(typeof c.speciala, "boolean", `speciala la ${c.id}`);
     if (Object.hasOwn(c, "creata")) assert.ok(typeof c.creata === "string" && !Number.isNaN(Date.parse(c.creata)), `creata la ${c.id}`);
     assert.equal(typeof c.livrata, "boolean", `livrata la ${c.id}`);
@@ -117,4 +119,44 @@ test("fiecare comandă din meniu (nu cele speciale) e un preparat din meniu, cu 
     assert.equal(c.categorie, produs.categorie, `categorie diferită la ${c.id}`);
     assert.equal(c.pret, produs.pret * cantitate, `preț diferit la ${c.id}`);
   }
+});
+
+// --- fluxul complet: câmpurile noi ale comenzilor și resursele noi ---
+
+test("câmpurile noi ale comenzilor, când există, au forma corectă, iar stare e sincronă cu livrata", () => {
+  for (const c of db.comenzi) {
+    if (Object.hasOwn(c, "stare")) {
+      assert.ok(STARI_COMANDA.includes(c.stare), `stare necunoscută la ${c.id}: ${c.stare}`);
+      assert.equal(c.livrata, c.stare === "livrata", `livrata nu e sincronă cu stare la ${c.id}`);
+    }
+    assert.equal(stareComanda(c) === "livrata", c.livrata, `starea derivată nu e sincronă la ${c.id}`);
+    if (Object.hasOwn(c, "plata")) assert.ok(METODE_PLATA.includes(c.plata?.metoda) && STARI_PLATA.includes(c.plata?.stare), `plata la ${c.id}`);
+    if (Object.hasOwn(c, "livrareStare")) {
+      if (c.livrare === "ridicare") assert.equal(c.livrareStare, undefined, `ridicarea nu are livrareStare (${c.id})`);
+      else assert.ok(PASI_LIVRARE.includes(c.livrareStare), `livrareStare la ${c.id}`);
+    }
+    if (Object.hasOwn(c, "istoric")) {
+      assert.ok(Array.isArray(c.istoric), `istoric la ${c.id}`);
+      for (const e of c.istoric) assert.ok(STARI_COMANDA.includes(e.stare) && !Number.isNaN(Date.parse(e.la)), `intrare de istoric la ${c.id}`);
+    }
+    if (Object.hasOwn(c, "timpPreparare") && c.timpPreparare !== null) assert.ok(Number.isInteger(c.timpPreparare) && c.timpPreparare > 0, `timpPreparare la ${c.id}`);
+    if (Object.hasOwn(c, "adresa") && c.adresa !== null) assert.equal(typeof c.adresa, "string", `adresa la ${c.id}`);
+    if (Object.hasOwn(c, "contact") && c.contact !== null) assert.ok(typeof c.contact.nume === "string" && typeof c.contact.telefon === "string", `contact la ${c.id}`);
+    if (Object.hasOwn(c, "programataLa") && c.programataLa !== null) assert.ok(!Number.isNaN(Date.parse(c.programataLa)), `programataLa la ${c.id}`);
+  }
+});
+
+test("livratori: 2–3 livratori demo, cu id numeric unic, nume marcat „demo” și online boolean", () => {
+  assert.ok(db.livratori.length >= 2 && db.livratori.length <= 3, `${db.livratori.length} livratori`);
+  for (const l of db.livratori) {
+    assert.deepEqual(Object.keys(l).sort(), ["id", "nume", "online"], `câmpuri greșite la livratorul ${l.id}`);
+    assert.ok(Number.isInteger(l.id) && l.id > 0, `id invalid: ${l.id}`);
+    assert.ok(typeof l.nume === "string" && /demo/i.test(l.nume), `numele nu spune că e demo: ${l.nume}`);
+    assert.equal(typeof l.online, "boolean", `online la ${l.id}`);
+  }
+  assert.equal(new Set(db.livratori.map((l) => l.id)).size, db.livratori.length);
+});
+
+test("recenzii pornește goală (fără recenzii inventate)", () => {
+  assert.deepEqual(db.recenzii, []);
 });

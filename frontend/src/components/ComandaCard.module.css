@@ -35,6 +35,7 @@
   color: var(--muted); /* stins */
 }
 .eta { display: inline-flex; align-items: center; gap: 5px; } /* iconița și textul stării */
+.oprita { color: var(--eroare); font-weight: 600; } /* fluxul complet: anulată / respinsă, cu X și text (nu doar culoarea) */
 .pret { font-size: var(--t-20); } /* prețul, vizibil */
 
 /* Comenzile livrate: titlul și prețul, stinse (bifa și textul „Comandă încheiată” spun starea) */

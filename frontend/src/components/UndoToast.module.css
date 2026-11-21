@@ -48,6 +48,23 @@
 .undo:focus-visible { outline-color: var(--sofran); } /* focusul pe verde, șofran */
 .ok { gap: 10px; padding: 12px 18px; } /* confirmarea nu are buton: spațiu egal */
 .ok svg { color: var(--sofran); } /* bifa, șofran */
+.notificare { gap: 10px; padding-left: 16px; } /* fluxul complet: iconița, textul, linkul și X */
+.notificare > svg { color: var(--sofran); } /* clopoțelul, șofran */
+.notificare .undo { text-decoration: none; } /* linkul arată ca acțiunea din mesaj */
+.inchide {
+  display: grid; /* iconița pe mijloc */
+  place-items: center; /* centrată */
+  width: 40px; /* zonă de atingere */
+  height: 40px; /* la fel */
+  padding: 0; /* fără spațiu interior */
+  color: #EFE8D8; /* crem pe verde */
+  background: transparent; /* fără fundal */
+  border: none; /* fără contur */
+  border-radius: var(--r-mic); /* colțuri pentru hover și focus */
+  cursor: pointer; /* mânuța */
+}
+.inchide:hover { background: rgba(255, 255, 255, 0.1); } /* fundal discret la hover */
+.inchide:focus-visible { outline-color: var(--sofran); } /* focusul pe verde, șofran */
 
 /* Tipărire: fără mesaje */
 @media print {

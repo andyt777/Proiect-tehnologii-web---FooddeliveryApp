@@ -16,6 +16,7 @@ import { normalizeaza, potrivesteCautarea } from "../cautare.js"; // filtrarea d
 import { formatComenzi, formatProduse } from "../format.js"; // funcții de formatare a textelor
 import { useMagazin } from "../magazin.js"; // starea comună: meniul, livrarea, regiunea mesajelor
 import { RESTAURANTE_INFO } from "../restaurante.js"; // restaurantele, pentru rândul de carduri
+import { comutaLivrata } from "../stari.js"; // fluxul complet: bifa „Livrată” schimbă și starea, plata și istoricul
 import { formatPreparate, formatRestaurante, frazaRezumat, restauranteDinMeniu } from "../rezumat.js"; // textele derivate din date
 import { cuTranzitie } from "../tranzitie.js"; // învelește actualizările de state într-o animație
 import styles from "./ComenziPage.module.css"; // Etapa 8: stilurile paginii (CSS Modules)
@@ -24,7 +25,7 @@ import styles from "./ComenziPage.module.css"; // Etapa 8: stilurile paginii (CS
 // categorii, restaurante, meniu și „Comenzile tale” (listă + „Comandă specială” + rezumat ca text).
 // Meniul, coșul și favoritele sunt în starea comună (Layout); aici rămân comenzile, căutarea și categoria.
 export default function ComenziPage() { // pagina principală
-  const { meniu, incarcareMeniu, eroareMeniu, reincarcaMeniu, livrare, setLivrare, regiuneToast } = useMagazin(); // starea comună
+  const { meniu, incarcareMeniu, eroareMeniu, reincarcaMeniu, livrare, setLivrare, regiuneToast, noteazaComanda, laSchimbariComenzi } = useMagazin(); // starea comună (plus urmărirea comenzilor)
   const [comenzi, setComenzi] = useState([]); // lista de comenzi
   const [incarcareComenzi, setIncarcareComenzi] = useState(true); // true cât timp așteptăm comenzile
   const [eroareComenzi, setEroareComenzi] = useState(null); // mesajul erorii (null = nicio eroare)
@@ -56,6 +57,11 @@ export default function ComenziPage() { // pagina principală
     load(); // pornim încărcarea
     return () => { ignore = true; }; // cleanup: un răspuns întârziat nu mai suprascrie state-ul
   }, [reincercari]); // la prima randare și la fiecare reîncercare
+
+  // Fluxul complet: când urmărirea din Layout vede o comandă schimbată (ex. acceptată de restaurant), o înlocuim în listă
+  useEffect(() => laSchimbariComenzi((schimbate) => { // abonarea; funcția întoarsă e chiar cleanup-ul (dezabonarea)
+    setComenzi((prev) => prev.map((c) => schimbate.find((s) => s.id === c.id) ?? c)); // obiectul nou de la server, pe locul vechi
+  }), [laSchimbariComenzi]); // funcția e stabilă: abonarea se face o singură dată
 
   const loading = incarcareComenzi || incarcareMeniu; // pagina așteaptă comenzile sau meniul
   const error = eroareComenzi ?? eroareMeniu; // un singur mesaj de eroare pe pagină (un singur data-testid="error")
@@ -103,16 +109,18 @@ export default function ComenziPage() { // pagina principală
     setUltimaStearsa(null); // închidem „Anulează”: comanda nouă poate primi id-ul celei șterse
     const salvata = await createComanda(comanda); // POST /comenzi; serverul întoarce comanda cu id
     setEroareActiune(null); // serverul răspunde din nou
+    noteazaComanda(salvata); // fluxul complet: urmărirea o știe (și pornește, fiindcă e în curs)
     cuTranzitie(() => setComenzi((prev) => [...prev, salvata])); // în listă intră obiectul de la server
   } // sfârșitul funcției
 
-  // Etapa 7: bifarea pleacă întâi la server (PATCH doar cu câmpul schimbat)
+  // Etapa 7: bifarea pleacă întâi la server. Fluxul complet: PATCH cu `livrata` și, sincron, starea, plata și istoricul (din stari.js)
   async function handleToggleLivrata(id) { // primește id-ul comenzii bifate
     const comanda = comenzi.find((c) => c.id === id); // starea ei curentă
     if (!comanda || !incepe(id)) return; // comandă necunoscută sau cerere deja în curs
     try { // cererea poate eșua
-      const actualizata = await updateComanda(id, { livrata: !comanda.livrata }); // PATCH /comenzi/:id
+      const actualizata = await updateComanda(id, comutaLivrata(comanda, new Date())); // PATCH /comenzi/:id; `livrata` se inversează ca înainte
       setEroareActiune(null); // a mers: ascundem o eroare veche
+      noteazaComanda(actualizata); // fără notificare despre propria bifă
       cuTranzitie(() => setComenzi((prev) => prev.map((c) => (c.id === id ? actualizata : c)))); // obiectul de la server
     } catch (err) { // serverul n-a salvat: bifa rămâne cum era
       setEroareActiune(`Nu am putut schimba starea comenzii „${comanda.preparat}”: ${err.message}. Încearcă din nou.`); // ce s-a întâmplat și ce e de făcut
@@ -147,6 +155,7 @@ export default function ComenziPage() { // pagina principală
     try { // cererea poate eșua
       const readusa = await createComanda(comanda); // POST /comenzi cu tot cu id
       setEroareActiune(null); // a mers: ascundem o eroare veche
+      noteazaComanda(readusa); // urmărirea o știe din nou
       focusPeComenzi.current = true; // butonul „Anulează” a dispărut
       cuTranzitie(() => setComenzi((prev) => [...prev.slice(0, index), readusa, ...prev.slice(index)])); // pe locul ei
     } catch (err) { // serverul n-a salvat-o

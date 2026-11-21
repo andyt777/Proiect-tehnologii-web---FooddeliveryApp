@@ -42,22 +42,30 @@
 .pret { margin-top: 6px; font-size: var(--t-25); } /* prețul, mare */
 .subtitlu { margin-top: 28px; font-size: var(--t-20); } /* „Stare” */
 
-/* Pașii comenzii: trei puncte legate de o linie */
+/* Fluxul complet: pașii comenzii, unul sub altul, legați de o linie verticală */
 .etape {
   list-style: none; /* fără numerotarea implicită */
-  margin: 8px 0 0; /* aproape de titlu */
+  margin: 12px 0 0; /* aproape de titlu */
   padding: 0; /* fără indentare */
-  display: grid; /* trei coloane egale */
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* un pas pe coloană */
+  display: flex; /* pașii... */
+  flex-direction: column; /* ...unul sub altul */
 }
-.etapa { position: relative; display: flex; flex-direction: column; gap: 6px; padding-right: 8px; } /* punctul deasupra textului */
+.etapa {
+  position: relative; /* pentru linia spre pasul următor */
+  display: grid; /* punct | text | oră */
+  grid-template-columns: 24px minmax(0, 1fr) auto; /* textul ia restul */
+  align-items: center; /* centrate */
+  column-gap: 12px; /* spațiul dintre coloane */
+  padding-bottom: 18px; /* loc pentru linie */
+}
+.etapa:last-child { padding-bottom: 0; } /* ultimul pas, fără loc în plus */
 .etapa:not(:last-child)::after {
   content: ""; /* linia spre pasul următor */
-  position: absolute; /* lângă punct */
-  top: 11px; /* la mijlocul punctului */
-  left: 30px; /* după punct */
-  right: 6px; /* până aproape de pasul următor */
-  height: 2px; /* subțire */
+  position: absolute; /* sub punct */
+  top: 26px; /* imediat sub punct */
+  bottom: 2px; /* până aproape de punctul următor */
+  left: 11px; /* pe mijlocul punctului */
+  width: 2px; /* subțire */
   background: var(--line); /* gri, până e parcursă */
 }
 .gata:not(:last-child)::after { background: var(--link); } /* linia parcursă, verde */
@@ -72,9 +80,15 @@
 }
 .gata .punct { background: var(--accent); border-color: var(--accent); } /* pas încheiat: cerc plin cu bifă */
 .acum .punct { border-color: var(--link); box-shadow: inset 0 0 0 5px var(--bg); background: var(--link); } /* pasul în curs: inel cu punct în mijloc */
+.oprit .punct { color: #FFFDF8; background: #B3261E; border-color: #B3261E; } /* anulată / respinsă: cerc roșu cu X (forma spune starea) */
 .etapaText { font-weight: 600; } /* numele pasului */
 .urmeaza .etapaText { color: var(--muted); } /* pasul care urmează, stins */
-.etapaDetaliu { font-size: var(--t-14); color: var(--muted); } /* timpul estimat */
+.oprit .etapaText { color: var(--eroare); } /* oprirea, roșie (și cu X) */
+.etapaOra { font-size: var(--t-14); color: var(--muted); font-variant-numeric: tabular-nums; } /* ora reală, din istoric */
+.etapaDetaliu { grid-column: 2 / -1; font-size: var(--t-14); color: var(--muted); } /* timpul estimat, sub numele pasului */
+.motiv { margin-top: 12px; color: var(--muted); } /* motivul anulării / respingerii */
+.aviz { margin-top: 12px; font-weight: 600; color: var(--link); } /* rezultatul anulării */
+.aviz:empty { display: none; } /* regiunea există mereu, dar nu ocupă loc goală */
 
 /* Detaliile: termen în stânga, valoare în dreapta */
 .campuri { margin: 28px 0 0; } /* despărțite de pași */
@@ -90,6 +104,7 @@
 .campuri dd { margin: 0; font-weight: 600; text-align: right; } /* valoarea */
 .categorie { display: inline-flex; align-items: center; gap: 6px; } /* iconița și numele categoriei */
 .numar { font-variant-numeric: tabular-nums; } /* numărul comenzii */
+.lung { overflow-wrap: anywhere; } /* adresa și contactul se pot rupe pe mai multe rânduri */
 
 .scheletTitlu { height: 36px; } /* titlul mare, în așteptare */
 

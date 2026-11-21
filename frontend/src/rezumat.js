@@ -3,6 +3,7 @@
 import { CATEGORII } from "./categorii.js"; // numele categoriilor (Pizza, Burgers, Asian)
 import { ETICHETE_LIVRARE } from "./livrare.js"; // tipurile de livrare (standard, express, ridicare)
 import { formatComenzi, formatLei, formatProduse } from "./format.js"; // regula lui „de” (20 de produse), sumele în lei; redesign: și „6 comenzi”
+import { stareComanda } from "./stari.js"; // fluxul complet: starea derivată (anulată / respinsă)
 
 // Etapa 7: o comandă specială are pret: null până o confirmă restaurantul; doar numerele reale intră în sume
 export function arePret(comanda) { // primește o comandă
@@ -20,18 +21,26 @@ export function sumaPreturi(comenzi) { // primește o listă de comenzi
   return { suma, faraPret }; // obiect nou la fiecare apel
 } // sfârșitul funcției
 
+// Fluxul complet: o comandă anulată sau respinsă nu e nici pe drum, nici în total (starea vine din stari.js, cu valorile implicite)
+function esteOprita(comanda) { // primește o comandă
+  const stare = stareComanda(comanda); // „plasata” pentru comenzile vechi, fără `stare`
+  return stare === "anulata" || stare === "respinsa"; // ieșirile laterale
+} // sfârșitul funcției
+
 // Rezumatul listei de comenzi: o singură trecere prin listă; contoarele pornesc de la 0 pentru fiecare categorie și livrare
 export function rezumatComenzi(comenzi) { // primește toată lista de comenzi
   const peCategorie = Object.fromEntries(CATEGORII.map((c) => [c.nume, 0])); // { Pizza: 0, Burgers: 0, Asian: 0 }
   const peLivrare = Object.fromEntries(Object.keys(ETICHETE_LIVRARE).map((tip) => [tip, 0])); // { standard: 0, express: 0, ridicare: 0 }
-  let peDrum = 0; // câte comenzi nu sunt livrate
+  let peDrum = 0; // câte comenzi nu sunt livrate (și nici oprite)
+  let livrate = 0; // câte comenzi sunt livrate
   for (const c of comenzi) { // fiecare comandă o dată
-    if (!c.livrata) peDrum += 1; // nelivrată = pe drum
+    if (c.livrata) livrate += 1; // livrată
+    else if (!esteOprita(c)) peDrum += 1; // nelivrată și neanulată = pe drum
     if (Object.hasOwn(peCategorie, c.categorie)) peCategorie[c.categorie] += 1; // doar categoriile cunoscute (fără chei moștenite)
     if (Object.hasOwn(peLivrare, c.livrare)) peLivrare[c.livrare] += 1; // doar tipurile de livrare cunoscute
   } // sfârșitul buclei
-  const { suma: total, faraPret } = sumaPreturi(comenzi); // Etapa 7: totalul ignoră prețurile încă neconfirmate (null)
-  return { numar: comenzi.length, total, faraPret, peDrum, livrate: comenzi.length - peDrum, peCategorie, peLivrare }; // obiect nou la fiecare apel
+  const { suma: total, faraPret } = sumaPreturi(comenzi.filter((c) => !esteOprita(c))); // Etapa 7: totalul ignoră prețurile neconfirmate (null); fluxul complet: și comenzile anulate / respinse
+  return { numar: comenzi.length, total, faraPret, peDrum, livrate, peCategorie, peLivrare }; // obiect nou la fiecare apel
 } // sfârșitul funcției
 
 // Restaurantele din meniu, fiecare o singură dată, în ordinea în care apar
@@ -68,5 +77,8 @@ export function frazaRezumat(comenzi) { // primește toată lista de comenzi
   if (r.numar === 0) return ""; // nimic de rezumat
   const livrate = cuAcord(r.livrate, "livrată", "livrate"); // „1 livrată”, „3 livrate”, „20 de livrate”
   const total = r.faraPret > 0 ? `${formatLei(r.total)} ${formatFaraPret(r.faraPret)}` : formatLei(r.total); // „331 lei + 1 preț la confirmare”
-  return `${formatComenzi(r.numar)}: ${r.peDrum} pe drum, ${livrate}. Total: ${total}.`; // fraza întreagă
+  const anulate = comenzi.filter((c) => stareComanda(c) === "anulata").length; // fluxul complet: anulate de client
+  const respinse = comenzi.filter((c) => stareComanda(c) === "respinsa").length; // și respinse de restaurant
+  const oprite = `${anulate > 0 ? `, ${cuAcord(anulate, "anulată", "anulate")}` : ""}${respinse > 0 ? `, ${cuAcord(respinse, "respinsă", "respinse")}` : ""}`; // apar doar când există
+  return `${formatComenzi(r.numar)}: ${r.peDrum} pe drum, ${livrate}${oprite}. Total: ${total}.`; // fraza întreagă
 } // sfârșitul funcției

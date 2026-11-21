@@ -3,7 +3,7 @@
 // Sub Node, import.meta.env nu există; api.js folosește `import.meta.env?.VITE_API_URL`, deci cade pe adresa implicită.
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import { API_URL, TIMP_MAXIM_MS, createComanda, deleteComanda, fetchComanda, fetchComenzi, fetchMeniu, request, updateComanda } from "../src/api.js";
+import { API_URL, TIMP_MAXIM_MS, createComanda, createRecenzie, deleteComanda, fetchComanda, fetchComenzi, fetchLivratori, fetchMeniu, fetchRecenzii, request, updateComanda, updateLivrator } from "../src/api.js";
 
 const fetchOriginal = globalThis.fetch;
 afterEach(() => {
@@ -266,3 +266,28 @@ test("fetchComanda traduce erorile de rețea, ca restul cererilor", async () => 
   await assert.rejects(fetchComanda("1"), { message: "Serverul nu poate fi contactat" });
 });
 
+// --- fluxul complet: livratori și recenzii ---
+
+test("fetchLivratori și fetchRecenzii cer resursele lor și resping un răspuns care nu e listă", async () => {
+  const apeluri = fetchInregistrat(raspuns([{ id: 1, nume: "Andrei (livrator demo)", online: false }]));
+  assert.equal((await fetchLivratori()).length, 1);
+  assert.equal(apeluri[0].url, "http://localhost:3001/livratori");
+  fetchInregistrat(raspuns([]));
+  assert.deepEqual(await fetchRecenzii(), []);
+  fetchInregistrat(raspuns({ nu: "listă" }));
+  await assert.rejects(fetchRecenzii(), /Răspuns neașteptat/);
+});
+
+test("updateLivrator trimite PATCH /livratori/:id, iar createRecenzie POST /recenzii", async () => {
+  const apeluri = fetchInregistrat(raspuns({ id: 2, online: true }));
+  await updateLivrator(2, { online: true });
+  assert.equal(apeluri[0].url, "http://localhost:3001/livratori/2");
+  assert.equal(apeluri[0].optiuni.method, "PATCH");
+  assert.deepEqual(JSON.parse(apeluri[0].optiuni.body), { online: true });
+  const recenzie = { comandaId: 2, restaurant: "Burger Van", nota: 5, text: "", creata: "2026-11-22T18:00:00.000Z" };
+  const apeluriPost = fetchInregistrat(raspuns({ id: 1, ...recenzie }, 201));
+  await createRecenzie(recenzie);
+  assert.equal(apeluriPost[0].url, "http://localhost:3001/recenzii");
+  assert.equal(apeluriPost[0].optiuni.method, "POST");
+  assert.deepEqual(JSON.parse(apeluriPost[0].optiuni.body), recenzie);
+});

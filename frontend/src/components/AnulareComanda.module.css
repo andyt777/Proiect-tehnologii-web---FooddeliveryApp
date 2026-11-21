@@ -1,0 +1,55 @@
+/* Stilurile anulării de pe pagina comenzii (CSS Modules); .btn-secondary e clasă globală */
+
+.inchis { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin-top: 20px; } /* butonul și indicația pe un rând */
+.indiciu { font-size: var(--t-14); color: var(--muted); } /* regula, stinsă */
+
+/* Formularul de confirmare: o foaie simplă, fără umbră (nu plutește) */
+.form {
+  display: flex; /* elementele unul sub altul */
+  flex-direction: column; /* pe verticală */
+  gap: 16px; /* spațiul dintre ele */
+  margin-top: 20px; /* despărțit de pași */
+  padding: 20px; /* spațiu interior */
+  background: var(--surface); /* foaia albă */
+  border-radius: var(--r-foaie); /* colțurile foilor */
+}
+.grup { display: flex; flex-direction: column; gap: 4px; margin: 0; padding: 0; border: none; min-width: 0; } /* motivele, fără chenarul implicit */
+.legenda { margin-bottom: 6px; padding: 0; font-weight: 800; } /* întrebarea */
+.optiune { display: flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; } /* un motiv pe rând, zonă de atingere de 44px */
+.optiune input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); } /* radio verde */
+.camp { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; } /* eticheta deasupra câmpului */
+.camp label { font-size: var(--t-14); font-weight: 600; } /* eticheta */
+.camp input {
+  width: 100%; /* tot rândul */
+  min-height: 48px; /* zonă de atingere */
+  padding: 0 14px; /* textul nu stă lipit de margine */
+  color: var(--text); /* textul principal */
+  background: var(--bg); /* hârtia: câmpul se vede pe foaie */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțurile câmpurilor */
+}
+.camp [aria-invalid="true"] { border-color: var(--eroare); box-shadow: 0 0 0 1px var(--eroare); } /* câmpul greșit: contur dublu roșu */
+.eroare {
+  padding: 10px 14px; /* cutie mică */
+  font-weight: 600; /* lizibil */
+  color: var(--text); /* textul principal */
+  background: var(--eroare-bg); /* roșu foarte deschis */
+  border-left: 4px solid var(--eroare); /* bara din stânga: se vede și fără culoare */
+  border-radius: var(--r-mic); /* colțuri mici */
+}
+.butoane { display: flex; flex-wrap: wrap; gap: 8px; } /* cele două butoane */
+
+/* „Confirmă anularea”: acțiune distructivă, roșie, cu colțuri de control (nu pastilă: nu e acțiunea principală a paginii) */
+.confirma {
+  display: inline-flex; /* textul pe mijloc */
+  align-items: center; /* centrat */
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 18px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: #FFFDF8; /* alb cald pe roșu (6:1) */
+  background: #B3261E; /* roșul erorilor, același în ambele teme */
+  border: none; /* fără contur */
+  border-radius: var(--r-camp); /* colțuri de control */
+  cursor: pointer; /* mânuța */
+}
+.confirma:hover { background: #8C1D18; } /* mai închis la hover */

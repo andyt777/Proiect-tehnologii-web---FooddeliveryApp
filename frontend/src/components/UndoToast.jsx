@@ -1,4 +1,5 @@
-import { CircleCheck, Undo2 } from "lucide-react"; // iconițele: bifă (confirmare) și săgeata „înapoi”
+import { Link } from "react-router-dom"; // fluxul complet: din notificare, spre pagina comenzii
+import { Bell, CircleCheck, Undo2, X } from "lucide-react"; // iconițele: clopoțel (notificare), bifă (confirmare), săgeata „înapoi”, X
 import { formatLei, formatProduse } from "../format.js"; // texte pentru mesajul de confirmare
 import styles from "./UndoToast.module.css"; // Etapa 8: stilurile mesajelor (CSS Modules)
 
@@ -25,6 +26,20 @@ export function ToastConfirmare({ confirmare }) { // { produse, total } sau null
       <span>Comanda a fost plasată: {formatProduse(confirmare.produse)}, {formatLei(confirmare.total)}.</span>{/* ex. „3 produse, 154 lei” */}
     </div>
   ); // sfârșitul JSX-ului
+} // sfârșitul componentei
+
+// Fluxul complet: „Pizza Margherita: În preparare”, cu link spre comandă și X; dispar singure (vezi urmarireComenzi.js)
+export function ToastNotificari({ notificari, onInchide }) { // lista de mesaje și funcția de închidere
+  return notificari.map((n) => ( // un mesaj pentru fiecare schimbare
+    <div key={n.cheie} className={`${styles.toast} ${styles.notificare}`}>{/* cutia mesajului */}
+      <Bell size={18} aria-hidden="true" />{/* iconiță decorativă */}
+      <span>{n.text}</span>{/* textul anunțat de regiunea aria-live */}
+      <Link to={`/comenzi/${n.id}`} className={styles.undo}>Vezi comanda</Link>{/* pagina comenzii, cu pașii ei */}
+      <button type="button" className={styles.inchide} onClick={() => onInchide(n.cheie)} aria-label="Închide notificarea">{/* ascunde mesajul */}
+        <X size={16} aria-hidden="true" />{/* iconiță decorativă */}
+      </button>
+    </div>
+  )); // sfârșitul map-ului
 } // sfârșitul componentei
 
 // „„Pizza Diavola” a fost ștearsă.” cu butonul „Anulează”

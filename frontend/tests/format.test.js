@@ -1,7 +1,7 @@
 // Teste pentru formatările românești (src/format.js), rulate cu `node --test`
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatData, formatLei, formatComenzi, formatProduse } from "../src/format.js";
+import { formatData, formatLei, formatComenzi, formatOra, formatProduse } from "../src/format.js";
 
 // --- formatLei ---
 // Valorile așteptate au fost verificate pe Node 24 (ICU complet): "ro-RO" folosește punct pentru mii și virgulă pentru zecimale
@@ -66,3 +66,8 @@ test("formatData întoarce null pentru o valoare lipsă sau invalidă (nu „Inv
   }
 });
 
+test("formatOra: ora în format românesc, null pentru lipsă sau text greșit", () => {
+  const iso = new Date(2026, 10, 22, 18, 5).toISOString();
+  assert.equal(formatOra(iso), "18:05");
+  for (const rau of [null, undefined, "", "nu e dată", 42]) assert.equal(formatOra(rau), null);
+});

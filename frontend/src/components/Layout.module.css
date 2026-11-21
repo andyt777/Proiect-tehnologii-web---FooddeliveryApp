@@ -136,8 +136,8 @@
     right: 0; /* pe toată lățimea */
     bottom: 0; /* jos */
     z-index: 15; /* peste conținut, sub mesaje */
-    display: grid; /* patru coloane egale */
-    grid-template-columns: repeat(4, 1fr); /* Acasă, Favorite, Coș, Despre */
+    display: grid; /* cinci coloane egale */
+    grid-template-columns: repeat(5, 1fr); /* Acasă, Favorite, Coș, Cont, Despre */
     gap: 0; /* fără spații */
     height: calc(var(--nav-jos-h) + env(safe-area-inset-bottom, 0px)); /* plus zona de sub bara telefonului */
     padding-bottom: env(safe-area-inset-bottom, 0px); /* conținutul nu intră sub ea */

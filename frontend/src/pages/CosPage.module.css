@@ -11,6 +11,53 @@
   gap: 48px; /* spațiul dintre ele */
 }
 .lista { list-style: none; margin: 0; padding: 0; } /* fără buline și indentare */
+.stanga { display: flex; flex-direction: column; gap: 40px; min-width: 0; } /* fluxul complet: liniile, apoi datele de livrare */
+
+/* Fluxul complet: secțiunile cu datele de livrare (contact, adresă, programare, plată), plate pe hârtie */
+.sectiune { display: flex; flex-direction: column; gap: 12px; } /* titlul, apoi câmpurile */
+.sectiuneTitlu { font-size: var(--t-25); } /* titlul secțiunii */
+.indicatie { font-size: var(--t-14); color: var(--muted); } /* explicațiile scurte */
+.campuri2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } /* două câmpuri alăturate */
+.camp { display: flex; flex-direction: column; gap: 6px; min-width: 0; } /* eticheta deasupra câmpului */
+.camp label { font-size: var(--t-14); font-weight: 600; } /* eticheta, scurtă și îngroșată */
+.camp input {
+  width: 100%; /* tot rândul */
+  min-height: 48px; /* zonă de atingere confortabilă */
+  padding: 0 14px; /* textul nu stă lipit de margine */
+  color: var(--text); /* textul principal */
+  background: var(--surface); /* albul cald, pe hârtie */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțurile câmpurilor */
+  transition: border-color 0.15s; /* schimbare lină */
+}
+.camp input:hover { border-color: var(--text); } /* conturul mai închis la hover */
+.camp input::placeholder { color: var(--muted); } /* exemplul, lizibil (AA) */
+.camp [aria-invalid="true"] { border-color: var(--eroare); box-shadow: 0 0 0 1px var(--eroare); } /* câmpul greșit: contur dublu roșu */
+.campOra { max-width: 220px; } /* ora nu are nevoie de tot rândul */
+.eroareCamp { display: flex; align-items: flex-start; gap: 6px; font-size: var(--t-14); font-weight: 600; color: var(--eroare); } /* mesajul de sub câmp: iconiță + text */
+.eroareCamp svg { margin-top: 3px; } /* aliniată cu primul rând */
+
+/* Opțiunile (adresă, programare, plată): rânduri cu contur, ca alegerea livrării */
+.grup { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; border: none; min-width: 0; } /* fără chenarul implicit */
+.optiune {
+  display: flex; /* bulina, iconița și textele */
+  align-items: center; /* centrate */
+  gap: 12px; /* spațiul dintre ele */
+  padding: 12px 14px; /* spațiu interior */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțuri de control */
+  cursor: pointer; /* mânuța */
+  transition: border-color 0.15s, background 0.15s; /* schimbare lină */
+}
+.optiune:hover { border-color: var(--text); } /* conturul mai închis la hover */
+.optiune input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex-shrink: 0; } /* bulina, verde */
+.optiune:has(input:checked) { border-color: var(--link); border-width: 2px; background: color-mix(in srgb, var(--link) 8%, transparent); } /* opțiunea aleasă: contur gros verde */
+.optiuneIcon { color: var(--muted); } /* iconița metodei de plată */
+.optiuneText { display: flex; flex-direction: column; min-width: 0; } /* titlul deasupra detaliului */
+.optiuneTitlu { font-weight: 600; overflow-wrap: anywhere; } /* ex. „Numerar”, „Acasă” */
+.optiuneDetaliu { font-size: var(--t-14); color: var(--muted); overflow-wrap: anywhere; } /* ex. avertismentul plății simulate */
+.bifa { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 600; cursor: pointer; } /* „Salvează în cont” */
+.bifa input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); } /* bifa, verde */
 .linie {
   display: grid; /* miniatură | text | acțiuni | subtotal */
   grid-template-columns: auto minmax(0, 1fr) auto auto; /* textul ia restul */
@@ -69,6 +116,7 @@
 @media (max-width: 640px) {
   .pagina { padding-top: 32px; } /* mai puțin aer */
   .titlu { font-size: var(--t-31); } /* titlul, mai mic */
+  .campuri2 { grid-template-columns: minmax(0, 1fr); } /* fluxul complet: numele și telefonul, unul sub altul */
   .linie {
     grid-template-columns: auto minmax(0, 1fr) auto; /* miniatură | text | subtotal */
     grid-template-areas: "foto info subtotal" "foto actiuni actiuni"; /* acțiunile pe rândul al doilea */

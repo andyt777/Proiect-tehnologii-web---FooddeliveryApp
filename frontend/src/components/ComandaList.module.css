@@ -7,7 +7,7 @@
   padding: 0; /* fără indentare */
 }
 
-/* separatorul dintre comenzile pe drum și cele livrate: un titlu mic, în sentence case */
+/* separatorul dintre comenzile în curs și cele încheiate: un titlu mic, în sentence case */
 .divider {
   padding: 20px 0 6px; /* aer deasupra, aproape de primul rând */
   font-size: var(--t-16); /* text obișnuit */

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"; // useState: tema, sertarul, regiunea mesajelor; useEffect: derularea la schimbarea paginii
 import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } from "react-router-dom"; // navigarea fără reîncărcarea paginii
-import { Heart, House, Info, Moon, ShoppingBag, Sun } from "lucide-react"; // iconițele navigației și ale butoanelor
+import { Heart, House, Info, Moon, ShoppingBag, Sun, UserRound } from "lucide-react"; // iconițele navigației și ale butoanelor
 import Logo from "./Logo.jsx"; // semnul Savoro
 import CosDrawer from "./CosDrawer.jsx"; // sertarul coșului, disponibil pe toate paginile
-import { RegiuneToast, ToastConfirmare } from "./UndoToast.jsx"; // mesajele de jos
+import { RegiuneToast, ToastConfirmare, ToastNotificari } from "./UndoToast.jsx"; // mesajele de jos
 import { useStareMagazin } from "../magazin.js"; // meniul, coșul, favoritele, livrarea, confirmarea
+import { useUrmarireComenzi } from "../urmarireComenzi.js"; // fluxul complet: notificările despre starea comenzilor
 import { numarProduse } from "../cos.js"; // numărul de pe butonul coșului
 import { formatProduse } from "../format.js"; // „3 produse”
 import { cuTranzitie } from "../tranzitie.js"; // schimbarea temei, cu o trecere lină
@@ -36,6 +37,7 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
   const [cosDeschis, setCosDeschis] = useState(false); // sertarul coșului e deschis?
   const [regiuneToast, setRegiuneToast] = useState(null); // elementul DOM al mesajelor de jos (pentru portalul din ComenziPage)
   const magazin = useStareMagazin(); // starea comună a paginilor
+  const { notificari, inchideNotificare, noteazaComanda, laSchimbariComenzi } = useUrmarireComenzi(); // fluxul complet: urmărirea comenzilor în curs
   const { pathname, hash, key } = useLocation(); // adresa curentă; key e nou la fiecare navigare, chiar spre aceeași adresă
   const tipNavigare = useNavigationType(); // „PUSH” (link), „REPLACE” sau „POP” (Înapoi / Înainte / prima încărcare)
   const navigate = useNavigate(); // navigare din cod (din sertarul gol)
@@ -67,7 +69,7 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
   const disponibil = !magazin.incarcareMeniu && !magazin.eroareMeniu; // meniul a sosit, deci știm ce e în coș
   const produseInCos = numarProduse(magazin.linii); // doar produsele care există în meniu
   const etichetaCos = disponibil ? `Coș: ${formatProduse(produseInCos)}` : "Coș (indisponibil momentan)"; // fără meniu nu spunem „0 produse”
-  const context = { ...magazin, regiuneToast }; // ce primesc paginile prin useMagazin(): starea comună și regiunea mesajelor
+  const context = { ...magazin, regiuneToast, noteazaComanda, laSchimbariComenzi }; // ce primesc paginile prin useMagazin(): starea comună, regiunea mesajelor și urmărirea comenzilor
 
   return ( // JSX-ul layout-ului
     <>{/* Fragment: antetul, conținutul, subsolul, sertarul și mesajele */}
@@ -94,6 +96,10 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
               </span>
               Coș{/* textul linkului */}
               {disponibil && produseInCos > 0 && <span className="sr-only">: {formatProduse(produseInCos)}</span>}{/* numărul, pentru cititoarele de ecran */}
+            </NavLink>
+            <NavLink to="/cont" className={navClass}>{/* fluxul complet: contul (nume, telefon, adrese) */}
+              <UserRound size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița */}
+              Cont{/* textul linkului */}
             </NavLink>
             <NavLink to="/despre" className={navClass}>{/* pagina de prezentare */}
               <Info size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița */}
@@ -136,6 +142,7 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
       />
       <RegiuneToast ref={setRegiuneToast}>{/* regiunea mesajelor; ComenziPage pune aici „Anulează” printr-un portal */}
         <ToastConfirmare confirmare={magazin.confirmare} />{/* „Comanda a fost plasată” */}
+        <ToastNotificari notificari={notificari} onInchide={inchideNotificare} />{/* fluxul complet: „Pizza Margherita: În preparare” */}
       </RegiuneToast>
     </>
   ); // sfârșitul JSX-ului

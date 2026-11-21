@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom"; // Etapa 8: titlul duce la pagina de detaliu, fără reîncărcare
-import { CircleCheck, Clock, Trash2, Zap } from "lucide-react"; // iconițe: bifă, ceas, fulger (Express), coș de gunoi
+import { CircleCheck, CircleX, Clock, Trash2, Zap } from "lucide-react"; // iconițe: bifă, X (oprită), ceas, fulger (Express), coș de gunoi
 import Miniatura from "./Miniatura.jsx"; // fotografia mică (sau iconița categoriei)
 import { imagineComanda } from "../imagini.js"; // fotografia preparatului comandat (sau null)
-import { DURATE_LIVRARE, ETICHETE_LIVRARE } from "../livrare.js"; // texte pentru tipul și durata livrării
+import { ETICHETE_LIVRARE } from "../livrare.js"; // texte pentru tipul livrării
 import { formatLei } from "../format.js"; // formatarea prețului
 import { arePret } from "../rezumat.js"; // Etapa 7: comanda specială are pret: null până la confirmare
+import { etichetaStare, stareComanda } from "../stari.js"; // fluxul complet: starea comenzii (cu valorile implicite pentru comenzile vechi)
 import styles from "./ComandaCard.module.css"; // Etapa 8: stilurile cardului (CSS Modules)
 
 // O singură comandă din listă, primită prin props.
@@ -13,10 +14,13 @@ import styles from "./ComandaCard.module.css"; // Etapa 8: stilurile cardului (C
 // Redesign „Pădure”: rând simplu, fără puncte de legătură; doar „Express” primește culoare (șofran).
 export default function ComandaCard({ comanda, onToggle, onDelete }) { // destructurăm props: datele comenzii și cele două callback-uri
   const imagine = comanda.speciala ? null : imagineComanda(comanda); // Etapa 7: preparatul cerut special nu are fotografie proprie
+  const stare = stareComanda(comanda); // fluxul complet: „plasata”, „in_preparare”, „anulata”...
+  const oprita = stare === "anulata" || stare === "respinsa"; // ieșirile laterale
+  const IconitaStare = comanda.livrata ? CircleCheck : oprita ? CircleX : Clock; // forma spune starea, nu doar textul
 
   return ( // întoarcem JSX
     <li // fiecare card e un element de listă
-      className={comanda.livrata ? `${styles.card} ${styles.done}` : styles.card} // „done” dacă e livrată
+      className={comanda.livrata || oprita ? `${styles.card} ${styles.done}` : styles.card} // „done” dacă e livrată sau oprită
       style={{ viewTransitionName: `comanda-${comanda.id}` }} // nume unic per comandă: rândul alunecă la noua poziție
       data-testid="item" // Etapa 7: reperul cardului pentru verificarea automată
       data-id={comanda.id} // id-ul de la server: verificarea găsește exact această comandă
@@ -36,9 +40,9 @@ export default function ComandaCard({ comanda, onToggle, onDelete }) { // destru
             <span>{ETICHETE_LIVRARE[comanda.livrare] ?? comanda.livrare}</span> // ex. „Ridicare personală”
           )}{/* sfârșitul randării condiționate */}
           {comanda.speciala && <span className="tag tag-speciala">Comandă specială</span>}{/* Etapa 7: comanda făcută din formular */}
-          <span className={styles.eta}>{/* starea / timpul estimat */}
-            {comanda.livrata ? <CircleCheck size={15} aria-hidden="true" /> : <Clock size={15} aria-hidden="true" />}{/* forma spune starea */}
-            {comanda.livrata ? "Comandă încheiată" : DURATE_LIVRARE[comanda.livrare]}{/* textul corespunzător stării */}
+          <span className={oprita ? `${styles.eta} ${styles.oprita}` : styles.eta}>{/* fluxul complet: starea comenzii */}
+            <IconitaStare size={15} aria-hidden="true" />{/* bifă, X sau ceas */}
+            {etichetaStare(comanda)}{/* ex. „În preparare”, „Gata de ridicare”, „Anulată” */}
           </span>
         </p>
       </div>

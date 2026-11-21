@@ -29,3 +29,11 @@ export function formatData(iso) { // primește textul ISO salvat de formular sau
   if (Number.isNaN(data.getTime())) return null; // text care nu e o dată
   return data.toLocaleString("ro-RO", { dateStyle: "long", timeStyle: "short" }); // regulile românești, în fusul orar al browserului
 } // sfârșitul funcției
+
+// Fluxul complet: doar ora unui moment din istoric („18:30”); null pentru un text care nu e o dată
+export function formatOra(iso) { // primește textul ISO
+  if (typeof iso !== "string" || iso === "") return null; // lipsă
+  const data = new Date(iso); // textul transformat în dată
+  if (Number.isNaN(data.getTime())) return null; // text care nu e o dată
+  return data.toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" }); // ora românească, în fusul orar al browserului
+} // sfârșitul funcției

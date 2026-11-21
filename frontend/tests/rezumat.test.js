@@ -143,3 +143,18 @@ test("frazaRezumat face acordul la singular și adaugă prețurile la confirmare
   assert.equal(frazaRezumat(comenzi), "2 comenzi: 1 pe drum, 1 livrată. Total: 42 lei + 1 preț la confirmare.");
   assert.equal(frazaRezumat([comenzi[0]]), "1 comandă: 0 pe drum, 1 livrată. Total: 42 lei.");
 });
+
+test("fluxul complet: comenzile anulate / respinse nu sunt pe drum și nu intră în total", () => {
+  const comenzi = [
+    { livrata: false, pret: 42, categorie: "Pizza", livrare: "express" },
+    { livrata: false, pret: 48, categorie: "Pizza", livrare: "standard", stare: "anulata" },
+    { livrata: false, pret: 30, categorie: "Asian", livrare: "standard", stare: "respinsa" },
+    { livrata: true, pret: 10, categorie: "Asian", livrare: "ridicare", stare: "livrata" },
+  ];
+  const r = rezumatComenzi(comenzi);
+  assert.equal(r.numar, 4);
+  assert.equal(r.peDrum, 1);
+  assert.equal(r.livrate, 1);
+  assert.equal(r.total, 52);
+  assert.equal(frazaRezumat(comenzi), "4 comenzi: 1 pe drum, 1 livrată, 1 anulată, 1 respinsă. Total: 52 lei.");
+});

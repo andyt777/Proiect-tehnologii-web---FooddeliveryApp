@@ -1,0 +1,96 @@
+/* Stilurile paginii contului (CSS Modules); .btn-primary, .btn-secondary, .btn-close, .btn-danger și .tag sunt clase globale */
+
+.pagina { padding-top: 48px; } /* aer sub antet */
+.titlu { font-size: var(--t-39); } /* „Contul tău” */
+.intro { max-width: 60ch; margin-top: 8px; color: var(--muted); } /* ce este pagina, pe rânduri scurte */
+
+/* Contactul în stânga, adresele în dreapta; una sub alta pe ecrane înguste */
+.grila {
+  display: grid; /* două coloane */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); /* adresele, puțin mai late */
+  align-items: start; /* fiecare cât conținutul lui */
+  gap: 48px; /* spațiul dintre ele */
+  margin-top: 40px; /* despărțite de introducere */
+}
+.sectiune { display: flex; flex-direction: column; align-items: flex-start; gap: 16px; min-width: 0; } /* titlul, apoi conținutul */
+.sectiuneTitlu { font-size: var(--t-25); } /* titlul secțiunii */
+.indicatie { font-size: var(--t-14); color: var(--muted); } /* explicațiile scurte */
+
+/* Formularele: foaie albă, plată */
+.form {
+  display: flex; /* câmpurile unul sub altul */
+  flex-direction: column; /* pe verticală */
+  gap: 16px; /* spațiul dintre ele */
+  width: 100%; /* toată coloana */
+  padding: 24px; /* spațiu interior */
+  background: var(--surface); /* foaia albă */
+  border-radius: var(--r-foaie); /* colțurile foilor */
+}
+.formAdresa { padding: 18px; } /* în listă, puțin mai compact */
+.form :global(.btn-primary) { align-self: flex-start; } /* butonul, cât textul lui */
+.camp { display: flex; flex-direction: column; gap: 6px; } /* eticheta deasupra câmpului */
+.camp label { font-size: var(--t-14); font-weight: 600; } /* eticheta */
+.camp input {
+  width: 100%; /* tot rândul */
+  min-height: 48px; /* zonă de atingere */
+  padding: 0 14px; /* textul nu stă lipit de margine */
+  color: var(--text); /* textul principal */
+  background: var(--bg); /* hârtia: câmpul se vede pe foaie */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțurile câmpurilor */
+  transition: border-color 0.15s; /* schimbare lină */
+}
+.camp input:hover { border-color: var(--text); } /* conturul mai închis la hover */
+.camp input::placeholder { color: var(--muted); } /* exemplul, lizibil (AA) */
+.camp [aria-invalid="true"] { border-color: var(--eroare); box-shadow: 0 0 0 1px var(--eroare); } /* câmpul greșit: contur dublu roșu */
+.eroare {
+  padding: 10px 14px; /* cutie mică */
+  font-weight: 600; /* lizibil */
+  color: var(--text); /* textul principal */
+  background: var(--eroare-bg); /* roșu foarte deschis */
+  border-left: 4px solid var(--eroare); /* bara din stânga: se vede și fără culoare */
+  border-radius: var(--r-mic); /* colțuri mici */
+}
+.aviz { font-weight: 600; color: var(--link); } /* confirmările, verzi */
+.aviz:empty { display: none; } /* regiunea există mereu, dar nu ocupă loc goală */
+.butoane { display: flex; flex-wrap: wrap; gap: 8px; } /* salvarea și renunțarea */
+
+/* Lista de adrese: rânduri pe hârtie, despărțite de linii fine */
+.lista { list-style: none; width: 100%; margin: 0; padding: 0; } /* fără buline */
+.adresa {
+  display: flex; /* textul și acțiunile */
+  align-items: center; /* centrate */
+  justify-content: space-between; /* la capete */
+  gap: 12px; /* spațiul dintre ele */
+  padding: 12px 0; /* aer între rânduri */
+  border-bottom: 1px solid var(--line); /* separator fin */
+}
+.adresaText { min-width: 0; } /* textul se poate îngusta */
+.adresaTitlu { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-weight: 600; overflow-wrap: anywhere; } /* eticheta și „Implicită” */
+.adresaDetaliu { font-size: var(--t-14); color: var(--muted); overflow-wrap: anywhere; } /* adresa, sub etichetă */
+.adresaActiuni { display: flex; align-items: center; gap: 2px; flex-shrink: 0; } /* butoanele, pe un rând */
+.linkBtn {
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 10px; /* spațiu lateral */
+  font-size: var(--t-14); /* text mic */
+  font-weight: 600; /* lizibil */
+  color: var(--link); /* verde, ca un link */
+  background: transparent; /* fără fundal */
+  border: none; /* fără contur */
+  border-radius: var(--r-camp); /* colțuri pentru hover și focus */
+  cursor: pointer; /* mânuța */
+}
+.linkBtn:hover { text-decoration: underline; } /* se vede că se poate apăsa */
+.gol { display: flex; align-items: flex-start; gap: 10px; color: var(--muted); } /* starea fără adrese */
+.gol svg { margin-top: 2px; } /* aliniată cu textul */
+
+/* Tabletă și telefon: o coloană */
+@media (max-width: 860px) {
+  .grila { grid-template-columns: minmax(0, 1fr); gap: 40px; } /* una sub alta */
+}
+@media (max-width: 640px) {
+  .pagina { padding-top: 32px; } /* mai puțin aer */
+  .titlu { font-size: var(--t-31); } /* titlul, mai mic */
+  .adresa { flex-direction: column; align-items: flex-start; } /* acțiunile, sub text */
+  .form { padding: 18px; } /* foaia, mai compactă */
+}

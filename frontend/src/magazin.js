@@ -6,20 +6,21 @@ import { useOutletContext } from "react-router-dom"; // paginile citesc starea d
 import { fetchMeniu } from "./api.js"; // GET /meniu, prin singurul fișier cu fetch
 import { adaugaInCos, citesteCos, liniiCos, pastreazaDinMeniu, schimbaCantitate, scoateDinCos } from "./cos.js"; // logica pură a coșului
 import { citesteFavorite, comutaFavorit, pastreazaFavoriteDinMeniu } from "./favorite.js"; // logica pură a favoritelor
+import { citesteProfil } from "./profil.js"; // fluxul complet: contul clientului (nume, telefon, adrese)
 
 const DURATA_CONFIRMARE_MS = 5000; // mesajul „Comanda a fost plasată” dispare singur după 5 secunde
 
 // Citește o listă salvată; textul din localStorage nu e de încredere, deci trece prin funcția de verificare
-function citesteSalvat(cheie, verifica) { // cheie = „cos” sau „favorite”; verifica = citesteCos sau citesteFavorite
+function citesteSalvat(cheie, verifica) { // cheie = „cos”, „favorite” sau „profil”; verifica = citesteCos, citesteFavorite sau citesteProfil
   try { // localStorage poate arunca eroare (mod privat, browser blocat)
     return verifica(localStorage.getItem(cheie)); // doar elementele bine formate
   } catch { // fără acces la localStorage
-    return []; // pornim cu o listă goală
+    return verifica(null); // pornim cu valoarea goală a fiecărei funcții ([] sau profilul gol)
   } // sfârșitul try/catch
 } // sfârșitul funcției
 
-// Scrie o listă în localStorage; o eroare nu oprește aplicația
-function salveaza(cheie, valoare) { // primește cheia și lista
+// Scrie o valoare în localStorage; o eroare nu oprește aplicația
+function salveaza(cheie, valoare) { // primește cheia și valoarea (listă sau profil)
   try { // scrierea poate eșua (mod privat, spațiu plin)
     localStorage.setItem(cheie, JSON.stringify(valoare)); // lista ca text JSON
   } catch { // prindem eroarea
@@ -35,6 +36,7 @@ export function useStareMagazin() { // fără parametri
   const [reincercari, setReincercari] = useState(0); // crește la „Încearcă din nou”; efectul de încărcare depinde de el
   const [cos, setCos] = useState(() => citesteSalvat("cos", citesteCos)); // liniile coșului: [{ produsId, cantitate }]
   const [favorite, setFavorite] = useState(() => citesteSalvat("favorite", citesteFavorite)); // id-urile preparatelor favorite
+  const [profil, setProfil] = useState(() => citesteSalvat("profil", citesteProfil)); // fluxul complet: numele, telefonul și adresele salvate
   const [livrare, setLivrare] = useState("standard"); // tipul de livrare ales în hero sau în coș (aceeași valoare peste tot)
   const [confirmare, setConfirmare] = useState(null); // ultima plasare reușită, pentru mesajul de jos (null = ascuns)
 
@@ -62,6 +64,7 @@ export function useStareMagazin() { // fără parametri
 
   useEffect(() => salveaza("cos", cos), [cos]); // coșul se păstrează între vizite
   useEffect(() => salveaza("favorite", favorite), [favorite]); // la fel favoritele
+  useEffect(() => salveaza("profil", profil), [profil]); // și contul
 
   // Confirmarea dispare singură; o plasare nouă (obiect nou) repornește numărătoarea
   useEffect(() => { // rulează când apare o confirmare nouă
@@ -90,6 +93,8 @@ export function useStareMagazin() { // fără parametri
     scoate: (produsId) => setCos((prev) => scoateDinCos(prev, produsId)), // coșul de gunoi
     favorite, // id-urile favorite
     comutaFavorit: (id) => setFavorite((prev) => comutaFavorit(prev, id)), // inima de pe card
+    profil, // contul: { nume, telefon, adrese, implicita }
+    setProfil, // folosit de /cont și de /cos (cu funcțiile pure din profil.js)
     livrare, // tipul de livrare ales
     setLivrare, // schimbarea lui (hero sau coș)
     confirmare, // mesajul de jos după plasare

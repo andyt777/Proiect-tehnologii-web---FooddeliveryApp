@@ -37,7 +37,7 @@ function traduceEroarea(err, timpMaxim) { // primește eroarea prinsă și durat
 } // sfârșitul funcției
 
 // GET pentru o listă: în plus față de request, verificăm că răspunsul chiar e o listă
-async function cereLista(path, timpMaxim) { // folosită de fetchComenzi și fetchMeniu
+async function cereLista(path, timpMaxim) { // folosită de fetchComenzi, fetchMeniu, fetchLivratori și fetchRecenzii
   const date = await request(path, {}, timpMaxim); // GET e metoda implicită a lui fetch
   if (!Array.isArray(date)) throw new Error("Răspuns neașteptat de la server"); // așteptăm o listă; altceva nu poate fi afișat
   return date; // lista validă
@@ -75,4 +75,24 @@ export function updateComanda(id, changes) { // id-ul comenzii și câmpurile no
 // Etapa 7: DELETE /comenzi/:id; json-server 0.17 răspunde 200 cu {}, alt server poate răspunde 204 (request întoarce atunci null)
 export function deleteComanda(id) { // id-ul comenzii de șters
   return request(`/comenzi/${encodeURIComponent(id)}`, { method: "DELETE" }); // fără corp
+} // sfârșitul funcției
+
+// Fluxul complet: GET /livratori, livratorii demo ({ id, nume, online })
+export function fetchLivratori(timpMaxim) { // timpMaxim opțional (doar pentru teste)
+  return cereLista("/livratori", timpMaxim); // promisiune cu lista de livratori
+} // sfârșitul funcției
+
+// PATCH /livratori/:id, ex. { online: true } când livratorul demo intră în tură
+export function updateLivrator(id, changes) { // id-ul livratorului și câmpurile noi
+  return request(`/livratori/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(changes) }); // întoarce livratorul actualizat
+} // sfârșitul funcției
+
+// GET /recenzii, recenziile lăsate după livrare ({ id, comandaId, restaurant, nota, text, creata })
+export function fetchRecenzii(timpMaxim) { // timpMaxim opțional (doar pentru teste)
+  return cereLista("/recenzii", timpMaxim); // promisiune cu lista de recenzii
+} // sfârșitul funcției
+
+// POST /recenzii; serverul pune id-ul și întoarce recenzia salvată
+export function createRecenzie(recenzie) { // primește recenzia deja validată
+  return request("/recenzii", { method: "POST", body: JSON.stringify(recenzie) }); // corpul cererii, ca text JSON
 } // sfârșitul funcției
