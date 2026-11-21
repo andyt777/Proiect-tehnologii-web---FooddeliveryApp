@@ -8,10 +8,11 @@ import styles from "./DesprePage.module.css"; // stilurile paginii (CSS Modules)
 const STACK = [ // listă fixă, afișată ca listă de definiții
   { nume: "React", rol: "interfața: componente, props și state" }, // biblioteca de UI
   { nume: "Vite", rol: "serverul de dezvoltare și build-ul" }, // instrumentul de build
-  { nume: "React Router", rol: "paginile: comenzile, detaliul unei comenzi, Despre și 404" }, // rutele din App.jsx
+  { nume: "React Router", rol: "paginile: acasă, restaurantele, coșul, favoritele, detaliul unei comenzi, Despre și 404" }, // rutele din App.jsx
   { nume: "json-server", rol: "API-ul de test, cu datele din db.json" }, // serverul de date
   { nume: "CSS Modules", rol: "stilurile fiecărei componente, lângă ea" }, // fișierele .module.css
   { nume: "Lucide", rol: "iconițele" }, // pachetul lucide-react
+  { nume: "Gabarito", rol: "fontul, de pe Google Fonts" }, // redesign „Pădure”: singura familie de litere
 ]; // sfârșitul listei
 
 // Autorii fotografiilor (Unsplash), aceleași rânduri ca tabelul „Fotografii” din README
@@ -38,20 +39,20 @@ export default function DesprePage() { // componenta rutei /despre
   return ( // JSX-ul paginii
     <div className={`wrap ${styles.pagina}`}>{/* containerul centrat */}
       <section className={styles.intro} aria-labelledby="despre-titlu">{/* ce este Savoro */}
-        <p className={styles.eyebrow}>Proiect Tehnologii Web · UNSTPB 2026–2027</p>{/* supratitlul */}
-        <h2 id="despre-titlu" className={`titlu-focus ${styles.titlu}`} ref={titluRef} tabIndex={-1}>Despre <em>Savoro</em></h2>{/* titlul paginii */}
+        <h1 id="despre-titlu" className={`titlu-focus ${styles.titlu}`} ref={titluRef} tabIndex={-1}>Despre Savoro</h1>{/* titlul paginii */}
         <p className={styles.lead}>{/* descrierea, din README */}
           Savoro îți ține comenzile de mâncare într-un singur loc: vezi ce e încă pe drum, ce a ajuns și bifezi comenzile livrate.
         </p>
         <p className={styles.paragraf}>{/* ce poate face utilizatorul acum */}
-          Alegi preparate din meniul a trei restaurante, le pui în coș și plasezi comanda. Pentru un preparat care nu e în meniu
-          trimiți o „Comandă specială”, iar restaurantul îți confirmă prețul. Fiecare comandă are pagina ei, cu toate detaliile.
+          Alegi preparate de la trei restaurante, le pui în coș și plasezi comanda. Păstrezi preparatele preferate cu inima de pe card.
+          Pentru un preparat care nu e în meniu trimiți o „Comandă specială”, iar restaurantul îți confirmă prețul. Fiecare comandă are pagina ei.
         </p>
+        <p className={styles.paragraf}>Proiect pentru disciplina Tehnologii Web, UNSTPB, anul universitar 2026–2027.</p>{/* contextul proiectului, ca text simplu */}
       </section>
 
       <div className={styles.grila}>{/* tehnologiile și fotografiile, una lângă alta pe ecranele late */}
-        <section className="panel" aria-labelledby="stack-titlu">{/* panoul global */}
-          <h3 id="stack-titlu" className={styles.panelTitlu}>Cu ce e construit</h3>{/* titlul panoului */}
+        <section className="panel" aria-labelledby="stack-titlu">{/* foaia cu tehnologiile */}
+          <h2 id="stack-titlu" className={styles.panelTitlu}>Cu ce e construit</h2>{/* titlul panoului */}
           <dl className={styles.stack}>{/* tehnologie | rol */}
             {STACK.map((t) => ( // un rând pentru fiecare tehnologie
               <div key={t.nume}>{/* numele e unic, deci bun ca key */}
@@ -63,7 +64,7 @@ export default function DesprePage() { // componenta rutei /despre
         </section>
 
         <section id="fotografii" className={`panel ${styles.fotografii}`} aria-labelledby="fotografii-titlu">{/* ancora din subsol: /despre#fotografii */}
-          <h3 id="fotografii-titlu" className={styles.panelTitlu}>Fotografii</h3>{/* titlul panoului */}
+          <h2 id="fotografii-titlu" className={styles.panelTitlu}>Fotografii</h2>{/* titlul panoului */}
           <p className={styles.nota}>Toate fotografiile sunt de pe Unsplash (licența Unsplash), redimensionate și convertite în WebP.</p>{/* licența */}
           <table className={styles.tabel}>{/* tabel: preparat | fotograf */}
             <thead>{/* capul tabelului */}

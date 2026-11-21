@@ -1,57 +1,55 @@
-/* Etapa 8: stilurile mesajelor de jos (CSS Modules), mutate din App.css */
+/* Stilurile mesajelor de jos (CSS Modules): confirmarea plasării și „Anulează” */
 
-/* Mesajele de jos, pe mijloc: confirmarea comenzii și „Anulează”, unul sub altul */
-.region { /* Etapa 8: fostul .toast-region */
-  position: fixed;
-  left: 50%;
-  bottom: 24px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  transform: translateX(-50%);
-  width: max-content;
-  max-width: calc(100% - 32px);
-  view-transition-name: toast; /* mesajul rămâne deasupra rândurilor care se mută (grupul e în index.css) */
+/* Regiunea, pe mijloc jos, deasupra barei de navigare de pe telefon */
+.region {
+  position: fixed; /* rămâne pe ecran la derulare */
+  left: 50%; /* pornește de la mijloc... */
+  bottom: calc(var(--nav-jos-h) + 20px + env(safe-area-inset-bottom, 0px)); /* ...deasupra barei de jos (0 pe desktop) */
+  z-index: 20; /* peste conținut */
+  display: flex; /* mesajele, unul sub altul */
+  flex-direction: column; /* pe verticală */
+  align-items: center; /* centrate */
+  gap: 8px; /* spațiul dintre ele */
+  transform: translateX(-50%); /* centrat exact */
+  width: max-content; /* cât textul... */
+  max-width: calc(100% - 32px); /* ...dar nu mai lat decât ecranul */
+  view-transition-name: toast; /* rămâne deasupra rândurilor care se mută (grupul e în index.css) */
 }
+.slot { display: contents; } /* <div>-ul portalului nu schimbă așezarea mesajelor */
 .toast {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 8px 8px 8px 18px;
-  font-size: 0.94rem;
-  font-weight: 500;
-  color: #ffffff;
-  background: var(--toast-bg);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: var(--radius);
-  box-shadow: 0 12px 32px var(--shadow-float); /* umbră bleumarin (neagră în tema întunecată) */
-  animation: toast-in 0.2s ease-out;
+  display: flex; /* textul și butonul pe un rând */
+  align-items: center; /* centrate */
+  gap: 16px; /* spațiul dintre ele */
+  padding: 8px 8px 8px 18px; /* mai mult spațiu în stânga textului */
+  font-weight: 600; /* lizibil */
+  color: #EFE8D8; /* crem pe verde (8:1 și mai mult, în ambele teme) */
+  background: var(--toast-bg); /* verdele de pădure */
+  border-radius: var(--r-camp); /* colțuri de control */
+  box-shadow: var(--shadow-float); /* plutește: are umbră */
+  animation: toast-in 0.2s ease-out; /* apare ca răspuns la o acțiune */
 }
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(12px); } /* urcă puțin în timp ce apare */
 }
-.undo { /* Etapa 8: fostul .toast-undo */
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  height: 40px;
-  padding: 0 14px;
-  font: inherit;
-  font-weight: 600;
-  color: var(--toast-action); /* roz gumă pe bleumarin (7:1 în ambele teme) */
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+.undo {
+  display: inline-flex; /* iconița și textul pe un rând */
+  align-items: center; /* centrate */
+  gap: 6px; /* spațiul dintre ele */
+  min-height: 40px; /* zonă de atingere */
+  padding: 0 14px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: var(--sofran); /* șofran pe verde (6.6:1): acțiunea din mesaj */
+  background: transparent; /* fără fundal */
+  border: none; /* fără contur */
+  border-radius: var(--r-mic); /* colțuri pentru hover și focus */
+  cursor: pointer; /* mânuța */
 }
-.undo:hover { background: rgba(255, 255, 255, 0.1); }
-/* confirmarea nu are buton, deci are spațiu egal pe ambele părți; bifa e bleu pe bleumarin */
-.ok { gap: 10px; padding: 12px 18px; } /* Etapa 8: fostul .toast-ok */
-.ok svg { color: var(--toast-ok); } /* bleu #89cff0 (6.8:1 în ambele teme) */
+.undo:hover { background: rgba(255, 255, 255, 0.1); } /* fundal discret la hover */
+.undo:focus-visible { outline-color: var(--sofran); } /* focusul pe verde, șofran */
+.ok { gap: 10px; padding: 12px 18px; } /* confirmarea nu are buton: spațiu egal */
+.ok svg { color: var(--sofran); } /* bifa, șofran */
 
 /* Tipărire: fără mesaje */
 @media print {
-  .region { display: none !important; }
+  .region { display: none !important; } /* ascunse */
 }

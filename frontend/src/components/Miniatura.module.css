@@ -1,0 +1,9 @@
+/* Stilurile miniaturii unui preparat (CSS Modules); .thumb e clasa globală pentru iconiță */
+
+.foto {
+  width: 56px; /* pătrat */
+  height: 56px; /* pătrat */
+  object-fit: cover; /* fotografia umple pătratul */
+  background: var(--skeleton); /* se vede doar până sosește imaginea */
+  border-radius: var(--r-camp); /* colțuri mici: e o miniatură, nu o fotografie mare */
+}

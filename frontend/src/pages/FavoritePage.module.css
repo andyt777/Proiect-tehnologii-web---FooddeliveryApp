@@ -1,0 +1,20 @@
+/* Stilurile paginii favoritelor (CSS Modules); .empty și .btn-primary sunt clase globale */
+
+.pagina { padding-top: 48px; } /* aer sub antet */
+.titlu { font-size: var(--t-39); } /* „Favorite” */
+.golIcon {
+  display: grid; /* iconița pe mijloc */
+  place-items: center; /* centrată */
+  width: 64px; /* cerc */
+  height: 64px; /* cerc */
+  margin-bottom: 8px; /* despărțită de text */
+  color: var(--link); /* verde */
+  background: var(--soft); /* fundal discret */
+  border-radius: 50%; /* cerc */
+}
+
+/* Telefon: titlul mai mic */
+@media (max-width: 640px) {
+  .pagina { padding-top: 32px; } /* mai puțin aer */
+  .titlu { font-size: var(--t-31); } /* titlul, mai mic */
+}

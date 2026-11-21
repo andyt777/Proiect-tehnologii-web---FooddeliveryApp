@@ -1,145 +1,107 @@
-/* Etapa 8: stilurile paginii unei comenzi (CSS Modules): fotografie mare, titlu expresiv, mult spațiu alb.
-   .error, .info, .badge, .price, .skeleton și .btn-primary sunt clase globale (index.css). */
+/* Stilurile paginii unei comenzi (CSS Modules); .error, .info, .tag, .price, .skeleton și .btn-primary sunt clase globale */
 
-.pagina {
-  padding-top: 32px;        /* spațiu sub antet */
-  padding-bottom: 80px;     /* spațiu deasupra subsolului */
-}
+.pagina { padding-top: 24px; } /* spațiu sub antet */
 
-/* „← Înapoi la comenzi”: link discret, cu săgeată */
+/* „Înapoi la comenzi”: link discret, cu săgeată */
 .inapoi {
-  display: inline-flex;     /* săgeata lângă text */
-  align-items: center;      /* centrate pe verticală */
-  gap: 6px;                 /* spațiul dintre ele */
-  min-height: 44px;         /* zonă de clic confortabilă */
-  margin-bottom: 24px;      /* despărțit de conținut */
-  font-size: 0.95rem;       /* puțin mai mic decât textul */
-  font-weight: 600;         /* semibold */
-  color: var(--muted);      /* text secundar (7:1 pe alb) */
-  text-decoration: none;    /* fără subliniere */
-  border-radius: var(--radius-sm); /* conturul de focus urmează colțurile */
-  transition: color 0.15s;  /* schimbare lină la hover */
+  display: inline-flex; /* săgeata lângă text */
+  align-items: center; /* centrate */
+  gap: 6px; /* spațiul dintre ele */
+  min-height: 44px; /* zonă de atingere */
+  margin-bottom: 20px; /* despărțit de conținut */
+  font-weight: 600; /* lizibil */
+  color: var(--muted); /* stins */
+  text-decoration: none; /* fără subliniere */
+  border-radius: var(--r-mic); /* colțuri pentru focus */
 }
-.inapoi:hover { color: var(--accent-text); } /* roz la hover */
-.inapoi svg { transition: transform 0.2s ease-out; } /* săgeata se mișcă lin */
-.inapoi:hover svg { transform: translateX(-3px); } /* săgeata „trage” spre stânga */
+.inapoi:hover { color: var(--link); text-decoration: underline; } /* verde la hover */
 
-/* explicația de sub mesajul de eroare */
-.indiciu { color: var(--muted); } /* text secundar */
+.indiciu { color: var(--muted); } /* explicația de sub mesajul de eroare */
 
-/* Detaliul: fotografia în stânga, textele în dreapta, aliniate sus */
+/* Detaliul: fotografia în stânga, textele în dreapta */
 .detaliu {
-  display: grid;            /* două coloane */
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); /* fotografia puțin mai lată */
-  align-items: start;       /* textele încep sus, lângă fotografie */
-  gap: 56px;                /* mult spațiu între coloane */
+  display: grid; /* două coloane */
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); /* fotografia puțin mai lată */
+  align-items: start; /* aliniate sus */
+  gap: 56px; /* mult spațiu între coloane */
 }
-.media { min-width: 0; }    /* coloana se poate îngusta */
+.media { min-width: 0; } /* coloana se poate îngusta */
 .foto {
-  display: block;           /* fără spațiul de sub imagine */
-  width: 100%;              /* toată coloana */
-  height: auto;             /* proporția vine din aspect-ratio */
-  aspect-ratio: 4 / 3;      /* aceeași formă ca fotografiile din meniu */
-  object-fit: cover;        /* decupată, nu deformată */
-  background: var(--skeleton); /* locul fotografiei, până sosește */
-  border-radius: var(--radius-lg); /* colțuri mari, ca pe carduri */
-  box-shadow: var(--shadow); /* umbra panourilor */
+  display: block; /* ocupă coloana */
+  width: 100%; /* toată lățimea */
+  aspect-ratio: 4 / 3; /* forma fotografiilor */
+  object-fit: cover; /* fotografia umple cutia */
+  background: var(--skeleton); /* se vede doar până sosește imaginea */
+  border-radius: var(--r-foto); /* colțurile fotografiilor */
 }
-/* comandă fără fotografie: iconița categoriei, mare, pe roz deschis */
-.fotoGol {
-  display: grid;            /* iconița pe mijloc */
-  place-items: center;      /* centrată */
-  color: var(--accent-text); /* roz */
-  background: var(--accent-soft); /* roz foarte deschis */
-}
+.fotoGol { display: grid; place-items: center; color: var(--muted); background: var(--soft); } /* iconița categoriei, pe fundal discret */
 
-.text { min-width: 0; padding-top: 8px; } /* coloana textelor, aliniată optic cu fotografia */
-/* supratitlul: categoria cu majuscule mici și eticheta „Comandă specială” */
-.eyebrow {
-  display: flex;            /* categoria și eticheta pe un rând */
-  flex-wrap: wrap;          /* se rup pe ecrane înguste */
-  align-items: center;      /* centrate pe verticală */
-  gap: 10px;                /* spațiul dintre ele */
-  margin-bottom: 14px;      /* despărțit de titlu */
-  font-size: 0.8rem;        /* mic */
-  font-weight: 700;         /* bold */
-  letter-spacing: 0.12em;   /* rărit, ca supratitlul din hero */
-  text-transform: uppercase; /* majuscule */
-  color: var(--muted);      /* text secundar */
-}
-.eyebrow :global(.badge) { letter-spacing: normal; text-transform: none; } /* eticheta rămâne scrisă normal */
-/* titlul: Fraunces italic, mare, ca titlul din hero */
-.titlu {
-  font-family: var(--font-display); /* Fraunces */
-  font-size: clamp(2.2rem, 4.6vw, 3.6rem); /* mare pe desktop, potrivit pe telefon */
-  font-weight: 600;         /* semibold */
-  font-style: italic;       /* Fraunces italic */
-  line-height: 1.04;        /* rânduri strânse, ca la titlul din hero */
-  letter-spacing: -0.025em; /* litere puțin mai apropiate */
-  text-wrap: balance;       /* rânduri de lungimi apropiate */
-  overflow-wrap: anywhere;  /* un nume foarte lung nu iese din coloană */
-}
-.restaurant { margin-top: 12px; font-size: 1.1rem; color: var(--muted); } /* „de la Sushi Kyo” */
-.pret { margin-top: 20px; } /* prețul, despărțit de titlu */
-.pret :global(.price) { font-size: 1.9rem; } /* prețul mare, Fraunces italic (clasa globală) */
-.pret :global(.price-asteptare) { font-size: 1.05rem; } /* „Preț la confirmare” rămâne text obișnuit */
+.text { display: flex; flex-direction: column; gap: 6px; min-width: 0; } /* textele, unul sub altul */
+.titlu { font-size: var(--t-39); overflow-wrap: anywhere; } /* numele preparatului; un nume lung se rupe */
+.restaurant { font-size: var(--t-20); color: var(--muted); } /* „de la Sushi Kyo” */
+.pret { margin-top: 6px; font-size: var(--t-25); } /* prețul, mare */
+.subtitlu { margin-top: 28px; font-size: var(--t-20); } /* „Stare” */
 
-/* Câmpurile: termen în stânga, valoare în dreapta, despărțite de linii fine */
-.campuri {
-  margin: 32px 0 0;         /* despărțite de preț */
-  border-top: 1px solid var(--line); /* linia de deasupra primului rând */
+/* Pașii comenzii: trei puncte legate de o linie */
+.etape {
+  list-style: none; /* fără numerotarea implicită */
+  margin: 8px 0 0; /* aproape de titlu */
+  padding: 0; /* fără indentare */
+  display: grid; /* trei coloane egale */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* un pas pe coloană */
 }
-.campuri > div {
-  display: grid;            /* termen | valoare */
-  grid-template-columns: 9.5rem minmax(0, 1fr); /* coloana termenilor, fixă */
-  align-items: center;      /* centrate pe verticală */
-  gap: 16px;                /* spațiul dintre ele */
-  padding-block: 14px;      /* rânduri aerisite */
-  border-bottom: 1px solid var(--line); /* linia de sub fiecare rând */
+.etapa { position: relative; display: flex; flex-direction: column; gap: 6px; padding-right: 8px; } /* punctul deasupra textului */
+.etapa:not(:last-child)::after {
+  content: ""; /* linia spre pasul următor */
+  position: absolute; /* lângă punct */
+  top: 11px; /* la mijlocul punctului */
+  left: 30px; /* după punct */
+  right: 6px; /* până aproape de pasul următor */
+  height: 2px; /* subțire */
+  background: var(--line); /* gri, până e parcursă */
 }
-.campuri dt { font-size: 0.9rem; color: var(--muted); } /* termenul, text secundar */
-.campuri dd { margin: 0; font-weight: 500; } /* valoarea, puțin îngroșată */
-.livrare { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; } /* eticheta și timpul pe un rând */
-.livrare > span:last-child { font-weight: 400; color: var(--muted); } /* timpul estimat, text secundar */
-.categorie { display: flex; align-items: center; gap: 8px; } /* iconița lângă nume */
-.categorie svg { color: var(--accent-text); } /* iconița, roz */
+.gata:not(:last-child)::after { background: var(--link); } /* linia parcursă, verde */
+.punct {
+  display: grid; /* bifa pe mijloc */
+  place-items: center; /* centrată */
+  width: 24px; /* cerc */
+  height: 24px; /* cerc */
+  color: var(--on-accent); /* bifa, crem */
+  border: 2px solid var(--contur); /* cerc gol: pas care urmează */
+  border-radius: 50%; /* cerc */
+}
+.gata .punct { background: var(--accent); border-color: var(--accent); } /* pas încheiat: cerc plin cu bifă */
+.acum .punct { border-color: var(--link); box-shadow: inset 0 0 0 5px var(--bg); background: var(--link); } /* pasul în curs: inel cu punct în mijloc */
+.etapaText { font-weight: 600; } /* numele pasului */
+.urmeaza .etapaText { color: var(--muted); } /* pasul care urmează, stins */
+.etapaDetaliu { font-size: var(--t-14); color: var(--muted); } /* timpul estimat */
 
-/* starea: pastilă cu iconiță (ceas sau bifă), ca bifa „Livrată” de pe card */
-.stare {
-  display: inline-flex;     /* iconița lângă text */
-  align-items: center;      /* centrate pe verticală */
-  gap: 6px;                 /* spațiul dintre ele */
-  height: 30px;             /* pastilă */
-  padding: 0 12px 0 10px;   /* spațiu lateral */
-  font-size: 0.88rem;       /* text mic */
-  font-weight: 600;         /* semibold */
-  border: 1.5px solid var(--line-strong); /* contur bleu, ca pastila de pe card */
-  border-radius: 999px;     /* pastilă */
+/* Detaliile: termen în stânga, valoare în dreapta */
+.campuri { margin: 28px 0 0; } /* despărțite de pași */
+.campuri div {
+  display: flex; /* termen și valoare pe un rând */
+  justify-content: space-between; /* la capete */
+  align-items: center; /* centrate */
+  gap: 16px; /* spațiul dintre ele */
+  padding: 12px 0; /* aer între rânduri */
+  border-top: 1px solid var(--line); /* separator fin */
 }
-.livrata {
-  color: var(--brand-text); /* bleu închis pe bleu (5.8:1; 6.9:1 în tema întunecată) */
-  background: var(--brand-soft); /* bleu deschis */
-  border-color: transparent; /* fără contur, ca pe cardul livrat */
-}
+.campuri dt { color: var(--muted); } /* termenul, stins */
+.campuri dd { margin: 0; font-weight: 600; text-align: right; } /* valoarea */
+.categorie { display: inline-flex; align-items: center; gap: 6px; } /* iconița și numele categoriei */
+.numar { font-variant-numeric: tabular-nums; } /* numărul comenzii */
 
-/* scheletul titlului: o linie groasă, cât un titlu mare */
-.scheletTitlu { width: 85%; height: 40px; border-radius: var(--radius-sm); } /* vine după .skeleton-line (index.css e importat primul) */
+.scheletTitlu { height: 36px; } /* titlul mare, în așteptare */
 
-/* Ecrane medii: fotografia deasupra textelor */
+/* Tabletă și telefon: o coloană */
 @media (max-width: 860px) {
-  .detaliu { grid-template-columns: minmax(0, 1fr); gap: 28px; } /* o singură coloană */
-  .text { padding-top: 0; } /* fără alinierea optică cu fotografia */
+  .detaliu { grid-template-columns: minmax(0, 1fr); gap: 28px; } /* fotografia deasupra */
 }
-
-/* Ecrane înguste: mai puțin spațiu */
 @media (max-width: 640px) {
-  .pagina { padding-top: 20px; padding-bottom: 56px; } /* spațiu mai mic sus și jos */
-  .inapoi { margin-bottom: 12px; } /* linkul mai aproape de fotografie */
-  .campuri > div { grid-template-columns: 7.5rem minmax(0, 1fr); } /* coloana termenilor mai îngustă */
+  .titlu { font-size: var(--t-31); } /* titlul, mai mic */
 }
 
-/* Tipărire: fără fotografie și fără linkul înapoi */
+/* Tipărire: fără linkul înapoi */
 @media print {
-  .inapoi, .media { display: none !important; } /* doar textele pe hârtie */
-  .detaliu { display: block; } /* o singură coloană */
+  .inapoi { display: none !important; } /* doar comanda */
 }

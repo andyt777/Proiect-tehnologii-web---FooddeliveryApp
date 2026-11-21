@@ -1,19 +1,19 @@
-// Etapa 6: „scheletele” afișate cât timp datele vin de la server: forme gri, cu aceeași așezare ca elementele reale,
+// Etapa 6: „scheletele” afișate cât timp datele vin de la server: forme fără text, cu aceeași așezare ca elementele reale,
 // ca pagina să nu sară când apar datele. Sunt doar decor (aria-hidden); textul „Se încarcă…” de lângă ele e cel citit.
 // Etapa 8: scheletele folosesc chiar modulele componentelor reale, deci au aceeași așezare fără reguli copiate.
-import meniuStyles from "./Meniu.module.css"; // grila meniului
+import grilaStyles from "./GrilaPreparate.module.css"; // redesign: grila de preparate
 import meniuCardStyles from "./MeniuCard.module.css"; // cardul unui preparat
-import listaStyles from "./ComandaList.module.css"; // panoul listei de comenzi
+import listaStyles from "./ComandaList.module.css"; // lista de comenzi
 import cardStyles from "./ComandaCard.module.css"; // rândul unei comenzi
 
 const CARDURI_MENIU = ["m1", "m2", "m3", "m4", "m5", "m6"]; // șase carduri: două rânduri pe desktop
-const RANDURI_COMENZI = ["c1", "c2", "c3"]; // trei rânduri, cât lista din README
+const RANDURI_COMENZI = ["c1", "c2", "c3"]; // trei rânduri
 
-// Grila meniului, cu aceleași clase ca MeniuCard (Etapa 8: din modulele lui Meniu și MeniuCard)
-export function ScheletMeniu() { // fără props
+// Grila meniului, cu aceleași clase ca GrilaPreparate și MeniuCard
+export function ScheletMeniu({ numar = CARDURI_MENIU.length }) { // numar (opțional): pagina unui restaurant are trei preparate
   return ( // întoarcem JSX
-    <ul className={meniuStyles.grid} aria-hidden="true">{/* ascuns pentru cititoarele de ecran */}
-      {CARDURI_MENIU.map((id) => ( // un card gri pentru fiecare cheie
+    <ul className={grilaStyles.grid} aria-hidden="true">{/* ascuns pentru cititoarele de ecran */}
+      {CARDURI_MENIU.slice(0, numar).map((id) => ( // un card pentru fiecare cheie
         <li key={id} className={meniuCardStyles.card}>{/* aceeași cutie ca un preparat */}
           <span className={`${meniuCardStyles.foto} skeleton`} />{/* locul fotografiei, tot 4:3 */}
           <div className={`${meniuCardStyles.info} schelet-text`}>{/* locul numelui și al restaurantului */}
@@ -26,13 +26,13 @@ export function ScheletMeniu() { // fără props
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei
 
-// Lista de comenzi, cu aceleași clase ca ComandaCard (Etapa 8: din modulele lui ComandaList și ComandaCard)
+// Lista de comenzi, cu aceleași clase ca ComandaList și ComandaCard
 export function ScheletComenzi() { // fără props
   return ( // întoarcem JSX
     <ul className={listaStyles.list} aria-hidden="true">{/* ascuns pentru cititoarele de ecran */}
-      {RANDURI_COMENZI.map((id) => ( // un rând gri pentru fiecare cheie
+      {RANDURI_COMENZI.map((id) => ( // un rând pentru fiecare cheie
         <li key={id} className={cardStyles.card}>{/* aceeași așezare ca o comandă */}
-          <span className="thumb skeleton" />{/* locul iconiței */}
+          <span className="thumb skeleton" />{/* locul miniaturii */}
           <div className="schelet-text">{/* locul titlului și al detaliilor */}
             <span className="skeleton skeleton-line" />{/* titlul */}
             <span className="skeleton skeleton-line skeleton-short" />{/* restaurantul și livrarea */}

@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { arePret, formatFaraPret, formatPreparate, formatRestaurante, restauranteDinMeniu, rezumatComenzi, sumaPreturi } from "../src/rezumat.js";
+import { arePret, formatFaraPret, frazaRezumat, formatPreparate, formatRestaurante, restauranteDinMeniu, rezumatComenzi, sumaPreturi } from "../src/rezumat.js";
 
 const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
 
@@ -124,3 +124,22 @@ for (const [numar, restaurante, preparate] of CAZURI) {
     assert.equal(formatPreparate(numar), preparate);
   });
 }
+
+// --- frazaRezumat (redesign „Pădure”: rezumatul ca text, în locul plăcilor bento) ---
+
+test("frazaRezumat pe db.json: 6 comenzi, 3 pe drum, 3 livrate, 331 lei", () => {
+  assert.equal(frazaRezumat(db.comenzi), "6 comenzi: 3 pe drum, 3 livrate. Total: 331 lei.");
+});
+
+test("frazaRezumat întoarce text gol pentru o listă goală", () => {
+  assert.equal(frazaRezumat([]), "");
+});
+
+test("frazaRezumat face acordul la singular și adaugă prețurile la confirmare", () => {
+  const comenzi = [
+    { livrata: true, pret: 42, categorie: "Pizza", livrare: "express" },
+    { livrata: false, pret: null, speciala: true, categorie: "Pizza", livrare: "standard" },
+  ];
+  assert.equal(frazaRezumat(comenzi), "2 comenzi: 1 pe drum, 1 livrată. Total: 42 lei + 1 preț la confirmare.");
+  assert.equal(frazaRezumat([comenzi[0]]), "1 comandă: 0 pe drum, 1 livrată. Total: 42 lei.");
+});

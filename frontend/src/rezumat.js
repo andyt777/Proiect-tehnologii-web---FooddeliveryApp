@@ -2,7 +2,7 @@
 // Funcții pure (fără React), ca să poată fi testate cu `node --test`.
 import { CATEGORII } from "./categorii.js"; // numele categoriilor (Pizza, Burgers, Asian)
 import { ETICHETE_LIVRARE } from "./livrare.js"; // tipurile de livrare (standard, express, ridicare)
-import { formatProduse } from "./format.js"; // regula lui „de” (20 de produse)
+import { formatComenzi, formatLei, formatProduse } from "./format.js"; // regula lui „de” (20 de produse), sumele în lei; redesign: și „6 comenzi”
 
 // Etapa 7: o comandă specială are pret: null până o confirmă restaurantul; doar numerele reale intră în sume
 export function arePret(comanda) { // primește o comandă
@@ -59,4 +59,14 @@ export function formatPreparate(numar) { // primește numărul de preparate
 // Etapa 7: „+ 1 preț la confirmare”, „+ 2 prețuri la confirmare”, afișat lângă sumele care ignoră comenzile speciale
 export function formatFaraPret(numar) { // primește câte comenzi n-au încă preț
   return `+ ${cuAcord(numar, "preț", "prețuri")} la confirmare`; // aceeași regulă de acord
+} // sfârșitul funcției
+
+// Redesign „Pădure”: rezumatul comenzilor ca o frază simplă, în locul plăcilor bento.
+// Ex. „6 comenzi: 3 pe drum, 3 livrate. Total: 331 lei.”; "" pentru o listă goală (lista arată atunci starea goală)
+export function frazaRezumat(comenzi) { // primește toată lista de comenzi
+  const r = rezumatComenzi(comenzi); // aceleași cifre ca înainte, dintr-o singură trecere
+  if (r.numar === 0) return ""; // nimic de rezumat
+  const livrate = cuAcord(r.livrate, "livrată", "livrate"); // „1 livrată”, „3 livrate”, „20 de livrate”
+  const total = r.faraPret > 0 ? `${formatLei(r.total)} ${formatFaraPret(r.faraPret)}` : formatLei(r.total); // „331 lei + 1 preț la confirmare”
+  return `${formatComenzi(r.numar)}: ${r.peDrum} pe drum, ${livrate}. Total: ${total}.`; // fraza întreagă
 } // sfârșitul funcției

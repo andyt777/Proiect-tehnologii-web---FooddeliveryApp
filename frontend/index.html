@@ -4,14 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Savoro: cina ta preferată, la ușă. Alege din meniul restaurantelor și urmărește-ți comenzile." />
-    <meta name="theme-color" content="#dff1fb" /><!-- bara browserului în culoarea antetului bleu -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23d02a73'/%3E%3Cpath d='M7 16.5h18a9 9 0 0 1-18 0Z' fill='white'/%3E%3Cpath d='M18.5 5.5c-2.2 1.1-2.2 3 0 4.1s2.2 3 0 4.1M13 7.5c-1.4.7-1.4 1.9 0 2.6s1.4 1.9 0 2.6' stroke='white' stroke-width='1.8' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" /><!-- favicon-ul: semnul Savoro pe cercul roz #d02a73 -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" /><!-- Fraunces doar italic 600 (titluri, logo, prețuri); Inter drept pentru text -->
-    <!-- Fotografia din hero se cere înaintea CSS-ului și a JS-ului; aceleași reguli media ca <picture> din pages/ComenziPage.jsx (Etapa 8), deci se descarcă un singur fișier -->
-    <link rel="preload" as="image" href="/img/hero-900.webp" type="image/webp" media="(max-width: 640px)" fetchpriority="high" />
-    <link rel="preload" as="image" href="/img/hero-1600.webp" type="image/webp" media="not all and (max-width: 640px)" fetchpriority="high" />
+    <meta name="theme-color" content="#133A2B" /><!-- bara browserului în verdele de pădure al antetului -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23133A2B'/%3E%3Cpath d='M7 16.5h18a9 9 0 0 1-18 0Z' fill='%23F5EFE2'/%3E%3Cpath d='M18.5 5.5c-2.2 1.1-2.2 3 0 4.1s2.2 3 0 4.1M13 7.5c-1.4.7-1.4 1.9 0 2.6s1.4 1.9 0 2.6' stroke='%23F5EFE2' stroke-width='1.8' stroke-linecap='round' fill='none'/%3E%3C/svg%3E" /><!-- favicon-ul: semnul Savoro, crem pe cercul verde #133A2B -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><!-- conexiunea la Google Fonts pornește devreme -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin /><!-- serverul fișierelor de font -->
+    <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;600;800&display=swap" rel="stylesheet" /><!-- Gabarito, o singură familie fără serife: 400 text, 600 etichete, 800 titluri; subsetul latin-ext are ș ț ă î â -->
+    <!-- Fotografia mare din hero (pizza, portret) se cere înaintea CSS-ului și a JS-ului: e primul lucru vizibil pe „/” -->
+    <link rel="preload" as="image" href="/img/hero-900.webp" type="image/webp" fetchpriority="high" /><!-- aceeași fotografie pe telefon și pe desktop -->
     <title>Savoro</title>
     <!-- Tema aleasă data trecută se pune pe <html> înainte de prima desenare, ca pagina să nu clipească -->
     <script>

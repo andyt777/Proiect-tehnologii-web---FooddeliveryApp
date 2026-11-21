@@ -49,10 +49,55 @@ cd frontend
 npm run dev
 ```
 
-Then open the address printed in terminal 2 (pages: `/`, `/comenzi/1`, `/despre`). Without `npm run api` the page shows an error
+Then open the address printed in terminal 2 (pages: `/`, `/restaurante/sushi-kyo`, `/cos`, `/favorite`, `/comenzi/1`, `/despre`). Without `npm run api` the page shows an error
 with a "Încearcă din nou" button. `npm test` runs the unit tests (no server needed).
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
+
+## Redesign „Pădure”: forest green, cream, Gabarito
+
+Branch `redesign/padure`, spec in `docs/superpowers/specs/2026-11-21-savoro-padure-redesign-design.md`. It replaces the
+"Cer senin" look (pastel blue / pink, Fraunces italic, bento, torn receipt) with a Wolt-like discipline: one brand
+colour, one bold sans, photos doing the work, plain copy. Front end only: `db.json`, `api.js` and json-server are unchanged.
+
+Visual system (tokens in `src/index.css`):
+- palette: `--padure` #133A2B (header, hero, primary buttons, active states), `--padure-2` #1F5440 (hover),
+  `--hartie` #F5EFE2 (page), `--alb` #FFFDF8 (sheets), `--cerneala` #17211B (text), `--sters` #5B6459 (secondary text,
+  5.4:1 on paper), `--sofran` #E9B44C only for "Express", the cart count and the focus ring on green; errors use
+  #B3261E with an icon and text. Dark theme: page #0E1F17, sheets #15291F, text #EFE8D8, buttons #2C6B52, saffron focus ring
+- type: Gabarito only (Google Fonts, 400/600/800, the latin-ext subset has ș ț ă î â), fallbacks Rethink Sans, Onest,
+  system UI. Scale 14/16/20/25/31/39/61px, headings 800 with -0.02em tracking, sentence case, tabular prices
+- shape: photos 18px, sheets / drawer 24px, inputs and small controls 12px, pills only for primary buttons. Cards are
+  flat on the paper; only the drawer, toasts and the mobile bottom bar have shadows
+- signature: the green header continues into the home hero (huge cream headline, search, delivery mode); the three
+  dish photos break out of the band's bottom edge onto the paper. The restaurant page repeats it with one photo
+- motion only after an action: cart count bump, drawer slide, toast. No entrance animations; reduced motion respected
+
+Pages (all inside `components/Layout.jsx`):
+
+| Route | Page | What it shows |
+| ----- | ---- | ------------- |
+| `/` | `pages/ComenziPage.jsx` | hero, category row, "Restaurante" row, menu grid, "Comenzile tale" (one-sentence summary, list with every test id, "Comandă specială" form) |
+| `/restaurante/:slug` | `pages/RestaurantPage.jsx` | restaurant header (photo, cuisine, description, delivery options from `livrare.js`) and its dishes; an unknown slug renders the 404 page |
+| `/cos` | `pages/CosPage.jsx` | checkout: lines, quantities, delivery choice, total, "Plasează comanda" (stage 7 logic: one POST per line, `Promise.allSettled`), then `/#comenzi` |
+| `/favorite` | `pages/FavoritePage.jsx` | dishes saved with the heart button (ids in `localStorage`, read defensively) |
+| `/comenzi/:id` | `pages/ComandaDetaliuPage.jsx` | large photo, title, a three-step status (Plasată, Pe drum, Livrată) derived only from `livrata`, details |
+| `/despre`, `*` | `DesprePage.jsx`, `NotFoundPage.jsx` | restyled; credits table kept |
+
+Architecture changes:
+- the menu, cart, favourites, chosen delivery type and the "Comanda a fost plasată" toast moved from `ComenziPage` to
+  `src/magazin.js` (`useStareMagazin`, used once by `Layout`, passed to pages with `<Outlet context>`; pages read it
+  with `useMagazin()`). Orders, search and category stay in `ComenziPage`
+- the cart drawer is now a quick view on every page with "Mergi la plată" (to `/cos`); placing happens on `/cos`
+- "Anulează" is rendered by `ComenziPage` into the Layout toast region through a portal, so both toasts share one
+  `aria-live` region
+- navigation: one `<nav data-testid="nav">` (Acasă, Favorite, Despre; plus Coș on phones) that becomes a fixed bottom
+  bar up to 640px. A "Sari la conținut" skip link; `/#meniu`, `/#comenzi`, `/#restaurante` scroll to the section and
+  focus its heading
+- `/` still shows exactly one `data-testid="error"` and one `data-testid="loading"`: the menu and orders states are merged
+- removed: `RezumatBento`, `BonComanda`, the full-width hero photo, eyebrow labels, `A · B` meta strings, Fraunces / Inter
+- new pure helpers with `node:test` tests: `src/restaurante.js` (slug, lookup, dishes per restaurant),
+  `src/favorite.js` (parse / toggle / prune favourites), `src/etape.js` (status steps), `frazaRezumat` in `src/rezumat.js`
 
 ## Stage 8: routing and detail page
 
@@ -144,7 +189,9 @@ goes to the API first; the list shows what the server returned, so everything su
   `tests/cos.test.js`; `tests/db.test.js` accepts `pret: null` (only with `speciala`) and the optional
   `speciala` / `creata` fields
 
-## Redesign: cinematic hero, photo menu, bento
+## Redesign: cinematic hero, photo menu, bento (replaced)
+
+Superseded by the „Pădure” redesign above (the bento and the receipt were removed); kept as a record.
 
 Done after stage 6, on the `redesign/cinematic` branch (restore point: tag `pre-redesign`). The goal was a
 2026 food-delivery look (Glovo / Wolt level) without losing anything stages 1–6 require. Spec and plan:
@@ -192,6 +239,8 @@ Decisions:
 
 Photo credits. All photos are from Unsplash (Unsplash License), resized and converted to WebP.
 Category cards reuse dish photos: Pizza → `pizza-diavola`, Burgers → `burger-vita`, Asian → `sushi-platou`.
+Restaurant cards: Pizzeria Napoli → `pizza-margherita`, Burger Van → `burger-pui`, Sushi Kyo → `ramen-porc`.
+The home hero uses `hero-900.webp` (portrait), `sushi-platou` and `burger-vita`; `hero-1600.webp` is no longer used.
 
 | File | Dish | Photographer | Unsplash page |
 | ---- | ---- | ------------ | ------------- |
@@ -471,6 +520,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | redesign: photo hero, category filter, photo menu, bento summary, grouped orders, helper tests |
 | Claude | "Comandă specială" form, validation, request() and server-first add / toggle / delete / undo / cart, tw.json, tests, stage 7 |
 | Claude | React Router pages (layout, detail, about, 404), fetchComanda, CSS Modules split, tests, stage 8 |
+| Claude | „Pădure” redesign: tokens, Gabarito, restaurant / cart / favourites pages, shared state, status steps, helper tests |
 
 Details per stage: see the ai-log/ folder.
 

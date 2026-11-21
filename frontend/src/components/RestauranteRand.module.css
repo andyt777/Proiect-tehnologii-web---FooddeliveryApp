@@ -1,0 +1,54 @@
+/* Stilurile rândului „Restaurante” (CSS Modules) */
+
+.section { margin-top: 8px; } /* imediat după categorii */
+.rand {
+  list-style: none; /* fără buline */
+  margin: 0; /* fără margini implicite */
+  padding: 0; /* fără indentare */
+  display: grid; /* trei coloane pe desktop */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* lățimi egale */
+  gap: 28px; /* spațiul dintre carduri */
+}
+.card {
+  display: flex; /* fotografia, numele, detaliile */
+  flex-direction: column; /* unul sub altul */
+  gap: 2px; /* textele aproape */
+  color: var(--text); /* textul principal */
+  text-decoration: none; /* fără subliniere */
+  border-radius: var(--r-foto); /* colțuri pentru focus */
+}
+.foto {
+  display: block; /* ocupă rândul */
+  width: 100%; /* toată lățimea cardului */
+  aspect-ratio: 16 / 9; /* mai lată decât fotografiile de preparat */
+  margin-bottom: 10px; /* despărțită de nume */
+  object-fit: cover; /* fotografia umple cutia */
+  background: var(--skeleton); /* se vede doar până sosește imaginea */
+  border-radius: var(--r-foto); /* colțurile fotografiilor */
+  transition: transform 0.25s ease-out; /* mică reacție la hover */
+}
+.nume { font-size: var(--t-20); font-weight: 800; letter-spacing: -0.01em; } /* numele restaurantului */
+.detalii { font-size: var(--t-14); color: var(--muted); } /* bucătăria și numărul de preparate */
+a.card:hover .nume { text-decoration: underline; } /* se vede că e link */
+a.card:hover .foto { transform: scale(1.015); } /* fotografia se apropie puțin */
+.card:focus-visible { outline-offset: 6px; } /* inelul de focus, în jurul cardului */
+
+/* Telefon: rând orizontal care se derulează, cu următorul card vizibil pe jumătate */
+@media (max-width: 640px) {
+  .section { margin-inline: calc(-1 * var(--gutter)); } /* rândul iese până la marginile ecranului */
+  .section > :first-child { padding-inline: var(--gutter); } /* titlul rămâne aliniat */
+  .rand {
+    display: flex; /* pe un rând */
+    gap: 14px; /* carduri mai apropiate */
+    overflow-x: auto; /* derulare orizontală */
+    scroll-snap-type: x mandatory; /* se oprește la un card */
+    padding: 6px var(--gutter) 8px; /* loc pentru focus și pentru margini */
+    scrollbar-width: none; /* fără bara de derulare */
+  }
+  .rand > li { flex: 0 0 78%; scroll-snap-align: start; } /* un card și o bucată din următorul */
+}
+
+/* Tipărire: fără restaurante */
+@media print {
+  .section { display: none !important; } /* doar comenzile se tipăresc */
+}

@@ -1,36 +1,21 @@
-/* Etapa 8: stilurile listei de comenzi (CSS Modules), mutate din App.css; .empty și .empty-hint sunt clase globale */
+/* Stilurile listei de comenzi (CSS Modules); .empty și .empty-hint sunt clase globale */
 
-/* 4.6 Lista: rânduri ca într-un meniu tipărit, într-un singur panou */
-.list { /* Etapa 8: fostul .item-list */
-  list-style: none;
-  margin: 0;
-  padding: 0 24px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+/* Lista: rânduri pe hârtie, despărțite de linii fine (fără panou, fără umbră) */
+.list {
+  list-style: none; /* fără buline */
+  margin: 0; /* fără margini implicite */
+  padding: 0; /* fără indentare */
 }
 
-/* separatorul dintre comenzile pe drum și cele livrate */
-.divider { /* Etapa 8: fostul .group-divider */
-  margin-inline: -24px;
-  padding: 10px 24px;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
-  background: var(--bg-soft);
-  border-bottom: 1px solid var(--line);
+/* separatorul dintre comenzile pe drum și cele livrate: un titlu mic, în sentence case */
+.divider {
+  padding: 20px 0 6px; /* aer deasupra, aproape de primul rând */
+  font-size: var(--t-16); /* text obișnuit */
+  font-weight: 800; /* gros, ca un titlu */
+  color: var(--text); /* textul principal */
+  border-bottom: 1px solid var(--line); /* linia de sub titlu */
 }
-.divider + li { border-top: none; } /* Etapa 8: rândul de după separator (cardul are clasa lui din ComandaCard.module.css) */
-/* „Pe drum” e de obicei primul rând: colțurile de sus urmează panoul */
-.divider:first-child { border-top-left-radius: var(--radius-lg); border-top-right-radius: var(--radius-lg); }
+.divider:first-child { padding-top: 0; } /* primul separator, lipit de începutul listei */
+.numar { font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; } /* numărul din paranteză, stins */
 
-.illus { margin-bottom: 12px; } /* Etapa 8: fostul .empty-illus; farfuria goală */
-
-/* 4.9 Ecrane înguste */
-@media (max-width: 640px) {
-  .list { padding: 0 16px; }
-  .divider { margin-inline: -16px; padding-inline: 16px; }
-}
+.illus { margin-bottom: 8px; } /* farfuria goală, despărțită de text */

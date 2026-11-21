@@ -1,139 +1,173 @@
-/* Etapa 8: stilurile layout-ului comun (antet, navigație, subsol), mutate din App.css; clasele primesc nume unice la build */
+/* Stilurile layout-ului comun (antet, navigație, subsol) (CSS Modules) */
 
-/* 4.2 Antetul: bară bleu translucidă cu text bleumarin (bleumarin translucid în tema întunecată), fix la derulare;
-   fotografia și pagina se văd estompate prin el */
-.header { /* Etapa 8: fostul .app-header */
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  color: var(--header-fg); /* text bleumarin pe bleu (închis pe deschis invers în tema întunecată) */
-  /* 86% opac: textul --header-muted rămâne AA orice ar fi în spate (calculul e lângă variabile) */
-  background: var(--header-bg); /* bleu translucid */
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
-  backdrop-filter: blur(14px) saturate(1.4);
-  border-bottom: 1px solid var(--header-border);
-  view-transition-name: antet; /* antetul rămâne deasupra rândurilor care se mută (grupul e în index.css) */
+/* „Sari la conținut”: ascuns până primește focus de la tastatură */
+.skip {
+  position: absolute; /* deasupra antetului */
+  top: 8px; /* aproape de margine */
+  left: 8px; /* aproape de margine */
+  z-index: 30; /* peste tot */
+  padding: 10px 16px; /* ca un buton */
+  font-weight: 600; /* lizibil */
+  color: var(--cerneala); /* cerneală pe șofran (8.7:1) */
+  background: var(--sofran); /* se vede pe verde */
+  border-radius: var(--r-camp); /* colțuri de control */
+  transform: translateY(-200%); /* ascuns deasupra ecranului */
 }
-/* fără backdrop-filter, translucidul ar lăsa textul paginii să se citească prin antet: fundal plin */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .header { background: var(--header-solid); } /* bleu plin (bleumarin plin în tema întunecată) */
+.skip:focus { transform: none; } /* apare la focus */
+
+/* Antetul: bandă verde plină, lipită sus; pe „/” continuă fără cusătură în hero */
+.header {
+  position: sticky; /* rămâne sus la derulare */
+  top: 0; /* lipit de marginea de sus */
+  z-index: 10; /* deasupra paginii */
+  color: var(--on-brand); /* crem pe verde */
+  background: var(--brand); /* verdele de pădure */
+  view-transition-name: antet; /* rămâne deasupra rândurilor care se mută (grupul e în index.css) */
 }
-.inner { /* Etapa 8: fostul .header-inner */
-  height: var(--header-h);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.inner {
+  height: var(--header-h); /* înălțimea din index.css */
+  display: flex; /* logo, navigație, acțiuni pe un rând */
+  align-items: center; /* centrate pe verticală */
+  gap: 32px; /* spațiul dintre grupuri */
+}
+.logo {
+  display: inline-flex; /* semnul și numele pe un rând */
+  align-items: center; /* centrate */
+  gap: 10px; /* spațiul dintre ele */
+  font-size: var(--t-25); /* numele, mare */
+  font-weight: 800; /* gros, ca titlurile */
+  letter-spacing: -0.03em; /* strâns */
+  color: var(--on-brand); /* crem */
+  text-decoration: none; /* fără subliniere */
+  border-radius: var(--r-mic); /* colțuri pentru focus */
 }
 
-.logo { /* titlul aplicației, cu semnul Savoro */
-  display: flex;
-  align-items: center;
-  margin-right: 8px;
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  font-style: italic;       /* Fraunces italic, ca titlurile */
-}
-/* Etapa 8: logo-ul e link spre pagina comenzilor; arată la fel ca înainte (fără subliniere) */
-.logoLink {
-  display: flex;            /* semnul și numele pe același rând */
-  align-items: center;      /* centrate pe verticală */
-  gap: 10px;                /* spațiul dintre semn și nume, ca înainte */
-  text-decoration: none;    /* fără subliniere */
-  border-radius: var(--radius-sm); /* conturul de focus urmează colțurile */
-}
-
-/* Etapa 8: navigația din antet: „Comenzi” și „Despre”, ca pastile în culorile antetului */
-.nav {
-  display: flex;            /* linkurile pe un rând */
-  align-items: center;      /* centrate pe verticală */
-  gap: 4px;                 /* puțin spațiu între ele */
-}
+/* Navigația, pe desktop: linkuri text în antet */
+.nav { display: flex; align-items: center; gap: 4px; flex: 1; } /* ocupă spațiul din mijloc */
 .link {
-  display: inline-flex;     /* înălțime fixă, text centrat */
-  align-items: center;      /* textul centrat pe verticală */
-  height: 40px;             /* zonă de clic confortabilă */
-  padding: 0 14px;          /* spațiu lateral */
-  font-size: 0.92rem;       /* ca butonul de temă */
-  font-weight: 600;         /* semibold */
-  color: var(--header-muted); /* text secundar bleumarin (AA în cel mai rău caz) */
-  text-decoration: none;    /* fără subliniere */
-  border: 1px solid transparent; /* bordura există mereu, ca linkul activ să nu se lățească */
-  border-radius: var(--radius-sm); /* colțuri ca la celelalte pastile din antet */
-  transition: background 0.15s, color 0.15s; /* schimbare lină la hover */
+  position: relative; /* pentru linia de sub linkul activ */
+  display: inline-flex; /* iconița și textul */
+  align-items: center; /* centrate */
+  gap: 6px; /* spațiul dintre ele */
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 12px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: var(--on-brand-muted); /* crem stins (7.9:1) */
+  text-decoration: none; /* fără subliniere */
+  border-radius: var(--r-mic); /* colțuri pentru focus */
+  transition: color 0.15s; /* schimbare lină */
 }
-.link:hover { color: var(--header-fg); background: var(--header-pill); } /* la hover: text plin și fundal alb translucid */
-/* pagina curentă (NavLink pune și aria-current="page"): pastilă cu contur, deci se vede și fără culori */
-.active {
-  color: var(--header-fg);  /* text bleumarin plin */
-  background: var(--header-pill-hover); /* alb aproape opac */
-  border-color: var(--header-pill-border); /* conturul pastilelor */
+.link:hover { color: var(--on-brand); } /* crem plin la hover */
+.active { color: var(--on-brand); } /* pagina curentă: crem plin... */
+.active::after {
+  content: ""; /* ...și o linie dedesubt (nu doar culoarea) */
+  position: absolute; /* sub text */
+  left: 12px; /* aliniată cu textul */
+  right: 12px; /* aliniată cu textul */
+  bottom: 4px; /* aproape de marginea de jos */
+  height: 3px; /* groasă */
+  background: currentColor; /* în culoarea textului */
+  border-radius: 2px; /* capete rotunjite */
 }
-.active:hover { background: var(--header-pill-hover); } /* linkul activ nu se schimbă la hover */
+.navIcon { display: none; } /* iconițele se văd doar pe telefon */
+.navIconCos { position: relative; display: inline-flex; } /* sacoșa, cu numărul în colț */
+.doarTelefon { display: none; } /* coșul din navigație: pe desktop e butonul din dreapta */
 
-/* pastila de temă: alb translucid peste bara bleu (aceleași valori ca pastilele din bara de căutare) */
-.themeToggle { /* Etapa 8: fostul .theme-toggle; Etapa 5: butonul de comutare a temei */
-  height: 44px;
-  color: var(--header-fg);  /* textul butonului, bleumarin */
-  background: var(--header-pill); /* alb translucid */
-  border: 1px solid var(--header-pill-border); /* contur bleumarin transparent */
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-  margin-left: auto;        /* Etapa 8: fără căutare în antet, butonul stă la dreapta */
-  padding: 0 14px;
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: background 0.15s;
+/* Acțiunile din dreapta: tema și coșul */
+.actiuni { display: flex; align-items: center; gap: 8px; } /* pe un rând */
+.temaBtn,
+.cosBtn {
+  display: inline-flex; /* iconița și textul */
+  align-items: center; /* centrate */
+  gap: 8px; /* spațiul dintre ele */
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 14px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: var(--on-brand); /* crem */
+  background: transparent; /* fără fundal */
+  border: 1.5px solid rgba(245, 239, 226, 0.35); /* contur crem discret */
+  border-radius: var(--r-camp); /* colțuri de control */
+  cursor: pointer; /* mânuța */
+  transition: background 0.15s, border-color 0.15s; /* schimbare lină */
 }
-.themeToggle svg { color: var(--header-accent); } /* iconița soare / lună, roz */
-.themeToggle:hover { background: var(--header-pill-hover); } /* pastila devine mai opacă */
+.temaBtn:hover,
+.cosBtn:hover { background: rgba(245, 239, 226, 0.1); border-color: rgba(245, 239, 226, 0.6); } /* hover discret */
 
-/* Etapa 8: locul paginilor (Outlet); ocupă înălțimea rămasă, ca subsolul să stea jos și pe paginile scurte */
-.main { flex: 1; }
-
-/* Subsolul: doar ©, discret */
-.footer { border-top: 1px solid var(--line); } /* Etapa 8: fostul .app-footer */
-.footerInner { /* Etapa 8: fostul .footer-inner */
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 8px 24px;
-  padding-block: 28px;
-  font-size: 0.88rem;
-  color: var(--muted);
+/* Numărul de produse: singurul punct de șofran din antet */
+.numar {
+  display: inline-grid; /* cifra pe mijloc */
+  place-items: center; /* centrată */
+  min-width: 22px; /* cel puțin un cerc */
+  height: 22px; /* cerc */
+  padding: 0 6px; /* loc pentru două cifre */
+  font-size: 0.75rem; /* mic */
+  font-weight: 800; /* gros */
+  font-variant-numeric: tabular-nums; /* cifre egale */
+  color: var(--cerneala); /* cerneală pe șofran (8.7:1) */
+  background: var(--sofran); /* șofran */
+  border-radius: var(--r-pastila); /* rotund */
 }
-.footerInner a { text-underline-offset: 3px; }
-.footerInner a:hover { color: var(--text); }
+.bump { animation: bump 0.3s ease-out; } /* săritura la fiecare schimbare (key = valoarea) */
+@keyframes bump {
+  40% { transform: scale(1.3); } /* crește puțin */
+}
 
-/* 4.9 Ecrane înguste: antetul pe un singur rând (logo, navigație, temă); căutarea e în bara de sub el */
+.main { flex: 1; display: flex; flex-direction: column; } /* conținutul împinge subsolul jos */
+
+/* Subsolul: discret, pe hârtie */
+.footer {
+  margin-top: 72px; /* despărțit de conținut */
+  padding: 28px 0; /* aer sus și jos */
+  font-size: var(--t-14); /* text mic */
+  color: var(--muted); /* stins */
+  border-top: 1px solid var(--line); /* linie fină */
+}
+.footerInner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 24px; } /* cele două texte la capete */
+.footer a { color: var(--link); } /* linkul, verde */
+
+/* Telefon: navigația devine bara de jos, cu iconițe; coșul e în ea */
 @media (max-width: 640px) {
-  .inner { gap: 8px; }      /* Etapa 8: mai puțin spațiu între elemente */
-  .link { padding: 0 10px; } /* Etapa 8: linkurile mai înguste, ca rândul să încapă pe 360px */
-  .themeToggle { width: 44px; padding: 0; justify-content: center; }
-  /* pe telefon rămâne doar iconița; textul e citit în continuare de cititoarele de ecran */
-  .themeLabel { /* Etapa 8: fostul .theme-label */
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
+  .header { view-transition-name: none; } /* bara de jos e fixă în antet: fără nume de tranziție pe antet, ca să nu-i schimbe poziționarea */
+  .inner { gap: 12px; justify-content: space-between; } /* logo în stânga, tema în dreapta */
+  .logo { font-size: var(--t-20); } /* numele, mai mic */
+  .nav {
+    position: fixed; /* lipită jos */
+    left: 0; /* pe toată lățimea */
+    right: 0; /* pe toată lățimea */
+    bottom: 0; /* jos */
+    z-index: 15; /* peste conținut, sub mesaje */
+    display: grid; /* patru coloane egale */
+    grid-template-columns: repeat(4, 1fr); /* Acasă, Favorite, Coș, Despre */
+    gap: 0; /* fără spații */
+    height: calc(var(--nav-jos-h) + env(safe-area-inset-bottom, 0px)); /* plus zona de sub bara telefonului */
+    padding-bottom: env(safe-area-inset-bottom, 0px); /* conținutul nu intră sub ea */
+    background: var(--surface); /* suprafața albă */
+    box-shadow: 0 -8px 24px rgba(19, 58, 43, 0.12); /* plutește: umbră în sus */
+    view-transition-name: nav-jos; /* rămâne deasupra rândurilor care se mută (grupul e în index.css) */
   }
-}
-/* Etapa 8: pe ecranele foarte înguste rămâne doar semnul Savoro; numele e citit în continuare */
-@media (max-width: 370px) {
-  .logoText { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* ascuns vizual, ca .sr-only */
+  .link {
+    flex-direction: column; /* iconița deasupra textului */
+    justify-content: center; /* pe mijloc */
+    gap: 2px; /* aproape */
+    padding: 0; /* fără spațiu lateral */
+    font-size: 0.75rem; /* etichete mici */
+    color: var(--muted); /* stins pe alb */
+  }
+  .link:hover { color: var(--text); } /* mai închis la hover */
+  .active { color: var(--link); } /* pagina curentă, verde */
+  .active::after { left: 30%; right: 30%; top: 0; bottom: auto; } /* linia, sus, pe mijloc */
+  .link:focus-visible { outline-color: var(--focus); } /* pe alb, focusul obișnuit (nu șofran) */
+  .navIcon { display: block; } /* iconițele apar */
+  .doarTelefon { display: inline-flex; } /* coșul apare în bară */
+  .navIconCos .numar { position: absolute; top: -6px; right: -12px; } /* numărul, în colțul sacoșei */
+  .cosBtn { display: none; } /* sertarul nu e pe telefon: pagina /cos e în bara de jos */
+  .temaBtn { padding: 0; width: 44px; justify-content: center; } /* doar iconița */
+  .temaText { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* textul rămâne pentru cititoare */
+  .footer { margin-top: 48px; margin-bottom: calc(var(--nav-jos-h) + env(safe-area-inset-bottom, 0px)); } /* subsolul (ultimul element) nu intră sub bară */
 }
 
-/* Tipărire: antetul ca un titlu simplu, fără butoane */
+/* Tipărire: fără navigație, temă, coș și subsol */
 @media print {
-  .themeToggle, .nav { display: none !important; } /* Etapa 8: fără temă și fără navigație pe hârtie */
-  .header { position: static; background: none; border-bottom: 2px solid #000000; }
-  .footer { border-top: 2px solid #000000; }
+  .header { position: static; } /* nu se repetă pe fiecare pagină */
+  .nav, .actiuni, .footer, .skip { display: none !important; } /* fără controale */
 }

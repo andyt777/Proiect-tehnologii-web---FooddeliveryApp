@@ -1,0 +1,82 @@
+/* Stilurile paginii coșului (CSS Modules); .panel, .price, .btn-primary, .btn-danger și .empty sunt clase globale */
+
+.pagina { padding-top: 48px; } /* aer sub antet */
+.titlu { font-size: var(--t-39); } /* „Coșul tău” */
+
+/* Liniile în stânga, foaia cu totalul în dreapta */
+.grila {
+  display: grid; /* două coloane */
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px); /* foaia, lățime fixă */
+  align-items: start; /* fiecare cât conținutul lui */
+  gap: 48px; /* spațiul dintre ele */
+}
+.lista { list-style: none; margin: 0; padding: 0; } /* fără buline și indentare */
+.linie {
+  display: grid; /* miniatură | text | acțiuni | subtotal */
+  grid-template-columns: auto minmax(0, 1fr) auto auto; /* textul ia restul */
+  align-items: center; /* centrate */
+  gap: 16px; /* spațiul dintre coloane */
+  padding: 18px 0; /* aer între linii */
+  border-bottom: 1px solid var(--line); /* separator fin */
+}
+.linie:first-child { padding-top: 0; } /* prima linie, lipită de titlu */
+.info { min-width: 0; } /* textul se poate îngusta */
+.nume { font-size: var(--t-20); line-height: 1.2; } /* numele preparatului */
+.detalii { font-size: var(--t-14); color: var(--muted); } /* restaurantul și prețul unitar */
+.actiuni { display: flex; align-items: center; gap: 4px; } /* selectorul și ștergerea */
+.subtotal { min-width: 7ch; font-size: var(--t-20); text-align: right; } /* subtotalul, aliniat în dreapta */
+
+/* Foaia cu livrarea și totalul: rămâne la vedere la derulare */
+.rezumat { position: sticky; top: calc(var(--header-h) + 24px); display: flex; flex-direction: column; gap: 24px; } /* elementele, unul sub altul */
+.sume { display: flex; flex-direction: column; gap: 6px; margin: 0; } /* rândurile sumelor */
+.sume div { display: flex; justify-content: space-between; gap: 12px; } /* termen în stânga, valoare în dreapta */
+.sume dt { color: var(--muted); } /* termenul, stins */
+.sume dd { margin: 0; } /* fără indentarea implicită */
+.total { padding-top: 10px; font-size: var(--t-25); font-weight: 800; border-top: 1px solid var(--line); } /* totalul, mare */
+.total dt { color: var(--text); } /* „Total”, în culoarea textului */
+.eroare {
+  display: flex; /* iconița lângă text */
+  gap: 10px; /* spațiul dintre ele */
+  padding: 12px 14px; /* cutie mică */
+  font-weight: 600; /* lizibil */
+  color: var(--text); /* textul principal */
+  background: var(--eroare-bg); /* roșu foarte deschis */
+  border-left: 4px solid var(--eroare); /* bara din stânga: se vede și fără culoare */
+  border-radius: var(--r-mic); /* colțuri mici */
+}
+.eroare svg { color: var(--eroare); margin-top: 2px; } /* iconița, roșie */
+.plaseaza { width: 100%; } /* butonul pe toată lățimea foii */
+
+/* Starea goală: iconița în cerc */
+.golIcon {
+  display: grid; /* iconița pe mijloc */
+  place-items: center; /* centrată */
+  width: 64px; /* cerc */
+  height: 64px; /* cerc */
+  margin-bottom: 8px; /* despărțită de text */
+  color: var(--link); /* verde */
+  background: var(--soft); /* fundal discret */
+  border-radius: 50%; /* cerc */
+}
+
+/* Tabletă: foaia trece sub listă */
+@media (max-width: 900px) {
+  .grila { grid-template-columns: minmax(0, 1fr); gap: 32px; } /* una sub alta */
+  .rezumat { position: static; } /* nu mai e lipită */
+}
+
+/* Telefon: linia pe două rânduri */
+@media (max-width: 640px) {
+  .pagina { padding-top: 32px; } /* mai puțin aer */
+  .titlu { font-size: var(--t-31); } /* titlul, mai mic */
+  .linie {
+    grid-template-columns: auto minmax(0, 1fr) auto; /* miniatură | text | subtotal */
+    grid-template-areas: "foto info subtotal" "foto actiuni actiuni"; /* acțiunile pe rândul al doilea */
+    align-items: start; /* aliniate sus */
+    gap: 8px 14px; /* spații mai mici */
+  }
+  .linie > :first-child { grid-area: foto; } /* miniatura */
+  .info { grid-area: info; } /* textele */
+  .actiuni { grid-area: actiuni; } /* selectorul și ștergerea */
+  .subtotal { grid-area: subtotal; font-size: var(--t-16); } /* subtotalul */
+}

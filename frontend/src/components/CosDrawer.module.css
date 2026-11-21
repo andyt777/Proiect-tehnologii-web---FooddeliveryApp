@@ -1,167 +1,99 @@
-/* Etapa 8: stilurile coșului (CSS Modules), mutate din App.css; .thumb, .price, .btn-primary, .btn-close și .btn-danger sunt clase globale */
+/* Stilurile sertarului coșului (CSS Modules); .price, .btn-primary, .btn-close și .btn-danger sunt clase globale */
 
-/* Coșul: panou lateral pe <dialog>, lipit de marginea din dreapta, pe toată înălțimea */
+/* Sertarul: panou lateral pe <dialog>, lipit de marginea din dreapta, pe toată înălțimea */
 .drawer {
-  width: min(420px, 100%);
-  max-width: none;
-  height: 100%;
-  max-height: none;
-  margin: 0 0 0 auto;
-  padding: 0;
-  overflow: hidden;
-  color: var(--text);
-  background: var(--surface);
-  border: none;
-  border-left: 1px solid var(--line);
-  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
-  box-shadow: -24px 0 64px var(--shadow-float); /* umbră bleumarin spre stânga */
+  width: min(420px, 100%); /* cel mult 420px */
+  max-width: none; /* fără limita implicită a dialogului */
+  height: 100%; /* toată înălțimea */
+  max-height: none; /* fără limita implicită */
+  margin: 0 0 0 auto; /* lipit în dreapta */
+  padding: 0; /* spațiul îl pun secțiunile */
+  overflow: hidden; /* derularea e în listă */
+  color: var(--text); /* textul principal */
+  background: var(--surface); /* albul cald */
+  border: none; /* fără contur */
+  border-radius: var(--r-foaie) 0 0 var(--r-foaie); /* colțuri de foaie spre pagină */
+  box-shadow: var(--shadow-float); /* plutește: are umbră */
 }
-.drawer[open] { animation: drawer-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.drawer::backdrop { background: var(--backdrop); backdrop-filter: blur(2px); }
+.drawer[open] { animation: drawer-in 0.28s cubic-bezier(0.2, 0.8, 0.2, 1); } /* alunecă din dreapta, ca răspuns la clic */
+.drawer::backdrop { background: var(--backdrop); } /* pagina din spate, întunecată */
 @keyframes drawer-in {
-  from { transform: translateX(100%); }
+  from { transform: translateX(100%); } /* pornește din afara ecranului */
 }
 
-/* Structura panoului: antet fix, listă care se derulează, rezumat fix jos */
-.body { display: flex; flex-direction: column; height: 100%; } /* Etapa 8: fostul .drawer-body */
-.head { /* Etapa 8: fostul .drawer-head */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 14px 14px 14px 24px;
-  border-bottom: 1px solid var(--line);
+/* Structura: antet fix, listă care se derulează, subsol fix */
+.body { display: flex; flex-direction: column; height: 100%; } /* pe toată înălțimea */
+.head {
+  display: flex; /* titlul și X-ul pe un rând */
+  align-items: center; /* centrate */
+  justify-content: space-between; /* la capete */
+  gap: 12px; /* spațiul dintre ele */
+  padding: 16px 14px 8px 24px; /* mai puțin spațiu lângă X */
 }
-.head h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; font-style: italic; } /* „Coșul tău”, Fraunces italic */
-.form { flex: 1; min-height: 0; display: flex; flex-direction: column; } /* Etapa 8: fostul .drawer-form */
-.scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 24px 24px; } /* Etapa 8: fostul .drawer-scroll */
-.foot { /* Etapa 8: fostul .drawer-foot */
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px 24px 24px;
-  background: var(--bg-softer); /* bleu abia vizibil: se desparte de lista albă de deasupra */
-  border-top: 1px solid var(--line);
-}
-.foot :global(.btn-primary) { width: 100%; }
+.head h2 { font-size: var(--t-25); } /* „Coșul tău” */
 
-/* Liniile coșului: iconiță | nume + restaurant | subtotal, iar dedesubt selectorul și ștergerea */
-.lista { list-style: none; margin: 0; padding: 0; } /* Etapa 8: fostul .cos-lista */
-.linie { /* Etapa 8: fostul .cos-linie */
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    "thumb info pret"
-    "thumb actiuni actiuni";
-  gap: 8px 14px;
-  padding: 18px 0;
-  border-bottom: 1px dashed var(--line);
+.lista {
+  flex: 1; /* ocupă spațiul rămas */
+  min-height: 0; /* poate fi mai mică decât conținutul... */
+  overflow-y: auto; /* ...și se derulează */
+  list-style: none; /* fără buline */
+  margin: 0; /* fără margini implicite */
+  padding: 8px 24px 24px; /* spațiu în jur */
 }
-.linie :global(.thumb) {
-  grid-area: thumb;
-  align-self: start;
-  width: 42px;
-  height: 42px;
-  color: var(--accent-text);
-  background: var(--accent-soft);
+.linie {
+  display: grid; /* miniatură | text | subtotal */
+  grid-template-columns: auto minmax(0, 1fr) auto; /* textul ia restul */
+  gap: 14px; /* spațiul dintre coloane */
+  padding: 16px 0; /* aer între linii */
+  border-bottom: 1px solid var(--line); /* separator fin */
 }
-.info { grid-area: info; } /* Etapa 8: fostul .cos-info */
-.info h3 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; font-style: italic; } /* numele produsului din coș, Fraunces italic */
-.info p { margin-top: 2px; font-size: 0.86rem; color: var(--muted); }
-.subtotal { grid-area: pret; font-size: 1.05rem; } /* Etapa 8: fostul .cos-subtotal; vine după .price (index.css e importat primul) */
-.actiuni { grid-area: actiuni; display: flex; align-items: center; justify-content: space-between; } /* Etapa 8: fostul .cos-actiuni */
+.linie:last-child { border-bottom: none; } /* fără separator după ultima */
+.info { min-width: 0; } /* textul se poate îngusta */
+.info h3 { font-size: var(--t-16); font-weight: 600; letter-spacing: 0; line-height: 1.3; } /* numele preparatului */
+.info p { font-size: var(--t-14); color: var(--muted); } /* restaurantul */
+.actiuni { display: flex; align-items: center; gap: 4px; margin-top: 10px; } /* selectorul și ștergerea */
+.subtotal { padding-top: 2px; } /* aliniat cu numele */
 
-/* Alegerea livrării: butoane radio afișate ca niște carduri; cel ales are contur roz și fundal roz deschis */
-.optiuni { min-width: 0; margin: 22px 0 0; padding: 0; border: none; } /* Etapa 8: fostul .livrare-optiuni */
-.optiuni legend {
-  padding: 0;
-  font-size: 0.76rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
+.foot {
+  display: flex; /* totalul și butonul, unul sub altul */
+  flex-direction: column; /* pe verticală */
+  gap: 16px; /* spațiul dintre ele */
+  padding: 20px 24px 24px; /* spațiu în jur */
+  border-top: 1px solid var(--line); /* despărțit de listă */
 }
-.optiune { /* Etapa 8: fostul .livrare-optiune */
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-height: 56px;
-  margin-top: 8px;
-  padding: 10px 14px;
-  border: 1.5px solid var(--line-strong); /* contur bleu al opțiunii */
-  border-radius: var(--radius);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-.optiune:hover { border-color: var(--subtle); }
-.optiune:has(input:checked) { border-color: var(--accent-text); background: var(--accent-soft); }
-.optiune input {
-  width: 18px;
-  height: 18px;
-  margin: 0;
-  accent-color: var(--accent);
-  cursor: pointer;
-}
-.livrareText { display: flex; flex-direction: column; line-height: 1.35; } /* Etapa 8: fostul .livrare-text */
-.livrareText strong { font-size: 0.95rem; }
-.livrareText span { font-size: 0.85rem; color: var(--muted); }
+.rezumat { display: flex; flex-direction: column; gap: 6px; margin: 0; } /* rândurile rezumatului */
+.rezumat div { display: flex; justify-content: space-between; } /* termen în stânga, valoare în dreapta */
+.rezumat dt { color: var(--muted); } /* termenul, stins */
+.rezumat dd { margin: 0; } /* fără indentarea implicită */
+.total { font-size: var(--t-20); font-weight: 800; } /* totalul, mare */
+.total dt { color: var(--text); } /* „Total”, în culoarea textului */
 
-/* Rezumatul de jos: produse și total (fără taxe inventate) */
-.rezumat { display: flex; flex-direction: column; gap: 4px; margin: 0; } /* Etapa 8: fostul .cos-rezumat */
-.rezumat div { display: flex; align-items: baseline; justify-content: space-between; }
-.rezumat dt { font-size: 0.92rem; color: var(--muted); }
-.rezumat dd { margin: 0; font-weight: 600; }
-.total dt { font-weight: 600; color: var(--text); } /* Etapa 8: fostul .cos-total */
-.total dd { font-family: var(--font-display); font-size: 1.4rem; font-style: italic; } /* totalul coșului, Fraunces italic */
-
-/* Coșul gol: iconiță, mesaj și drumul înapoi spre meniu */
-.gol { /* Etapa 8: fostul .drawer-empty */
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 32px 24px;
-  color: var(--muted);
-  text-align: center;
+/* Starea goală */
+.gol {
+  flex: 1; /* ocupă spațiul rămas */
+  display: flex; /* elementele unul sub altul */
+  flex-direction: column; /* pe verticală */
+  align-items: center; /* centrate */
+  justify-content: center; /* pe mijloc */
+  gap: 8px; /* spațiul dintre ele */
+  padding: 24px; /* aer în jur */
+  color: var(--muted); /* text secundar */
+  text-align: center; /* centrat */
 }
-.golIcon { /* Etapa 8: fostul .drawer-empty-icon */
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 8px;
-  color: var(--accent-text);
-  background: var(--accent-soft);
-  border-radius: 50%;
+.golIcon {
+  display: grid; /* iconița pe mijloc */
+  place-items: center; /* centrată */
+  width: 64px; /* cerc */
+  height: 64px; /* cerc */
+  margin-bottom: 6px; /* despărțit de text */
+  color: var(--link); /* verde */
+  background: var(--soft); /* fundal discret */
+  border-radius: 50%; /* cerc */
 }
-.golTitlu { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; font-style: italic; color: var(--text); } /* Etapa 8: fostul .drawer-empty-title; „Coșul e gol”, Fraunces italic */
-.gol :global(.btn-primary) { margin-top: 14px; }
+.golTitlu { font-size: var(--t-20); font-weight: 800; color: var(--text); } /* „Coșul e gol” */
+.gol :global(.btn-primary) { margin-top: 12px; } /* butonul, despărțit de text */
 
-/* Etapa 7: liniile din coș care n-au ajuns la server */
-.eroare { /* Etapa 8: fostul .drawer-eroare */
-  display: flex;            /* iconița lângă text */
-  align-items: flex-start;  /* iconița aliniată cu primul rând */
-  gap: 10px;                /* spațiul dintre ele */
-  padding: 10px 14px;       /* cutie mică */
-  font-size: 0.9rem;        /* text de mesaj */
-  color: var(--text);       /* text principal pe roz deschis */
-  background: var(--error-bg); /* rozul panoului de eroare */
-  border: 1.5px solid var(--error-border); /* contur roz */
-  border-radius: var(--radius-sm); /* colțuri rotunjite */
-}
-.eroare svg { margin-top: 1px; color: var(--accent-text); } /* iconița de avertisment, roz */
-
-/* 4.9 Ecrane înguste: coșul ocupă tot ecranul */
-@media (max-width: 640px) {
-  .drawer { width: 100%; border-left: none; border-radius: 0; }
-  .head { padding-left: 16px; }
-  .scroll { padding-inline: 16px; }
-  .foot { padding-inline: 16px; }
-}
-
-/* Tipărire: fără coș */
+/* Tipărire: fără sertar */
 @media print {
-  .drawer { display: none !important; }
+  .drawer { display: none !important; } /* ascuns */
 }

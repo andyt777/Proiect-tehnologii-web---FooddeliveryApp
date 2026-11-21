@@ -1,0 +1,59 @@
+/* Stilurile paginii unui restaurant (CSS Modules) */
+
+/* Banda verde: textele în stânga, fotografia în dreapta, ieșind peste marginea de jos */
+.banda {
+  color: var(--on-brand); /* crem pe verde */
+  background: var(--brand); /* verdele de pădure, continuarea antetului */
+  padding-top: 32px; /* aer sub antet */
+}
+.bandaInner {
+  display: grid; /* două coloane */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* lățimi egale */
+  align-items: end; /* fotografia pornește de jos */
+  gap: 48px; /* spațiul dintre coloane */
+}
+.text { padding-bottom: 48px; } /* banda se termină sub texte */
+.inapoi {
+  display: inline-flex; /* săgeata și textul */
+  align-items: center; /* centrate */
+  gap: 6px; /* spațiul dintre ele */
+  min-height: 44px; /* zonă de atingere */
+  margin-bottom: 12px; /* despărțit de titlu */
+  font-weight: 600; /* lizibil */
+  color: var(--on-brand-muted); /* crem stins */
+  text-decoration: none; /* fără subliniere */
+  border-radius: var(--r-mic); /* colțuri pentru focus */
+}
+.inapoi:hover { color: var(--on-brand); text-decoration: underline; } /* crem plin la hover */
+.titlu { font-size: clamp(2.4375rem, 5vw, 3.8125rem); letter-spacing: -0.035em; line-height: 1; } /* numele, mare */
+.bucatarie { margin-top: 12px; font-size: var(--t-20); font-weight: 600; } /* bucătăria */
+.descriere { margin-top: 4px; max-width: 46ch; color: var(--on-brand-muted); } /* descrierea */
+.livrare {
+  display: flex; /* opțiunile pe un rând */
+  flex-wrap: wrap; /* trec pe rândul următor când nu încap */
+  gap: 12px 28px; /* spațiul dintre ele */
+  margin: 24px 0 0; /* despărțite de descriere */
+  padding-top: 20px; /* aer deasupra */
+  border-top: 1px solid rgba(245, 239, 226, 0.2); /* linie crem discretă */
+}
+.livrare dt { font-weight: 800; } /* tipul de livrare */
+.livrare dd { margin: 0; font-size: var(--t-14); color: var(--on-brand-muted); } /* durata */
+
+.foto {
+  width: 100%; /* toată coloana */
+  aspect-ratio: 4 / 3; /* forma fotografiilor de preparat */
+  margin-bottom: -72px; /* ultimii 72px ies din bandă, peste hârtie */
+  object-fit: cover; /* fotografia umple cutia */
+  background: var(--padure-2); /* se vede doar până sosește imaginea */
+  border-radius: var(--r-foto); /* colțurile fotografiilor */
+}
+
+.meniu { padding-top: 112px; } /* loc pentru fotografia care iese din bandă */
+
+/* Telefon și tabletă: o coloană, fotografia sub texte */
+@media (max-width: 860px) {
+  .bandaInner { grid-template-columns: minmax(0, 1fr); gap: 0; } /* una sub alta */
+  .text { padding-bottom: 28px; } /* fotografia urmează */
+  .foto { margin-bottom: -56px; } /* iese mai puțin */
+  .meniu { padding-top: 88px; } /* loc pentru ea */
+}

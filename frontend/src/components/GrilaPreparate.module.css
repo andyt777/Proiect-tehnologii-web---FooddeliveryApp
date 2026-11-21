@@ -1,0 +1,25 @@
+/* Stilurile grilei de preparate (CSS Modules); folosite și de scheletele meniului */
+
+.grid {
+  list-style: none; /* fără buline */
+  margin: 0; /* fără margini implicite */
+  padding: 0; /* fără indentare */
+  display: grid; /* grilă */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* trei coloane pe desktop */
+  gap: 40px 28px; /* mai mult spațiu între rânduri decât între coloane: cardurile se despart prin aer */
+}
+
+/* Tabletă: două coloane */
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } /* două coloane */
+}
+
+/* Telefon: o coloană */
+@media (max-width: 560px) {
+  .grid { grid-template-columns: minmax(0, 1fr); gap: 32px; } /* una sub alta */
+}
+
+/* Tipărire: fără grila de preparate */
+@media print {
+  .grid { display: none !important; } /* doar comenzile se tipăresc */
+}

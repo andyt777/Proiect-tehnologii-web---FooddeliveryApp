@@ -1,0 +1,56 @@
+/* Stilurile alegerii tipului de livrare (CSS Modules) */
+
+.grup { margin: 0; padding: 0; border: none; min-width: 0; } /* fără chenarul implicit al fieldset-ului */
+.legenda { padding: 0; margin-bottom: 10px; font-weight: 800; } /* numele grupului */
+
+/* Varianta „lista” (pagina coșului): câte un rând pentru fiecare tip */
+.optiuni { display: flex; flex-direction: column; gap: 8px; } /* rândurile, unul sub altul */
+.optiune {
+  display: flex; /* bulina și textele */
+  align-items: center; /* centrate */
+  gap: 12px; /* spațiul dintre ele */
+  padding: 12px 14px; /* spațiu interior */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțuri de control */
+  cursor: pointer; /* mânuța */
+  transition: border-color 0.15s, background 0.15s; /* schimbare lină */
+}
+.optiune:hover { border-color: var(--text); } /* conturul mai închis la hover */
+.optiune input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); flex-shrink: 0; } /* bulina, verde */
+.optiune:has(input:checked) { border-color: var(--link); border-width: 2px; background: color-mix(in srgb, var(--link) 8%, transparent); } /* opțiunea aleasă: contur gros verde */
+.text { display: flex; flex-direction: column; } /* eticheta deasupra duratei */
+.eticheta { font-weight: 600; } /* ex. „Express” */
+.durata { font-size: var(--t-14); color: var(--muted); } /* ex. „Sosește în ~20 min” */
+
+/* Varianta „compact” (hero, pe verde): trei segmente pe un rând */
+.compact .legenda { margin-bottom: 8px; font-size: var(--t-14); font-weight: 600; color: var(--on-brand-muted); } /* legenda, discretă pe verde */
+.compact .optiuni {
+  flex-direction: row; /* segmentele pe un rând */
+  gap: 4px; /* aproape */
+  width: fit-content; /* cât segmentele */
+  max-width: 100%; /* nu iese din ecran */
+  padding: 4px; /* chenarul segmentelor */
+  background: rgba(245, 239, 226, 0.1); /* crem transparent pe verde */
+  border-radius: var(--r-camp); /* colțuri de control */
+}
+.compact .optiune {
+  position: relative; /* bulina ascunsă stă peste segment */
+  padding: 8px 14px; /* segment compact */
+  min-height: 40px; /* zonă de atingere */
+  color: var(--on-brand); /* crem */
+  border: none; /* fără contur */
+  border-radius: var(--r-mic); /* colțuri mici */
+}
+.compact .optiune:hover { background: rgba(245, 239, 226, 0.12); } /* hover discret */
+.compact .optiune input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; } /* bulina invizibilă, dar focalizabilă și clicabilă */
+.compact .optiune:has(input:checked) { color: var(--padure); background: var(--hartie); } /* segmentul ales: verde pe crem (11:1) */
+.compact .optiune:has(input:focus-visible) { outline: 3px solid var(--sofran); outline-offset: 2px; } /* focusul, pe segment (bulina e invizibilă) */
+.compact .eticheta { white-space: nowrap; } /* pe un rând */
+.durataCompact { margin-top: 8px; font-size: var(--t-14); color: var(--on-brand-muted); } /* durata opțiunii alese */
+
+/* Telefon îngust: segmentele împart lățimea */
+@media (max-width: 400px) {
+  .compact .optiuni { width: 100%; } /* toată lățimea */
+  .compact .optiune { flex: 1; justify-content: center; padding-inline: 6px; } /* lățimi egale */
+  .compact .eticheta { white-space: normal; text-align: center; line-height: 1.2; } /* „Ridicare personală” se poate rupe pe două rânduri */
+}

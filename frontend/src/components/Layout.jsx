@@ -1,12 +1,18 @@
-import { useEffect, useState } from "react"; // useState: tema aleasă; useEffect: derularea la schimbarea paginii
-import { Link, NavLink, Outlet, useLocation, useNavigationType } from "react-router-dom"; // navigarea fără reîncărcarea paginii
-import { Moon, Sun } from "lucide-react"; // iconițele butonului de temă
+import { useEffect, useState } from "react"; // useState: tema, sertarul, regiunea mesajelor; useEffect: derularea la schimbarea paginii
+import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } from "react-router-dom"; // navigarea fără reîncărcarea paginii
+import { Heart, House, Info, Moon, ShoppingBag, Sun } from "lucide-react"; // iconițele navigației și ale butoanelor
 import Logo from "./Logo.jsx"; // semnul Savoro
+import CosDrawer from "./CosDrawer.jsx"; // sertarul coșului, disponibil pe toate paginile
+import { RegiuneToast, ToastConfirmare } from "./UndoToast.jsx"; // mesajele de jos
+import { useStareMagazin } from "../magazin.js"; // meniul, coșul, favoritele, livrarea, confirmarea
+import { numarProduse } from "../cos.js"; // numărul de pe butonul coșului
+import { formatProduse } from "../format.js"; // „3 produse”
 import { cuTranzitie } from "../tranzitie.js"; // schimbarea temei, cu o trecere lină
 import styles from "./Layout.module.css"; // Etapa 8: stilurile layout-ului (CSS Modules)
 
-// Etapa 8: layout-ul comun tuturor paginilor: antetul cu logo, navigație și tema, locul paginii (<Outlet />) și subsolul.
-// Tema stă aici (nu în pagina comenzilor), ca butonul să meargă pe toate paginile.
+// Etapa 8: layout-ul comun tuturor paginilor: antetul, locul paginii (<Outlet />) și subsolul.
+// Redesign „Pădure”: Layout ține și starea comună (meniu, coș, favorite), ca paginile noi s-o poată folosi;
+// sertarul coșului și mesajele de jos sunt aici, deci funcționează pe orice pagină.
 
 // Tema de pornire: cea aleasă data trecută, altfel cea a sistemului de operare.
 // Scriptul din index.html pune aceeași temă pe <html> înainte de React, ca pagina să nu clipească.
@@ -20,31 +26,36 @@ function temaInitiala() { // funcție apelată o singură dată, la prima randar
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; // altfel, preferința sistemului de operare
 } // sfârșitul funcției
 
-// NavLink transmite isActive (adresa curentă se potrivește cu linkul); linkul activ primește și clasa „active”
+// NavLink transmite isActive; linkul activ primește și clasa „active” (aria-current="page" îl pune NavLink singur)
 function navClass({ isActive }) { // primește starea linkului de la NavLink
-  return isActive ? `${styles.link} ${styles.active}` : styles.link; // marcarea paginii curente, fără cod scris de mână
+  return isActive ? `${styles.link} ${styles.active}` : styles.link; // marcarea paginii curente
 } // sfârșitul funcției
 
 export default function Layout() { // componenta layout-ului, folosită ca element al rutei-părinte din App.jsx
   const [tema, setTema] = useState(temaInitiala); // pasăm funcția (nu rezultatul): React o apelează doar la prima randare
-  const { pathname, hash } = useLocation(); // adresa curentă, ex. „/comenzi/3” și „#fotografii”
+  const [cosDeschis, setCosDeschis] = useState(false); // sertarul coșului e deschis?
+  const [regiuneToast, setRegiuneToast] = useState(null); // elementul DOM al mesajelor de jos (pentru portalul din ComenziPage)
+  const magazin = useStareMagazin(); // starea comună a paginilor
+  const { pathname, hash, key } = useLocation(); // adresa curentă; key e nou la fiecare navigare, chiar spre aceeași adresă
   const tipNavigare = useNavigationType(); // „PUSH” (link), „REPLACE” sau „POP” (Înapoi / Înainte / prima încărcare)
+  const navigate = useNavigate(); // navigare din cod (din sertarul gol)
 
-  // La un link nou pagina pornește de sus (fără asta, rămâne derulată cât era pagina veche); cu „#ancoră”, derulăm la ea.
+  // La un link nou pagina pornește de sus; cu „#ancoră”, derulăm la ea și, dacă e un titlu cu tabIndex -1, îi dăm focus.
   // La Înapoi / Înainte (POP) nu atingem derularea: o gestionează browserul.
   useEffect(() => { // rulează după ce pagina nouă a fost desenată
     if (tipNavigare === "POP") return; // prima încărcare sau butoanele browserului
     const tinta = hash ? document.getElementById(decodeURIComponent(hash.slice(1))) : null; // elementul ancorei (sau null)
-    if (tinta) tinta.scrollIntoView(); // ex. „/despre#fotografii” duce direct la tabelul cu fotografii
-    else window.scrollTo(0, 0); // altfel, începutul paginii
-  }, [pathname, hash, tipNavigare]); // la fiecare schimbare de adresă
+    if (!tinta) { window.scrollTo(0, 0); return; } // fără ancoră: începutul paginii
+    tinta.scrollIntoView(); // ex. „/#comenzi” după plasarea comenzii
+    if (tinta.getAttribute("tabindex") === "-1") tinta.focus({ preventScroll: true }); // titlurile de secțiune primesc focus
+  }, [pathname, hash, key, tipNavigare]); // la fiecare navigare
 
   // Comutarea temei: state-ul pentru buton, atributul data-theme pentru CSS
   function handleTema() { // apelată de butonul de temă
     const noua = tema === "dark" ? "light" : "dark"; // tema opusă celei curente
     cuTranzitie(() => { // animăm schimbarea culorilor
       setTema(noua); // actualizăm state-ul (iconița și textul butonului)
-      document.documentElement.dataset.theme = noua; // setăm data-theme pe <html>; CSS-ul schimbă variabilele de culoare
+      document.documentElement.dataset.theme = noua; // CSS-ul schimbă variabilele de culoare
     }); // sfârșitul cuTranzitie
     try { // salvarea poate eșua
       localStorage.setItem("tema", noua); // reținem alegerea pentru vizita următoare
@@ -53,46 +64,79 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
     } // sfârșitul try/catch
   } // sfârșitul funcției
 
+  const disponibil = !magazin.incarcareMeniu && !magazin.eroareMeniu; // meniul a sosit, deci știm ce e în coș
+  const produseInCos = numarProduse(magazin.linii); // doar produsele care există în meniu
+  const etichetaCos = disponibil ? `Coș: ${formatProduse(produseInCos)}` : "Coș (indisponibil momentan)"; // fără meniu nu spunem „0 produse”
+  const context = { ...magazin, regiuneToast }; // ce primesc paginile prin useMagazin(): starea comună și regiunea mesajelor
+
   return ( // JSX-ul layout-ului
-    <>{/* Fragment: antetul, conținutul și subsolul, fără un <div> în plus */}
-      <header className={styles.header}>{/* bara de sus, aceeași pe toate paginile */}
-        <div className={`wrap ${styles.inner}`}>{/* containerul centrat („wrap” e clasa globală din index.css) */}
-          <h1 className={styles.logo}>{/* titlul principal al aplicației */}
-            <Link to="/" className={styles.logoLink}>{/* logo-ul duce la pagina comenzilor, fără reîncărcare */}
-              <Logo />{/* iconița SVG */}
-              <span className={styles.logoText}>Savoro</span>{/* numele aplicației */}
-            </Link>
-          </h1>
-          <nav className={styles.nav} data-testid="nav" aria-label="Navigare principală">{/* Etapa 8: reperul navigației pentru verificarea automată */}
-            <NavLink to="/" end className={navClass}>{/* end: activ doar pe „/”, nu pe orice adresă care începe cu „/” */}
-              Comenzi{/* textul linkului */}
+    <>{/* Fragment: antetul, conținutul, subsolul, sertarul și mesajele */}
+      <a href="#continut" className={styles.skip}>Sari la conținut</a>{/* primul element la Tab: sare peste antet */}
+      <header className={`${styles.header} pe-padure`}>{/* bara verde de sus, aceeași pe toate paginile */}
+        <div className={`wrap ${styles.inner}`}>{/* containerul centrat */}
+          <Link to="/" className={styles.logo}>{/* logo-ul duce la pagina principală */}
+            <Logo />{/* semnul */}
+            <span>Savoro</span>{/* numele aplicației */}
+          </Link>
+          <nav className={styles.nav} data-testid="nav" aria-label="Navigare principală">{/* Etapa 8: reperul navigației; pe telefon devine bara de jos */}
+            <NavLink to="/" end className={navClass}>{/* end: activ doar pe „/” */}
+              <House size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița, doar pe telefon */}
+              Acasă{/* textul linkului */}
+            </NavLink>
+            <NavLink to="/favorite" className={navClass}>{/* preparatele salvate */}
+              <Heart size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița */}
+              Favorite{/* textul linkului */}
+            </NavLink>
+            <NavLink to="/cos" className={({ isActive }) => `${navClass({ isActive })} ${styles.doarTelefon}`}>{/* pe telefon, coșul e în bara de jos */}
+              <span className={styles.navIconCos}>{/* iconița cu numărul */}
+                <ShoppingBag size={22} aria-hidden="true" className={styles.navIcon} />{/* sacoșa */}
+                {disponibil && produseInCos > 0 && <span key={produseInCos} className={`${styles.numar} ${styles.bump}`} aria-hidden="true">{produseInCos}</span>}{/* numărul, cu o mică săritură la schimbare */}
+              </span>
+              Coș{/* textul linkului */}
+              {disponibil && produseInCos > 0 && <span className="sr-only">: {formatProduse(produseInCos)}</span>}{/* numărul, pentru cititoarele de ecran */}
             </NavLink>
             <NavLink to="/despre" className={navClass}>{/* pagina de prezentare */}
+              <Info size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița */}
               Despre{/* textul linkului */}
             </NavLink>
           </nav>
-          <button // butonul de temă
-            type="button" // buton simplu
-            className={styles.themeToggle} // clasa din modul
-            onClick={handleTema} // pasăm funcția (fără paranteze), nu o apelăm aici
-            aria-pressed={tema === "dark"} // buton de tip comutator: anunță dacă modul întunecat e activ
-          >
-            {tema === "dark" ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}{/* iconița depinde de tema curentă */}
-            <span className={styles.themeLabel}>{tema === "dark" ? "Mod luminos" : "Mod întunecat"}</span>{/* textul arată ce se întâmplă la clic */}
-          </button>
+          <div className={styles.actiuni}>{/* tema și coșul, în dreapta */}
+            <button type="button" className={styles.temaBtn} onClick={handleTema} aria-pressed={tema === "dark"}>{/* comutator: anunță dacă modul întunecat e activ */}
+              {tema === "dark" ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}{/* iconița depinde de tema curentă */}
+              <span className={styles.temaText}>{tema === "dark" ? "Mod luminos" : "Mod întunecat"}</span>{/* pe telefon doar iconița; textul rămâne pentru cititoare */}
+            </button>
+            <button type="button" className={styles.cosBtn} onClick={() => setCosDeschis(true)} aria-haspopup="dialog" aria-label={etichetaCos}>{/* deschide sertarul; ascuns pe telefon */}
+              <ShoppingBag size={18} aria-hidden="true" />{/* sacoșa */}
+              <span aria-hidden="true">Coș</span>{/* textul vizibil; numele complet e în aria-label */}
+              {disponibil && produseInCos > 0 && <span key={produseInCos} className={`${styles.numar} ${styles.bump}`} aria-hidden="true">{produseInCos}</span>}{/* key = valoarea: animația pornește la fiecare schimbare */}
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className={styles.main}>{/* conținutul principal: aici se desenează pagina potrivită adresei */}
-        <Outlet />{/* locul paginii curente (ComenziPage, ComandaDetaliuPage, DesprePage sau NotFoundPage) */}
+      <main id="continut" tabIndex={-1} className={`titlu-focus ${styles.main}`}>{/* ținta lui „Sari la conținut”; aici se desenează pagina potrivită adresei */}
+        <Outlet context={context} />{/* paginile citesc starea comună cu useMagazin() */}
       </main>
 
       <footer className={styles.footer}>{/* subsolul paginii */}
         <div className={`wrap ${styles.footerInner}`}>{/* containerul centrat */}
-          <p>© Savoro · Proiect Tehnologii Web · UNSTPB 2026–2027</p>{/* textul de copyright */}
-          <p><Link to="/despre#fotografii">Fotografii: Unsplash</Link></p>{/* Etapa 8: autorii fotografiilor sunt pe pagina Despre */}
+          <p>© Savoro, proiect Tehnologii Web, UNSTPB 2026–2027</p>{/* textul de copyright */}
+          <p><Link to="/despre#fotografii">Fotografii de pe Unsplash</Link></p>{/* autorii fotografiilor sunt pe pagina Despre */}
         </div>
       </footer>
+
+      <CosDrawer // sertarul coșului
+        deschis={cosDeschis} // false = închis
+        linii={magazin.linii} // liniile unite cu meniul
+        disponibil={disponibil} // false = meniul nu a sosit, deci nu spunem „Coșul e gol”
+        onClose={() => setCosDeschis(false)} // X, Esc sau clic pe fundal
+        onSchimba={magazin.schimba} // „−” / „+”
+        onScoate={magazin.scoate} // coșul de gunoi
+        onVeziMeniul={() => navigate("/#meniu")} // din coșul gol: meniul de pe pagina principală
+      />
+      <RegiuneToast ref={setRegiuneToast}>{/* regiunea mesajelor; ComenziPage pune aici „Anulează” printr-un portal */}
+        <ToastConfirmare confirmare={magazin.confirmare} />{/* „Comanda a fost plasată” */}
+      </RegiuneToast>
     </>
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei

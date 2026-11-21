@@ -1,32 +1,30 @@
-/* Etapa 8: stilurile selectorului de cantitate (CSS Modules), mutate din App.css */
+/* Stilurile selectorului de cantitate „− 2 +” (CSS Modules) */
 
-/* Selectorul de cantitate „− 2 +”: butoane rotunde de 44px într-o pastilă */
 .stepper {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  background: var(--bg-soft);
-  border: 1px solid var(--line-strong); /* contur bleu al pastilei */
-  border-radius: 999px;
+  display: inline-flex; /* cele trei elemente pe un rând */
+  align-items: center; /* centrate */
+  gap: 2px; /* puțin spațiu între ele */
+  background: var(--soft); /* fundal discret */
+  border-radius: var(--r-camp); /* colțuri de control, nu pastilă */
 }
-.btn { /* Etapa 8: fostul .stepper-btn */
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  color: var(--text);
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+.btn {
+  display: grid; /* iconița pe mijloc */
+  place-items: center; /* centrată */
+  width: 44px; /* zonă de atingere de 44px */
+  height: 44px; /* la fel */
+  padding: 0; /* fără spațiu interior */
+  color: var(--text); /* iconița, în culoarea textului */
+  background: transparent; /* fără fundal */
+  border: none; /* fără contur */
+  border-radius: var(--r-camp); /* colțuri pentru hover și focus */
+  cursor: pointer; /* mânuța */
+  transition: background 0.15s; /* schimbare lină */
 }
-.btn:hover:not([aria-disabled="true"]) { color: var(--accent-text); background: var(--accent-soft); }
-.btn[aria-disabled="true"] { color: var(--subtle); cursor: not-allowed; }
-.value { /* Etapa 8: fostul .stepper-value */
-  min-width: 2ch;
-  font-weight: 700;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+.btn:hover:not([aria-disabled="true"]) { background: color-mix(in srgb, var(--text) 8%, transparent); } /* fundal discret la hover */
+.btn[aria-disabled="true"] { color: var(--muted); cursor: not-allowed; } /* „+” la plafon */
+.value {
+  min-width: 2ch; /* loc pentru două cifre */
+  font-weight: 800; /* cantitatea, groasă */
+  text-align: center; /* centrată */
+  font-variant-numeric: tabular-nums; /* cifrele nu își schimbă lățimea */
 }

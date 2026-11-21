@@ -1,16 +1,20 @@
 import { useEffect, useRef } from "react"; // useRef: referințe la butoane; useEffect: mutăm focusul după randare
-import { Plus } from "lucide-react"; // iconița plus de pe „Adaugă”
+import { Link } from "react-router-dom"; // numele restaurantului duce la pagina lui
+import { Heart, Plus } from "lucide-react"; // inima (favorite) și plusul de pe „Adaugă”
 import Stepper from "./Stepper.jsx"; // selectorul de cantitate
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
 import { imaginePreparat } from "../imagini.js"; // fotografia preparatului (sau null)
 import { formatLei } from "../format.js"; // formatarea prețului
+import { restaurantDupaNume } from "../restaurante.js"; // slug-ul restaurantului, pentru link
 import styles from "./MeniuCard.module.css"; // Etapa 8: stilurile cardului (CSS Modules)
 
-// Un preparat din meniu: fotografie, nume ..... preț, restaurant și butonul de adăugare peste fotografie.
+// Un preparat din meniu: fotografie (cu inima de favorite), nume, restaurant, preț și „Adaugă”.
 // Cât timp preparatul e în coș, butonul „Adaugă” e înlocuit de selectorul de cantitate.
-export default function MeniuCard({ produs, cantitate, onAdauga, onSchimba }) { // props: preparatul, cantitatea din coș (0 = nu e în coș) și callback-urile
-  const Iconita = ICONITE_CATEGORIE[produs.categorie]; // componenta iconiței categoriei (când nu avem fotografie)
+// Redesign „Pădure”: cardul e plat, pe hârtie (fără umbră și fără contur); faraRestaurant ascunde restaurantul pe pagina lui.
+export default function MeniuCard({ produs, cantitate, favorit, onAdauga, onSchimba, onFavorit, faraRestaurant = false }) { // props: preparatul, cantitatea din coș, dacă e favorit și callback-urile
+  const Iconita = ICONITE_CATEGORIE[produs.categorie]; // iconița categoriei (când nu avem fotografie)
   const imagine = imaginePreparat(produs.preparat); // „/img/....webp” sau null
+  const restaurant = restaurantDupaNume(produs.restaurant); // { slug, ... } sau null
   const adaugaRef = useRef(null); // butonul „Adaugă”
   const plusRef = useRef(null); // butonul „+” din selector
   // Butonul apăsat dispare la randare (Adaugă -> selector, sau selector -> Adaugă), iar focusul s-ar pierde.
@@ -18,59 +22,59 @@ export default function MeniuCard({ produs, cantitate, onAdauga, onSchimba }) { 
   const focusDupa = useRef(null); // "plus", "adauga" sau null
 
   useEffect(() => { // rulează după fiecare schimbare a cantității
-    if (focusDupa.current === "plus") plusRef.current?.focus(); // după „Adaugă”: focus pe „+”, ca a doua apăsare să mai adauge una
+    if (focusDupa.current === "plus") plusRef.current?.focus(); // după „Adaugă”: focus pe „+”
     if (focusDupa.current === "adauga") adaugaRef.current?.focus(); // după ce linia a dispărut: focus înapoi pe „Adaugă”
     focusDupa.current = null; // cererea a fost îndeplinită
-  }, [cantitate]); // doar când se schimbă cantitatea (și din coș, dar atunci focusDupa e null)
+  }, [cantitate]); // doar când se schimbă cantitatea
 
   function handleAdauga() { // clic pe „Adaugă”
     focusDupa.current = "plus"; // după randare, focusul trece pe „+”
-    onAdauga(produs.id); // anunțăm ComenziPage
+    onAdauga(produs.id); // anunțăm starea comună
   } // sfârșitul funcției
 
   function handleSchimba(delta) { // clic pe „−” sau „+”
     if (cantitate + delta <= 0) focusDupa.current = "adauga"; // linia dispare, deci revine butonul „Adaugă”
-    onSchimba(produs.id, delta); // anunțăm ComenziPage
+    onSchimba(produs.id, delta); // anunțăm starea comună
   } // sfârșitul funcției
 
   return ( // întoarcem JSX
     <li className={styles.card}>{/* un element al grilei de preparate */}
-      {imagine ? ( // avem fotografia preparatului
-        <img // fotografia, 4:3
-          className={styles.foto} // colțuri rotunjite, aceeași formă în toate cardurile
-          src={imagine} // ex. „/img/gyoza.webp”
-          alt="" // decorativă: numele preparatului e chiar dedesubt
-          width="720" // dimensiunile reale, ca browserul să rezerve locul înainte să sosească imaginea
-          height="540" // la fel
-          loading="lazy" // meniul e sub hero: se încarcă doar când ajunge aproape de ecran
-          decoding="async" // decodarea nu blochează desenarea paginii
-        />
-      ) : ( // preparat fără fotografie
-        <span className={`${styles.foto} ${styles.fotoGol}`} aria-hidden="true"><Iconita size={40} strokeWidth={1.5} /></span>// iconița categoriei, în aceeași cutie 4:3
-      )}{/* sfârșitul randării condiționate */}
-      <div className={styles.info}>{/* textele preparatului */}
-        <div className="card-top">{/* titlu ..... preț, ca pe un meniu tipărit */}
-          <h3>{produs.preparat}</h3>{/* numele preparatului */}
-          <span className="dots" aria-hidden="true" />{/* punctele dintre titlu și preț */}
-          <span className="price">{formatLei(produs.pret)}</span>{/* prețul unitar */}
-        </div>
-        <p className={styles.restaurant}>{produs.restaurant}</p>{/* restaurantul */}
-      </div>
-      <div className={styles.action}>{/* butonul / selectorul, așezat din CSS peste colțul fotografiei */}
-        {cantitate > 0 ? ( // preparatul e deja în coș
-          <Stepper preparat={produs.preparat} cantitate={cantitate} onSchimba={handleSchimba} plusRef={plusRef} className={styles.stepper} /> // selectorul − cantitate +; Etapa 8: clasa din modul îl pune peste fotografie
-        ) : ( // nu e în coș
-          <button // butonul de adăugare
-            ref={adaugaRef} // ca să-i putem da focus înapoi
-            type="button" // buton simplu
-            className={styles.btnAdd} // clasa din modul
-            onClick={handleAdauga} // adăugăm în coș
-            aria-label={`Adaugă ${produs.preparat} în coș`} // începe cu textul vizibil („Adaugă”), ca să meargă și comanda vocală
-          >
-            <Plus size={18} aria-hidden="true" />{/* iconiță decorativă */}
-            Adaugă{/* textul vizibil */}
-          </button>
+      <div className={styles.media}>{/* fotografia și inima */}
+        {imagine ? ( // avem fotografia preparatului
+          <img className={styles.foto} src={imagine} alt="" width="720" height="540" loading="lazy" decoding="async" />// decorativă: numele e chiar dedesubt
+        ) : ( // preparat fără fotografie
+          <span className={`${styles.foto} ${styles.fotoGol}`} aria-hidden="true"><Iconita size={40} strokeWidth={1.5} /></span>// iconița categoriei, în aceeași cutie 4:3
         )}{/* sfârșitul randării condiționate */}
+        <button // inima: comutator de favorite
+          type="button" // buton simplu
+          className={styles.inima} // cerc alb peste colțul fotografiei
+          onClick={() => onFavorit(produs.id)} // anunțăm starea comună
+          aria-pressed={favorit} // anunță dacă preparatul e salvat
+          aria-label={`Salvează ${produs.preparat} la favorite`} // același nume în ambele stări; aria-pressed spune starea
+        >
+          <Heart size={20} aria-hidden="true" fill={favorit ? "currentColor" : "none"} />{/* plină când e favorit: forma spune starea, nu doar culoarea */}
+        </button>
+      </div>
+      <div className={styles.info}>{/* textele preparatului */}
+        <h3 className={styles.nume}>{produs.preparat}</h3>{/* numele preparatului */}
+        {!faraRestaurant && ( // pe pagina restaurantului, numele lui e deja în titlu
+          restaurant ? ( // restaurant cunoscut: link spre pagina lui
+            <Link to={`/restaurante/${restaurant.slug}`} className={styles.restaurant}>{produs.restaurant}</Link> // numele restaurantului
+          ) : ( // restaurant necunoscut: doar text
+            <p className={styles.restaurant}>{produs.restaurant}</p> // numele, fără link
+          )
+        )}{/* sfârșitul randării condiționate */}
+        <div className={styles.jos}>{/* prețul și acțiunea, pe același rând */}
+          <span className={`price ${styles.pret}`}>{formatLei(produs.pret)}</span>{/* prețul unitar */}
+          {cantitate > 0 ? ( // preparatul e deja în coș
+            <Stepper preparat={produs.preparat} cantitate={cantitate} onSchimba={handleSchimba} plusRef={plusRef} /> // selectorul − cantitate +
+          ) : ( // nu e în coș
+            <button ref={adaugaRef} type="button" className={`btn-primary ${styles.adauga}`} onClick={handleAdauga} aria-label={`Adaugă ${produs.preparat} în coș`}>{/* începe cu textul vizibil, ca să meargă și comanda vocală */}
+              <Plus size={18} aria-hidden="true" />{/* iconiță decorativă */}
+              Adaugă{/* textul vizibil */}
+            </button>
+          )}{/* sfârșitul randării condiționate */}
+        </div>
       </div>
     </li>
   ); // sfârșitul JSX-ului

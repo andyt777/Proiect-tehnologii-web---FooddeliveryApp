@@ -49,7 +49,7 @@ function ComandaRand({ separator, ...props }) { // scoatem `separator`, restul p
     <>{/* Fragment: grupează elemente fără să adauge un nod în DOM */}
       {separator && ( // separatorul apare doar înaintea primei comenzi din grup
         <li className={styles.divider} role="presentation" style={{ viewTransitionName: `separator-${separator.id}` }}>{/* role="presentation": nu e un element real al listei pentru cititoarele de ecran; nume unic per separator */}
-          {separator.text} · {separator.numar}{/* ex. „Pe drum · 3” */}
+          {separator.text} <span className={styles.numar}>({separator.numar})</span>{/* ex. „Pe drum (3)” */}
         </li>
       )}{/* sfârșitul randării condiționate */}
       <ComandaCard {...props} />{/* spread: transmitem toate props-urile rămase cardului */}
@@ -57,7 +57,7 @@ function ComandaRand({ separator, ...props }) { // scoatem `separator`, restul p
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei
 
-// Ilustrația pentru lista goală: o farfurie goală, cu tacâmuri, în stilul iconițelor
+// Ilustrația pentru lista goală: o farfurie goală, cu tacâmuri, în stilul iconițelor (culorile vin din variabilele temei)
 function FarfurieGoala() { // componentă fără props
   return ( // întoarcem un SVG
     <svg className={styles.illus} width="120" height="96" viewBox="0 0 120 96" fill="none" aria-hidden="true">{/* decorativ */}
