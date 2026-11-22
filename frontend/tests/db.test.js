@@ -24,8 +24,8 @@ function despartePreparat(preparat) {
 
 // --- structura ---
 
-test("db.json are exact resursele comenzi, livratori, meniu și recenzii, toate liste", () => {
-  assert.deepEqual(Object.keys(db).sort(), ["comenzi", "livratori", "meniu", "recenzii"]);
+test("db.json are exact resursele comenzi, livratori, meniu, recenzii și restaurante, toate liste", () => {
+  assert.deepEqual(Object.keys(db).sort(), ["comenzi", "livratori", "meniu", "recenzii", "restaurante"]);
   for (const resursa of Object.keys(db)) assert.ok(Array.isArray(db[resursa]), resursa);
 });
 
@@ -93,7 +93,10 @@ test("meniu are 9 preparate cu id-uri text, nevide și unice", () => {
 test("meniu are câmpurile obligatorii, prețuri întregi pozitive și categorii cunoscute", () => {
   assert.deepEqual(NUME_CATEGORII, ["Pizza", "Burgers", "Asian"]);
   for (const p of db.meniu) {
-    assert.deepEqual(Object.keys(p).sort(), ["categorie", "id", "preparat", "pret", "restaurant"], `câmpuri greșite la ${p.id}`);
+    const chei = Object.keys(p).filter((k) => k !== "disponibil" && k !== "imagine").sort();
+    assert.deepEqual(chei, ["categorie", "id", "preparat", "pret", "restaurant"], `câmpuri greșite la ${p.id}`);
+    if (Object.hasOwn(p, "disponibil")) assert.equal(typeof p.disponibil, "boolean", `disponibil la ${p.id}`);
+    if (Object.hasOwn(p, "imagine")) assert.ok(p.imagine === null || typeof p.imagine === "string", `imagine la ${p.id}`);
     assert.ok(typeof p.preparat === "string" && p.preparat.trim().length > 0, `preparat gol la ${p.id}`);
     assert.ok(typeof p.restaurant === "string" && p.restaurant.trim().length > 0, `restaurant gol la ${p.id}`);
     assert.ok(Number.isInteger(p.pret) && p.pret > 0, `preț invalid la ${p.id}: ${p.pret}`);
@@ -146,10 +149,11 @@ test("câmpurile noi ale comenzilor, când există, au forma corectă, iar stare
   }
 });
 
-test("livratori: 2–3 livratori demo, cu id numeric unic, nume marcat „demo” și online boolean", () => {
+test("livratori: 2–3 livratori demo, cu id numeric unic, nume marcat „demo”, online și activ boolean", () => {
   assert.ok(db.livratori.length >= 2 && db.livratori.length <= 3, `${db.livratori.length} livratori`);
   for (const l of db.livratori) {
-    assert.deepEqual(Object.keys(l).sort(), ["id", "nume", "online"], `câmpuri greșite la livratorul ${l.id}`);
+    assert.deepEqual(Object.keys(l).sort(), ["activ", "id", "nume", "online"], `câmpuri greșite la livratorul ${l.id}`);
+    assert.equal(l.activ, true, `activ la ${l.id}`);
     assert.ok(Number.isInteger(l.id) && l.id > 0, `id invalid: ${l.id}`);
     assert.ok(typeof l.nume === "string" && /demo/i.test(l.nume), `numele nu spune că e demo: ${l.nume}`);
     assert.equal(typeof l.online, "boolean", `online la ${l.id}`);
@@ -159,4 +163,12 @@ test("livratori: 2–3 livratori demo, cu id numeric unic, nume marcat „demo�
 
 test("recenzii pornește goală (fără recenzii inventate)", () => {
   assert.deepEqual(db.recenzii, []);
+});
+
+test("restaurante pornește goală: fără profil, restaurantele sunt deschise (compatibil cu datele vechi)", () => {
+  assert.deepEqual(db.restaurante, []);
+});
+
+test("meniul din db.json: preparatele fără `disponibil` sunt disponibile", () => {
+  for (const p of db.meniu) assert.notEqual(p.disponibil, false, p.id);
 });

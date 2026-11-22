@@ -1,12 +1,13 @@
 import MeniuCard from "./MeniuCard.jsx"; // cardul unui preparat
 import { useMagazin } from "../magazin.js"; // coșul și favoritele, din starea comună
+import { motivIndisponibil, profilRestaurant } from "../program.js";
 import styles from "./GrilaPreparate.module.css"; // stilurile grilei (CSS Modules)
 
 // Redesign „Pădure”: grila de preparate, aceeași pe pagina principală, pe pagina unui restaurant și pe /favorite.
 // Coșul și favoritele vin din starea comună (Layout), deci cardurile se actualizează și când schimbi ceva din coș.
 // onInainteDeFavorit (opțional): /favorite mută focusul înainte ca un card să dispară din listă.
 export default function GrilaPreparate({ preparate, faraRestaurant = false, onInainteDeFavorit }) { // props: lista deja filtrată
-  const { cos, adauga, schimba, favorite, comutaFavorit } = useMagazin(); // starea comună
+  const { cos, adauga, schimba, favorite, comutaFavorit, profiluri, ceas } = useMagazin(); // starea comună
   const cantitati = Object.fromEntries(cos.map((l) => [l.produsId, l.cantitate])); // { p1: 2, p4: 1 } pentru căutare rapidă
 
   function handleFavorit(id) { // inima de pe un card
@@ -26,6 +27,7 @@ export default function GrilaPreparate({ preparate, faraRestaurant = false, onIn
           onSchimba={schimba} // „−” / „+”
           onFavorit={handleFavorit} // inima
           faraRestaurant={faraRestaurant} // pe pagina restaurantului nu repetăm numele lui
+          indisponibil={motivIndisponibil(produs, profilRestaurant(profiluri, produs.restaurant), ceas)}
         />
       ))}{/* sfârșitul map-ului */}
     </ul>

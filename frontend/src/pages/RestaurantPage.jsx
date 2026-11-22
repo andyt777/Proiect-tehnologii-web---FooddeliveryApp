@@ -12,6 +12,7 @@ import { fetchRecenzii } from "../api.js";
 import { formatData } from "../format.js";
 import { ETICHETE_NOTA, NOTA_MAX, curataRecenzii, formatNota, formatRecenzii, medieRecenzii, recenziiRestaurant } from "../recenzii.js";
 import { preparateRestaurant, restaurantDupaSlug } from "../restaurante.js"; // restaurantul din adresă și preparatele lui
+import { profilRestaurant, randuriProgram, stareRestaurant } from "../program.js";
 import styles from "./RestaurantPage.module.css"; // stilurile paginii (CSS Modules)
 
 // Redesign „Pădure”: pagina unui restaurant, la /restaurante/:slug (ex. /restaurante/sushi-kyo).
@@ -24,7 +25,10 @@ export default function RestaurantPage() { // componenta rutei
 } // sfârșitul componentei
 
 function PaginaRestaurant({ restaurant }) { // conținutul paginii, pentru un restaurant cunoscut
-  const { meniu, incarcareMeniu, eroareMeniu, reincarcaMeniu } = useMagazin(); // starea comună
+  const { meniu, incarcareMeniu, eroareMeniu, reincarcaMeniu, profiluri, ceas } = useMagazin(); // starea comună
+  const profil = profilRestaurant(profiluri, restaurant.nume);
+  const stare = stareRestaurant(profil, ceas);
+  const program = randuriProgram(profil);
   const titluRef = useRef(null); // titlul paginii
 
   useEffect(() => { // rulează o dată, după prima randare
@@ -56,7 +60,14 @@ function PaginaRestaurant({ restaurant }) { // conținutul paginii, pentru un re
             </Link>
             <h1 id="restaurant-titlu" className={`titlu-focus ${styles.titlu}`} ref={titluRef} tabIndex={-1}>{restaurant.nume}</h1>{/* numele */}
             <p className={styles.bucatarie}>Bucătărie {restaurant.bucatarie.toLowerCase()}</p>{/* ex. „Bucătărie japoneză” */}
-            <p className={styles.descriere}>{restaurant.descriere}</p>{/* descrierea, doar ce e în meniu */}
+            <p className={styles.descriere}>{profil?.descriere || restaurant.descriere}</p>{/* descrierea: din profil, altfel cea statică */}
+            {!stare.deschis && (
+              <p className={styles.stareInchis}>
+                <strong>{stare.eticheta}</strong>
+                {stare.motiv === "pauza" ? ". Restaurantul nu primește comenzi acum." : ". Poți programa o comandă în orele lui."}
+              </p>
+            )}
+            {profil?.telefon && <p className={styles.descriere}>Telefon: <a className={styles.telefon} href={`tel:${profil.telefon}`}>{profil.telefon}</a></p>}
             {medie && <p className={styles.medie}><strong>Nota {formatNota(medie.medie)} din {NOTA_MAX}</strong>, din {formatRecenzii(medie.numar)} ale clienților</p>}
             <dl className={styles.livrare}>{/* opțiunile de livrare, din livrare.js */}
               {TIPURI_LIVRARE.map((tip) => ( // un rând pentru fiecare tip
@@ -66,6 +77,14 @@ function PaginaRestaurant({ restaurant }) { // conținutul paginii, pentru un re
                 </div>
               ))}{/* sfârșitul map-ului */}
             </dl>
+            {program.length > 0 && (
+              <details className={styles.program}>
+                <summary>Programul</summary>
+                <dl>
+                  {program.map((r) => <div key={r.zi}><dt>{r.eticheta}</dt><dd>{r.text}</dd></div>)}
+                </dl>
+              </details>
+            )}
           </div>
           {restaurant.imagine && <img className={styles.foto} src={restaurant.imagine} alt="" width="720" height="540" fetchPriority="high" decoding="async" />}{/* decorativă; iese din bandă, peste hârtie */}
         </div>

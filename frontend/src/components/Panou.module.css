@@ -134,6 +134,57 @@
 .traseuLivrator { transition: transform 1s linear; } /* mișcarea lină între bătăi (oprită de reduced motion în index.css) */
 .traseuLivrator circle { fill: var(--accent); stroke: var(--surface); stroke-width: 3; } /* livratorul, verde */
 
+/* --- filele (tabs) paginilor de rol --- */
+.file { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 28px; border-bottom: 1px solid var(--line); }
+.fila {
+  min-height: 48px;
+  padding: 0 16px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--muted);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+}
+.fila:hover { color: var(--text); }
+.fila[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+.panouFila:focus-visible { outline-offset: 6px; }
+.sectiuneMica { margin-top: 16px; }
+
+/* --- formularele de administrare (meniu, profil, livratori) --- */
+.camp textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--contur);
+  border-radius: var(--r-camp);
+  resize: vertical;
+}
+.formularProfil { max-width: 720px; gap: 16px; }
+.program { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 0; border: none; }
+.program legend { margin-bottom: 4px; font-weight: 700; }
+.programZi { display: grid; grid-template-columns: 9rem minmax(0, 1fr) minmax(0, 1fr); align-items: end; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.formularRand { flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 12px 16px; max-width: 720px; }
+.formularRand button { margin-top: 26px; }
+
+/* --- admin: tabelul clienților --- */
+.tabelInvelis { margin-top: 16px; overflow-x: auto; }
+.tabel { width: 100%; border-collapse: collapse; font-size: var(--t-14); }
+.tabel th, .tabel td { padding: 12px 10px; text-align: left; border-top: 1px solid var(--line); }
+.tabel thead th { color: var(--muted); font-weight: 600; border-top: none; }
+.tabel tbody th { font-weight: 700; }
+.tabel td:last-child, .tabel thead th:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .programZi { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .programZi > :first-child { grid-column: 1 / -1; }
+}
+
 /* Tabletă: coloanele restaurantului una sub alta */
 @media (max-width: 960px) {
   .coloane { grid-template-columns: minmax(0, 1fr); } /* o coloană */

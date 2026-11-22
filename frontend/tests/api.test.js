@@ -3,7 +3,7 @@
 // Sub Node, import.meta.env nu există; api.js folosește `import.meta.env?.VITE_API_URL`, deci cade pe adresa implicită.
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import { API_URL, TIMP_MAXIM_MS, createComanda, createRecenzie, deleteComanda, fetchComanda, fetchComenzi, fetchLivratori, fetchMeniu, fetchRecenzii, request, updateComanda, updateLivrator } from "../src/api.js";
+import { API_URL, TIMP_MAXIM_MS, createComanda, createLivrator, createPreparat, deleteLivrator, deletePreparat, fetchRestaurante, salveazaProfilRestaurant, updatePreparat, createRecenzie, deleteComanda, fetchComanda, fetchComenzi, fetchLivratori, fetchMeniu, fetchRecenzii, request, updateComanda, updateLivrator } from "../src/api.js";
 
 const fetchOriginal = globalThis.fetch;
 afterEach(() => {
@@ -290,4 +290,48 @@ test("updateLivrator trimite PATCH /livratori/:id, iar createRecenzie POST /rece
   assert.equal(apeluriPost[0].url, "http://localhost:3001/recenzii");
   assert.equal(apeluriPost[0].optiuni.method, "POST");
   assert.deepEqual(JSON.parse(apeluriPost[0].optiuni.body), recenzie);
+});
+
+test("meniul: createPreparat POST /meniu, updatePreparat PATCH și deletePreparat DELETE pe /meniu/:id (id codificat)", async () => {
+  const preparat = { preparat: "Pizza Prosciutto", restaurant: "Pizzeria Napoli", categorie: "Pizza", pret: 50, imagine: null, disponibil: true };
+  let apeluri = fetchInregistrat(raspuns({ id: "abc1234", ...preparat }, 201));
+  assert.equal((await createPreparat(preparat)).id, "abc1234");
+  assert.equal(apeluri[0].url, "http://localhost:3001/meniu");
+  assert.equal(apeluri[0].optiuni.method, "POST");
+  assert.deepEqual(JSON.parse(apeluri[0].optiuni.body), preparat);
+  apeluri = fetchInregistrat(raspuns({ id: "p1", disponibil: false }));
+  await updatePreparat("p1", { disponibil: false });
+  assert.equal(apeluri[0].url, "http://localhost:3001/meniu/p1");
+  assert.equal(apeluri[0].optiuni.method, "PATCH");
+  apeluri = fetchInregistrat(raspuns({}));
+  await deletePreparat("../comenzi");
+  assert.equal(apeluri[0].url, "http://localhost:3001/meniu/..%2Fcomenzi");
+  assert.equal(apeluri[0].optiuni.method, "DELETE");
+});
+
+test("restaurantele: fetchRestaurante cere lista; salveazaProfilRestaurant face POST pentru unul nou și PUT pentru unul existent", async () => {
+  let apeluri = fetchInregistrat(raspuns([]));
+  assert.deepEqual(await fetchRestaurante(), []);
+  assert.equal(apeluri[0].url, "http://localhost:3001/restaurante");
+  const profil = { id: "sushi-kyo", descriere: "", telefon: "", pauzat: false, program: null };
+  apeluri = fetchInregistrat(raspuns(profil, 201));
+  await salveazaProfilRestaurant(profil, false);
+  assert.equal(apeluri[0].url, "http://localhost:3001/restaurante");
+  assert.equal(apeluri[0].optiuni.method, "POST");
+  apeluri = fetchInregistrat(raspuns(profil));
+  await salveazaProfilRestaurant(profil, true);
+  assert.equal(apeluri[0].url, "http://localhost:3001/restaurante/sushi-kyo");
+  assert.equal(apeluri[0].optiuni.method, "PUT");
+  assert.deepEqual(JSON.parse(apeluri[0].optiuni.body), profil);
+});
+
+test("livratorii: createLivrator POST /livratori, deleteLivrator DELETE /livratori/:id", async () => {
+  let apeluri = fetchInregistrat(raspuns({ id: 4, nume: "Ana (livrator demo)", online: false, activ: true }, 201));
+  await createLivrator({ nume: "Ana (livrator demo)", online: false, activ: true });
+  assert.equal(apeluri[0].url, "http://localhost:3001/livratori");
+  assert.equal(apeluri[0].optiuni.method, "POST");
+  apeluri = fetchInregistrat(raspuns({}));
+  await deleteLivrator(4);
+  assert.equal(apeluri[0].url, "http://localhost:3001/livratori/4");
+  assert.equal(apeluri[0].optiuni.method, "DELETE");
 });

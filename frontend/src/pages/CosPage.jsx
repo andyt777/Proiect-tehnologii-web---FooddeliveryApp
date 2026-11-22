@@ -11,6 +11,7 @@ import { COD_MAX, CUPOANE, campuriCupon, gasesteCupon, imparteReducere, normaliz
 import { formatLei, formatProduse } from "../format.js"; // sume și numărul de produse
 import { useMagazin } from "../magazin.js"; // starea comună: coșul, meniul, livrarea, confirmarea, contul
 import { adaugaAdresa, salveazaContact } from "../profil.js"; // salvarea datelor în cont, la cerere
+import { mesajeProbleme, momentVerificare, problemeCos } from "../program.js";
 import styles from "./CosPage.module.css"; // stilurile paginii (CSS Modules)
 
 const ALTA = "alta"; // valoarea opțiunii „Altă adresă”
@@ -20,7 +21,7 @@ const ALTA = "alta"; // valoarea opțiunii „Altă adresă”
 // liniile salvate ies din coș, cele eșuate rămân, cu un mesaj. Dacă totul a ajuns, mergem la „Comenzile tale”.
 // Fluxul complet: înainte de plasare, contactul, adresa (din cont sau scrisă), programarea și plata (simulată sau numerar).
 export default function CosPage() { // componenta rutei /cos
-  const { linii, setCos, schimba, scoate, incarcareMeniu, eroareMeniu, reincarcaMeniu, livrare, setLivrare, setConfirmare, profil, setProfil, noteazaComanda } = useMagazin(); // starea comună
+  const { linii, setCos, schimba, scoate, incarcareMeniu, eroareMeniu, reincarcaMeniu, livrare, setLivrare, setConfirmare, profil, setProfil, noteazaComanda, profiluri, ceas } = useMagazin(); // starea comună
   const [trimite, setTrimite] = useState(false); // true cât timp comenzile pleacă spre server
   const [eroare, setEroare] = useState(null); // ce linii n-au ajuns la server (null = nicio eroare)
   const [nume, setNume] = useState(profil.nume); // numele, completat din cont
@@ -46,6 +47,7 @@ export default function CosPage() { // componenta rutei /cos
   const oraRef = useRef(null); // câmpul „Ora”
   const plataRef = useRef(null); // „Numerar”
   const cuponInputRef = useRef(null);
+  const problemeRef = useRef(null);
   const cuponEliminaRef = useRef(null);
   const focusCupon = useRef(null);
   const navigate = useNavigate(); // navigarea după plasare
@@ -63,6 +65,10 @@ export default function CosPage() { // componenta rutei /cos
   const verificareCupon = cuponAplicat ? valideazaCupon(cuponAplicat.cod, { subtotal: total, comenziAnterioare: cuponAplicat.comenziAnterioare }) : null;
   const reducere = verificareCupon?.ok ? verificareCupon.reducere : 0;
   const totalDePlata = total - reducere;
+
+  // Preparatele indisponibile și restaurantele închise (la ora aleasă) sau în pauză blochează plasarea
+  const probleme = problemeCos(linii, profiluri, momentVerificare(programare, ora, ceas));
+  const problemaLinie = new Map(probleme.map((p) => [p.produsId, p.motiv]));
 
   // Câmpul cuponului și butonul „Elimină cuponul” se înlocuiesc unul pe altul; focusul îl urmează pe cel nou
   useEffect(() => {
@@ -168,10 +174,12 @@ export default function CosPage() { // componenta rutei /cos
     const acum = new Date(); // momentul plasării, același pentru validare, `creata` și istoric
     const date = { nume, telefon, livrare, adresa, programare, ora, metodaPlata }; // valorile din formular
     const gresitCupon = verificareCupon && !verificareCupon.ok ? { camp: "cupon", mesaj: `${verificareCupon.mesaj} Elimină cuponul sau schimbă coșul.` } : null;
-    const gresit = valideazaCheckout(date, acum) ?? gresitCupon; // null sau { camp, mesaj }
+    const blocaje = problemeCos(deTrimis, profiluri, momentVerificare(programare, ora, acum.getTime()));
+    const gresitCos = blocaje.length > 0 ? { camp: "cos", mesaj: mesajeProbleme(blocaje).join(" ") } : null;
+    const gresit = valideazaCheckout(date, acum) ?? gresitCupon ?? gresitCos; // null sau { camp, mesaj }
     if (gresit) { // datele nu sunt bune: nu trimitem nimic
       setProblema(gresit); // mesajul, sub câmpul greșit
-      const refuri = { nume: numeRef, telefon: telefonRef, adresa: scrieAdresa ? adresaNouaRef : adresaSalvataRef, programare: programareRef, ora: oraRef, plata: plataRef, cupon: cuponEliminaRef }; // referințele câmpurilor (obiectul e creat aici, în handler, nu la randare)
+      const refuri = { nume: numeRef, telefon: telefonRef, adresa: scrieAdresa ? adresaNouaRef : adresaSalvataRef, programare: programareRef, ora: oraRef, plata: plataRef, cupon: cuponEliminaRef, cos: problemeRef }; // referințele câmpurilor (obiectul e creat aici, în handler, nu la randare)
       refuri[gresit.camp]?.current?.focus(); // utilizatorul ajunge direct la câmpul de corectat
       return; // ne oprim
     } // sfârșitul validării
@@ -247,6 +255,7 @@ export default function CosPage() { // componenta rutei /cos
                     <h2 className={styles.nume}>{linie.preparat}</h2>{/* numele preparatului */}
                     <p className={styles.detalii}>{linie.restaurant}</p>{/* restaurantul */}
                     <p className={styles.detalii}><span className="price">{formatLei(linie.pret)}</span> bucata</p>{/* prețul unitar */}
+                    {problemaLinie.has(linie.id) && <p className={styles.problemaLinie}><CircleAlert size={16} aria-hidden="true" />{problemaLinie.get(linie.id)}</p>}
                   </div>
                   <div className={styles.actiuni}>{/* selectorul și ștergerea */}
                     <Stepper preparat={linie.preparat} cantitate={linie.cantitate} onSchimba={(delta) => handleSchimba(linie, delta)} />{/* − cantitate + */}
@@ -412,7 +421,18 @@ export default function CosPage() { // componenta rutei /cos
               )}
               <div className={styles.total}><dt>{reducere > 0 ? "De plată" : "Total"}</dt><dd className="price">{formatLei(totalDePlata)}</dd></div>{/* totalul, fără taxe inventate */}
             </dl>
-            {problema && <p className={styles.eroare}><CircleAlert size={18} aria-hidden="true" />Verifică datele marcate în formular.</p>}{/* lângă buton: unde e problema */}
+            {probleme.length > 0 && (
+              <div ref={problemeRef} tabIndex={-1} className={`titlu-focus ${styles.eroare}`} role={problema?.camp === "cos" ? "alert" : undefined}>
+                <CircleAlert size={18} aria-hidden="true" />
+                <div>
+                  <p>Comanda nu poate fi plasată încă:</p>
+                  <ul className={styles.problemeLista}>
+                    {mesajeProbleme(probleme).map((m) => <li key={m}>{m}</li>)}
+                  </ul>
+                </div>
+              </div>
+            )}
+            {problema && problema.camp !== "cos" && <p className={styles.eroare}><CircleAlert size={18} aria-hidden="true" />Verifică datele marcate în formular.</p>}{/* lângă buton: unde e problema */}
             {eroare && <p className={styles.eroare} role="alert"><CircleAlert size={18} aria-hidden="true" />{eroare}</p>}{/* Etapa 7: liniile care n-au ajuns au rămas în coș */}
             <button type="submit" className={`btn-primary ${styles.plaseaza}`} aria-disabled={trimite}>{trimite ? "Se trimite…" : "Plasează comanda"}</button>{/* trimite formularul; aria-disabled cât se trimite */}
           </aside>

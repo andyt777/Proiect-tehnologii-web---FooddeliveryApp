@@ -53,3 +53,19 @@ a.restaurant:hover { color: var(--link); text-decoration: underline; } /* se ved
 }
 .pret { font-size: var(--t-20); } /* prețul, vizibil */
 .adauga { min-height: 44px; padding: 0 18px; } /* pastila „Adaugă”, mai compactă */
+
+/* Preparat indisponibil sau restaurant închis: eticheta peste fotografie, fotografia stinsă, butonul dezactivat */
+.cardIndisponibil .foto { opacity: 0.55; filter: grayscale(0.6); }
+.eticheta {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 4px 10px;
+  font-size: var(--t-14);
+  font-weight: 700;
+  color: #FFFDF8;
+  background: #2B2B2B;
+  border-radius: var(--r-mic);
+}
+.adauga:disabled { cursor: not-allowed; opacity: 1; color: var(--muted); }

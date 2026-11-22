@@ -69,3 +69,12 @@
   .foto { margin-bottom: -56px; } /* iese mai puțin */
   .meniu { padding-top: 88px; } /* loc pentru ea */
 }
+
+/* Profilul restaurantului: starea (închis / pauză), telefonul și programul */
+.stareInchis { margin-top: 12px; padding: 8px 12px; max-width: 46ch; color: #FFFDF8; background: rgba(0, 0, 0, 0.35); border-left: 4px solid #FFFDF8; border-radius: var(--r-mic); }
+.telefon { color: var(--on-brand); }
+.program { margin-top: 16px; color: var(--on-brand-muted); }
+.program summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--on-brand); cursor: pointer; }
+.program dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 16px; margin: 8px 0 0; font-size: var(--t-14); }
+.program dl div { display: contents; }
+.program dd { margin: 0; font-variant-numeric: tabular-nums; }

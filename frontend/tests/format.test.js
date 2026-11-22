@@ -1,7 +1,7 @@
 // Teste pentru formatările românești (src/format.js), rulate cu `node --test`
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { formatData, formatLei, formatComenzi, formatOra, formatProduse } from "../src/format.js";
+import { formatData, formatLei, formatLeiDe, formatComenzi, formatOra, formatProduse } from "../src/format.js";
 
 // --- formatLei ---
 // Valorile așteptate au fost verificate pe Node 24 (ICU complet): "ro-RO" folosește punct pentru mii și virgulă pentru zecimale
@@ -70,4 +70,19 @@ test("formatOra: ora în format românesc, null pentru lipsă sau text greșit",
   const iso = new Date(2026, 10, 22, 18, 5).toISOString();
   assert.equal(formatOra(iso), "18:05");
   for (const rau of [null, undefined, "", "nu e dată", 42]) assert.equal(formatOra(rau), null);
+});
+
+test("formatLeiDe: regula lui „de” și singularul", () => {
+  assert.equal(formatLeiDe(1), "1 leu");
+  assert.equal(formatLeiDe(2), "2 lei");
+  assert.equal(formatLeiDe(19), "19 lei");
+  assert.equal(formatLeiDe(20), "20 de lei");
+  assert.equal(formatLeiDe(52), "52 de lei");
+  assert.equal(formatLeiDe(100), "100 de lei");
+  assert.equal(formatLeiDe(101), "101 lei");
+  assert.equal(formatLeiDe(119), "119 lei");
+  assert.equal(formatLeiDe(120), "120 de lei");
+  assert.equal(formatLeiDe(1000), "1.000 de lei");
+  assert.equal(formatLeiDe(0), "0 lei");
+  assert.equal(formatLeiDe(42.5), "42,5 lei");
 });

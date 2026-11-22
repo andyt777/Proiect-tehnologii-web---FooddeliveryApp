@@ -142,3 +142,8 @@
   .actiuni { grid-area: actiuni; } /* selectorul și ștergerea */
   .subtotal { grid-area: subtotal; font-size: var(--t-16); } /* subtotalul */
 }
+
+/* Liniile care blochează plasarea (preparat indisponibil, restaurant închis sau în pauză) */
+.problemaLinie { display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: var(--t-14); font-weight: 700; color: var(--eroare); }
+.problemeLista { margin: 6px 0 0; padding-left: 18px; font-weight: 400; }
+.problemeLista li + li { margin-top: 4px; }

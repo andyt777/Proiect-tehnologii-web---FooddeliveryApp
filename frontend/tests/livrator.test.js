@@ -69,7 +69,7 @@ test("curataLivratori scoate intrările stricate și păstrează doar câmpurile
     { id: 5, nume: "Ioana", online: true, parola: "x" },
     { id: "6", nume: "Mihai", online: "true" },
   ]);
-  assert.deepEqual(curate, [{ id: 5, nume: "Ioana", online: true }, { id: "6", nume: "Mihai", online: false }]);
+  assert.deepEqual(curate, [{ id: 5, nume: "Ioana", online: true, activ: true }, { id: "6", nume: "Mihai", online: false, activ: true }]);
 });
 
 // --- curseDisponibile ---

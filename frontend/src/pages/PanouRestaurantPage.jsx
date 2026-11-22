@@ -7,7 +7,13 @@ import PoartaRol from "../components/PoartaRol.jsx"; // pagina doar în rolul Re
 import { patchTranzitie } from "../actiuniComenzi.js"; // corpul PATCH, cu verificarea rolului
 import { useComenziLive } from "../comenziLive.js"; // comenzile, ținute la zi
 import { useMagazin } from "../magazin.js"; // urmărirea comenzilor din Layout
-import { RESTAURANTE_INFO } from "../restaurante.js"; // restaurantele demo
+import { RESTAURANTE_INFO, restaurantDupaNume } from "../restaurante.js"; // restaurantele demo
+import AdminMeniu from "../components/AdminMeniu.jsx";
+import FilePanou, { PanouFila } from "../components/FilePanou.jsx";
+import FormularProfilRestaurant from "../components/FormularProfilRestaurant.jsx";
+import { formatLei } from "../format.js";
+import { comenziIncheiateRestaurant, comenziRestaurant, formatMinute, formatProcent, indicatori } from "../metrici.js";
+import { profilRestaurant, stareRestaurant } from "../program.js";
 import { ETICHETE_PAS_LIVRARE, esteRidicare, normalizeazaComanda, poateTrece } from "../stari.js"; // stările, cu valorile implicite
 import styles from "../components/Panou.module.css"; // stilurile comune ale panourilor (CSS Modules)
 
@@ -18,13 +24,22 @@ const COLOANE = [ // ordinea de pe ecran
   { id: "gata", titlu: "Gata", stari: ["gata"], gol: "Nicio comandă gata." }, // așteaptă livratorul sau clientul
 ]; // sfârșitul listei
 
+const FILE = [
+  { id: "comenzi", titlu: "Comenzi" },
+  { id: "meniu", titlu: "Meniu" },
+  { id: "profil", titlu: "Profil și program" },
+  { id: "istoric", titlu: "Istoric și indicatori" },
+];
+const LIMITA_ISTORIC = 30;
+
 // Pachetul B: pagina /restaurant (rolul demo Restaurant): comenzile unui restaurant, pe coloane, cu acțiunile lui.
 export default function PanouRestaurantPage() { // componenta rutei
   return <PoartaRol rol="restaurant" titlu="Comenzile restaurantului"><PanouRestaurant /></PoartaRol>; // explicație dacă rolul e altul
 } // sfârșitul componentei
 
 function PanouRestaurant() { // conținutul, în rolul Restaurant
-  const { noteazaComanda } = useMagazin(); // fără notificări despre acțiunile făcute aici
+  const { noteazaComanda, profiluri, reincarcaProfiluri, ceas } = useMagazin(); // fără notificări despre acțiunile făcute aici
+  const [fila, setFila] = useState("comenzi");
   const { comenzi, incarcare, eroare, acum, reincarca, aplica } = useComenziLive(noteazaComanda); // lista, la zi
   const [restaurant, setRestaurant] = useState(RESTAURANTE_INFO[0].nume); // restaurantul ales
   const [deschis, setDeschis] = useState(null); // formularul deschis: { id, tip: „accepta” | „respinge” } sau null
@@ -73,6 +88,11 @@ function PanouRestaurant() { // conținutul, în rolul Restaurant
     setDeschis(null); // formularul dispare
   } // sfârșitul funcției
 
+  const info = restaurantDupaNume(restaurant);
+  const profil = profilRestaurant(profiluri, restaurant);
+  const stare = stareRestaurant(profil, ceas);
+  const incheiate = comenziIncheiateRestaurant(comenzi, restaurant);
+  const cifre = indicatori(comenziRestaurant(comenzi, restaurant));
   const aleRestaurantului = comenzi.filter((c) => c?.restaurant === restaurant).map((c) => ({ bruta: c, n: normalizeazaComanda(c) })); // comenzile lui, cu valorile implicite
 
   function actiuniCard(bruta, c) { // butoanele și formularele unui card
@@ -102,7 +122,51 @@ function PanouRestaurant() { // conținutul, în rolul Restaurant
             {RESTAURANTE_INFO.map((r) => <option key={r.slug} value={r.nume}>{r.nume}</option>)}{/* cele trei restaurante demo */}
           </select>
         </div>
+        <p className={styles.indiciu}>Acum: <strong>{stare.eticheta}</strong>{profil ? "" : " (fără program salvat)"}.</p>
       </div>
+
+      <FilePanou prefix="restaurant" eticheta="Secțiunile restaurantului" file={FILE} activa={fila} onAlege={setFila} />
+
+      {fila === "meniu" && <PanouFila prefix="restaurant" id="meniu"><AdminMeniu key={restaurant} restaurant={restaurant} /></PanouFila>}
+      {fila === "profil" && info && (
+        <PanouFila prefix="restaurant" id="profil">
+          <section className={styles.sectiune} aria-labelledby="restaurant-profil-titlu">
+            <h2 id="restaurant-profil-titlu" className={styles.sectiuneTitlu}>Profil și program</h2>
+            <FormularProfilRestaurant key={`${info.slug}-${profil ? "salvat" : "nou"}`} restaurant={info} profil={profil} onSalvat={reincarcaProfiluri} />
+          </section>
+        </PanouFila>
+      )}
+      {fila === "istoric" && (
+        <PanouFila prefix="restaurant" id="istoric">
+          <section className={styles.sectiune} aria-labelledby="restaurant-indicatori">
+            <h2 id="restaurant-indicatori" className={styles.sectiuneTitlu}>Indicatori</h2>
+            <p className={styles.nota}>Calculați din comenzile acestui restaurant și din istoricul lor. Comenzile vechi, fără istoric, intră doar în numărătoare și valoare.</p>
+            <dl className={styles.indicatori}>
+              <div><dt>Comenzi</dt><dd>{cifre.numar}</dd></div>
+              <div><dt>Valoare (fără anulate și respinse)</dt><dd>{formatLei(cifre.valoare)}</dd></div>
+              <div><dt>Timp mediu până la acceptare</dt><dd>{formatMinute(cifre.medieAcceptareMin)}</dd></div>
+              <div><dt>Timp mediu de preparare</dt><dd>{formatMinute(cifre.mediePreparareMin)}</dd></div>
+              <div><dt>Rata de finalizare</dt><dd>{formatProcent(cifre.rataFinalizare)}</dd></div>
+              <div><dt>Rata de anulare și respingere</dt><dd>{formatProcent(cifre.rataAnulare)}</dd></div>
+            </dl>
+          </section>
+          <section className={styles.sectiune} aria-labelledby="restaurant-istoric">
+            <h2 id="restaurant-istoric" className={styles.sectiuneTitlu}>Comenzi încheiate</h2>
+            {incarcare ? <p className="info" role="status">Se încarcă comenzile…</p> : incheiate.length === 0 ? (
+              <p className={styles.gol}>Nicio comandă încheiată încă.</p>
+            ) : (
+              <>
+                <p className={styles.indiciu}>Livrate, anulate și respinse, cele mai noi primele{incheiate.length > LIMITA_ISTORIC ? ` (ultimele ${LIMITA_ISTORIC} din ${incheiate.length})` : ""}.</p>
+                <ul className={`${styles.lista} ${styles.sectiuneMica}`}>
+                  {incheiate.slice(0, LIMITA_ISTORIC).map((c) => <li key={c.id}><ComandaPanou comanda={c} /></li>)}
+                </ul>
+              </>
+            )}
+          </section>
+        </PanouFila>
+      )}
+      {fila === "comenzi" && (
+      <PanouFila prefix="restaurant" id="comenzi">
 
       {eroareActiune && ( // o acțiune a eșuat; coloanele rămân
         <div className={`error ${styles.avertisment}`}>{/* panoul de eroare */}
@@ -153,6 +217,8 @@ function PanouRestaurant() { // conținutul, în rolul Restaurant
           </div>
         </>
       )}{/* sfârșitul celor trei stări */}
+      </PanouFila>
+      )}
     </div>
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei

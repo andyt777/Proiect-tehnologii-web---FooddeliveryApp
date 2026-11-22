@@ -6,7 +6,7 @@
 // Coșul devine câte o comandă pentru fiecare linie, deci reducerea întregului coș se împarte pe linii (imparteReducere).
 // Verificările rulează doar în browser: un cupon „valid” aici nu e o garanție, ar trebui verificat și pe un server real.
 // Funcții pure (fără React sau fetch), testate cu `node --test`.
-import { formatLei } from "./format.js"; // sumele din mesaje („100 lei”)
+import { formatLeiDe } from "./format.js"; // sumele din mesaje („100 de lei”, „1 leu”)
 import { normalizeazaComanda } from "./stari.js"; // comenzile citite cu valorile implicite
 
 export const COD_MAX = 20; // lungimea maximă a unui cod scris de utilizator
@@ -50,8 +50,7 @@ export function valideazaCupon(cod, { subtotal, comenziAnterioare = 0 }) { // pr
   if (!cupon) return { ok: false, mesaj: "Codul nu există. Verifică literele și cifrele." }; // cod necunoscut
   if (!Number.isFinite(subtotal) || subtotal < cupon.minim) { // coșul e prea mic
     const lipsa = Number.isFinite(subtotal) ? cupon.minim - subtotal : cupon.minim; // cât mai trebuie adăugat
-    const textLipsa = lipsa === 1 ? "1 leu" : formatLei(lipsa);
-    return { ok: false, mesaj: `Codul ${cupon.cod} e valabil de la ${formatLei(cupon.minim)}. Mai adaugă produse de ${textLipsa}.` }; // ce poate face utilizatorul
+    return { ok: false, mesaj: `Codul ${cupon.cod} e valabil de la ${formatLeiDe(cupon.minim)}. Mai adaugă produse de ${formatLeiDe(lipsa)}.` }; // ce poate face utilizatorul
   } // sfârșitul if
   if (cupon.primaComanda && comenziAnterioare > 0) return { ok: false, mesaj: `Codul ${cupon.cod} e doar pentru prima comandă, iar tu ai deja comenzi plasate din coș.` }; // regula primei comenzi
   const reducere = calculeazaReducere(cupon, subtotal); // suma în lei

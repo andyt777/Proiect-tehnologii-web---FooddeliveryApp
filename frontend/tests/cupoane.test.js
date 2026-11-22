@@ -108,18 +108,18 @@ test("valideazaCupon SAVORO10: exact la minim (100) e valabil, 10 lei reducere",
 test("valideazaCupon SAVORO10: sub minim (99) spune cât mai trebuie adăugat", () => {
   const r = valideazaCupon("SAVORO10", { subtotal: 99 });
   assert.equal(r.ok, false);
-  assert.match(r.mesaj, /^Codul SAVORO10 e valabil de la 100 lei\. Mai adaugă produse de 1 /);
+  assert.match(r.mesaj, /^Codul SAVORO10 e valabil de la 100 de lei\. Mai adaugă produse de 1 /);
 });
 
 test("valideazaCupon: lipsa de 1 leu se scrie la singular", () => {
   const r = valideazaCupon("SAVORO10", { subtotal: 99 });
-  assert.equal(r.mesaj, "Codul SAVORO10 e valabil de la 100 lei. Mai adaugă produse de 1 leu.");
+  assert.equal(r.mesaj, "Codul SAVORO10 e valabil de la 100 de lei. Mai adaugă produse de 1 leu.");
 });
 
 test("valideazaCupon: subtotal invalid e tratat ca prea mic, cu tot minimul lipsă", () => {
   const r = valideazaCupon("SAVORO10", { subtotal: NaN });
   assert.equal(r.ok, false);
-  assert.match(r.mesaj, /Mai adaugă produse de 100 lei/);
+  assert.match(r.mesaj, /Mai adaugă produse de 100 de lei/);
 });
 
 test("valideazaCupon PRIMA20: prima comandă, exact la minim (60), 20 lei reducere", () => {
@@ -130,7 +130,7 @@ test("valideazaCupon PRIMA20: prima comandă, exact la minim (60), 20 lei reduce
 test("valideazaCupon PRIMA20: sub minim (59) e refuzat", () => {
   const r = valideazaCupon("PRIMA20", { subtotal: 59, comenziAnterioare: 0 });
   assert.equal(r.ok, false);
-  assert.match(r.mesaj, /valabil de la 60 lei/);
+  assert.match(r.mesaj, /valabil de la 60 de lei/);
 });
 
 test("valideazaCupon PRIMA20: refuzat când clientul are deja comenzi din coș", () => {
@@ -297,4 +297,9 @@ test("fluxul pe coș: reducerea validată, împărțită pe linii, dă exact sum
   const comenzi = preturi.map((pret, i) => ({ pret, ...campuriCupon(v.cupon.cod, parti[i]) }));
   const platit = comenzi.reduce((s, c) => s + dePlata(c), 0);
   assert.equal(platit, subtotal - v.reducere);
+});
+
+test("valideazaCupon: sumele din mesaj folosesc „de” (100 de lei, 52 de lei), dar nu sub 20", () => {
+  assert.equal(valideazaCupon("SAVORO10", { subtotal: 48 }).mesaj, "Codul SAVORO10 e valabil de la 100 de lei. Mai adaugă produse de 52 de lei.");
+  assert.equal(valideazaCupon("SAVORO10", { subtotal: 85 }).mesaj, "Codul SAVORO10 e valabil de la 100 de lei. Mai adaugă produse de 15 lei.");
 });

@@ -10,6 +10,7 @@
   gap: 28px; /* spațiul dintre carduri */
 }
 .card {
+  position: relative;
   display: flex; /* fotografia, numele, detaliile */
   flex-direction: column; /* unul sub altul */
   gap: 2px; /* textele aproape */
@@ -51,4 +52,18 @@ a.card:hover .foto { transform: scale(1.015); } /* fotografia se apropie puțin 
 /* Tipărire: fără restaurante */
 @media print {
   .section { display: none !important; } /* doar comenzile se tipăresc */
+}
+
+/* Restaurant închis sau în pauză: eticheta peste fotografie (textul e citit odată cu linkul) */
+.eticheta {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 1;
+  padding: 4px 10px;
+  font-size: var(--t-14);
+  font-weight: 700;
+  color: #FFFDF8;
+  background: #2B2B2B;
+  border-radius: var(--r-mic);
 }

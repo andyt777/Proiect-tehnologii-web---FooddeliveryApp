@@ -3,12 +3,14 @@
 // și o dă paginilor prin <Outlet context={...} />. Logica rămâne în funcțiile pure din cos.js și favorite.js.
 import { useEffect, useState } from "react"; // useState: datele; useEffect: cererea și salvarea în localStorage
 import { useOutletContext } from "react-router-dom"; // paginile citesc starea dată de Layout
-import { fetchMeniu } from "./api.js"; // GET /meniu, prin singurul fișier cu fetch
+import { fetchMeniu, fetchRestaurante } from "./api.js"; // GET /meniu și /restaurante, prin singurul fișier cu fetch
 import { adaugaInCos, citesteCos, liniiCos, pastreazaDinMeniu, schimbaCantitate, scoateDinCos } from "./cos.js"; // logica pură a coșului
 import { citesteFavorite, comutaFavorit, pastreazaFavoriteDinMeniu } from "./favorite.js"; // logica pură a favoritelor
 import { citesteProfil } from "./profil.js"; // fluxul complet: contul clientului (nume, telefon, adrese)
 import { citesteRol } from "./rol.js"; // pachetul B: rolul ales în comutatorul demo
+import { curataProfiluri } from "./program.js";
 
+const INTERVAL_CEAS_MS = 60000;
 const DURATA_CONFIRMARE_MS = 5000; // mesajul „Comanda a fost plasată” dispare singur după 5 secunde
 
 // Citește o listă salvată; textul din localStorage nu e de încredere, deci trece prin funcția de verificare
@@ -41,6 +43,25 @@ export function useStareMagazin() { // fără parametri
   const [rol, setRol] = useState(() => citesteSalvat("rol", citesteRol)); // pachetul B: „client”, „restaurant”, „livrator” sau „admin” (demo, nu securitate)
   const [livrare, setLivrare] = useState("standard"); // tipul de livrare ales în hero sau în coș (aceeași valoare peste tot)
   const [confirmare, setConfirmare] = useState(null); // ultima plasare reușită, pentru mesajul de jos (null = ascuns)
+  const [profiluri, setProfiluri] = useState(() => new Map());
+  const [versiuneProfiluri, setVersiuneProfiluri] = useState(0);
+  const [ceas, setCeas] = useState(null);
+
+  // Profilurile restaurantelor (program, pauză). O eroare nu oprește magazinul: fără profil, restaurantul e deschis.
+  // `ceas` (ms) se actualizează după citire și apoi la fiecare minut, în callback-uri (randarea rămâne pură).
+  useEffect(() => {
+    let ignore = false;
+    fetchRestaurante()
+      .then((lista) => { if (!ignore) setProfiluri(curataProfiluri(lista)); })
+      .catch(() => {})
+      .finally(() => { if (!ignore) setCeas(Date.now()); });
+    return () => { ignore = true; };
+  }, [versiuneProfiluri]);
+
+  useEffect(() => {
+    const cronometru = setInterval(() => setCeas(Date.now()), INTERVAL_CEAS_MS);
+    return () => clearInterval(cronometru);
+  }, []);
 
   // Meniul se cere după prima randare și din nou la fiecare reîncercare (același tipar ca în Etapa 6)
   useEffect(() => { // efect secundar: sincronizăm state-ul cu serverul
@@ -88,6 +109,9 @@ export function useStareMagazin() { // fără parametri
     incarcareMeniu, // true cât se încarcă
     eroareMeniu, // mesajul erorii sau null
     reincarcaMeniu, // „Încearcă din nou”
+    profiluri,
+    reincarcaProfiluri: () => setVersiuneProfiluri((n) => n + 1),
+    ceas,
     cos, // liniile brute { produsId, cantitate }
     setCos, // pentru plasarea comenzii (scade exact cantitățile trimise)
     linii: liniiCos(cos, meniu), // coșul unit cu meniul: preparat, preț, cantitate, subtotal

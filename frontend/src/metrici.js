@@ -133,3 +133,21 @@ export function formatProcent(rata) { // primește o rată între 0 și 1 (sau n
 export function formatMinute(minute) { // primește minute (sau null)
   return typeof minute === "number" && Number.isFinite(minute) ? `${minute.toLocaleString("ro-RO", { maximumFractionDigits: 1 })} min` : "—"; // virgulă zecimală românească
 } // sfârșitul funcției
+
+// Istoricul unui restaurant: comenzile lui încheiate (livrate, anulate, respinse), cele mai noi primele
+export function comenziIncheiateRestaurant(comenzi, restaurant) {
+  if (!Array.isArray(comenzi)) return [];
+  const moment = (c) => {
+    const m = momenteStari(c);
+    const ms = Math.max(...[...m.values()].filter(Number.isFinite));
+    return Number.isFinite(ms) ? ms : Number(c?.id) || 0;
+  };
+  return comenzi
+    .filter((c) => c?.restaurant === restaurant && STARI_FINALE.includes(normalizeazaComanda(c).stare))
+    .sort((a, b) => moment(b) - moment(a));
+}
+
+// Comenzile unui restaurant (pentru indicatorii lui, calculați cu `indicatori`)
+export function comenziRestaurant(comenzi, restaurant) {
+  return Array.isArray(comenzi) ? comenzi.filter((c) => c?.restaurant === restaurant) : [];
+}

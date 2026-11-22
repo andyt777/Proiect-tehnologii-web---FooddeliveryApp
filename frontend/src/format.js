@@ -9,6 +9,13 @@ function prepozitiaDe(numar) { // funcție internă, folosită de formatComenzi 
   return numar !== 0 && (ultimeleDoua === 0 || ultimeleDoua >= 20) ? "de " : ""; // „de ” doar unde gramatica o cere
 } // sfârșitul funcției
 
+// O sumă în lei într-o propoziție, cu regula lui „de”: „1 leu”, „19 lei”, „52 de lei”, „100 de lei”, „101 lei”
+export function formatLeiDe(suma) {
+  if (suma === 1) return "1 leu";
+  const text = formatLei(suma);
+  return Number.isInteger(suma) && prepozitiaDe(Math.abs(suma)) !== "" ? text.replace(/ lei$/, " de lei") : text;
+}
+
 // Acordul în română: 1 comandă, 2 comenzi, 20 de comenzi
 export function formatComenzi(numar) { // primește numărul de comenzi
   if (numar === 1) return "1 comandă"; // singularul e un caz special

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom"; // numele restaurantului duce la pagina
 import { Heart, Plus } from "lucide-react"; // inima (favorite) și plusul de pe „Adaugă”
 import Stepper from "./Stepper.jsx"; // selectorul de cantitate
 import { ICONITE_CATEGORIE } from "../categorii.js"; // harta categorie -> iconiță
-import { imaginePreparat } from "../imagini.js"; // fotografia preparatului (sau null)
+import { imagineProdus } from "../meniuAdmin.js";
 import { formatLei } from "../format.js"; // formatarea prețului
 import { restaurantDupaNume } from "../restaurante.js"; // slug-ul restaurantului, pentru link
 import styles from "./MeniuCard.module.css"; // Etapa 8: stilurile cardului (CSS Modules)
@@ -11,9 +11,9 @@ import styles from "./MeniuCard.module.css"; // Etapa 8: stilurile cardului (CSS
 // Un preparat din meniu: fotografie (cu inima de favorite), nume, restaurant, preț și „Adaugă”.
 // Cât timp preparatul e în coș, butonul „Adaugă” e înlocuit de selectorul de cantitate.
 // Redesign „Pădure”: cardul e plat, pe hârtie (fără umbră și fără contur); faraRestaurant ascunde restaurantul pe pagina lui.
-export default function MeniuCard({ produs, cantitate, favorit, onAdauga, onSchimba, onFavorit, faraRestaurant = false }) { // props: preparatul, cantitatea din coș, dacă e favorit și callback-urile
+export default function MeniuCard({ produs, cantitate, favorit, onAdauga, onSchimba, onFavorit, faraRestaurant = false, indisponibil = null }) { // props: preparatul, cantitatea din coș, dacă e favorit și callback-urile
   const Iconita = ICONITE_CATEGORIE[produs.categorie]; // iconița categoriei (când nu avem fotografie)
-  const imagine = imaginePreparat(produs.preparat); // „/img/....webp” sau null
+  const imagine = imagineProdus(produs);
   const restaurant = restaurantDupaNume(produs.restaurant); // { slug, ... } sau null
   const adaugaRef = useRef(null); // butonul „Adaugă”
   const plusRef = useRef(null); // butonul „+” din selector
@@ -38,8 +38,9 @@ export default function MeniuCard({ produs, cantitate, favorit, onAdauga, onSchi
   } // sfârșitul funcției
 
   return ( // întoarcem JSX
-    <li className={styles.card}>{/* un element al grilei de preparate */}
+    <li className={`${styles.card} ${indisponibil ? styles.cardIndisponibil : ""}`}>{/* un element al grilei de preparate */}
       <div className={styles.media}>{/* fotografia și inima */}
+        {indisponibil && <span className={styles.eticheta}>{indisponibil}</span>}
         {imagine ? ( // avem fotografia preparatului
           <img className={styles.foto} src={imagine} alt="" width="720" height="540" loading="lazy" decoding="async" />// decorativă: numele e chiar dedesubt
         ) : ( // preparat fără fotografie
@@ -68,6 +69,10 @@ export default function MeniuCard({ produs, cantitate, favorit, onAdauga, onSchi
           <span className={`price ${styles.pret}`}>{formatLei(produs.pret)}</span>{/* prețul unitar */}
           {cantitate > 0 ? ( // preparatul e deja în coș
             <Stepper preparat={produs.preparat} cantitate={cantitate} onSchimba={handleSchimba} plusRef={plusRef} /> // selectorul − cantitate +
+          ) : indisponibil ? (
+            <button type="button" className={`btn-secondary ${styles.adauga}`} disabled aria-label={`${produs.preparat}: ${indisponibil}, nu se poate adăuga în coș`}>
+              {indisponibil}
+            </button>
           ) : ( // nu e în coș
             <button ref={adaugaRef} type="button" className={`btn-primary ${styles.adauga}`} onClick={handleAdauga} aria-label={`Adaugă ${produs.preparat} în coș`}>{/* începe cu textul vizibil, ca să meargă și comanda vocală */}
               <Plus size={18} aria-hidden="true" />{/* iconiță decorativă */}

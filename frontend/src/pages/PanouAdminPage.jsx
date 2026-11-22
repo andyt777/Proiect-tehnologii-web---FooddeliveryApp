@@ -9,7 +9,11 @@ import { patchPasLivrare, patchTranzitie } from "../actiuniComenzi.js";
 import { fetchLivratori } from "../api.js";
 import { useComenziLive } from "../comenziLive.js";
 import { formatComenzi, formatData, formatLei, formatOra } from "../format.js";
-import { curataLivratori, numeLivrator } from "../livrator.js";
+import { curataLivratori, livratoriActivi, numeLivrator } from "../livrator.js";
+import AdminClienti from "../components/AdminClienti.jsx";
+import AdminLivratori from "../components/AdminLivratori.jsx";
+import AdminRestaurante from "../components/AdminRestaurante.jsx";
+import FilePanou, { PanouFila } from "../components/FilePanou.jsx";
 import { useMagazin } from "../magazin.js";
 import { FILTRE_GOALE, REGULA_INTARZIERE, filtreazaComenzi, formatMinute, formatProcent, indicatori, intarziere, jurnalEvenimente } from "../metrici.js";
 import { RESTAURANTE_INFO } from "../restaurante.js";
@@ -20,6 +24,12 @@ import {
 import styles from "../components/Panou.module.css";
 
 const LIMITA_JURNAL = 40;
+const FILE = [
+  { id: "comenzi", titlu: "Comenzi" },
+  { id: "livratori", titlu: "Livratori" },
+  { id: "restaurante", titlu: "Restaurante" },
+  { id: "clienti", titlu: "Clienți" },
+];
 
 // Pachetul B: pagina /admin (rolul demo Admin): toate comenzile cu cele trei stări, filtre, întârzieri,
 // asignarea manuală a livratorului, anularea, indicatorii din `istoric` și jurnalul de evenimente.
@@ -31,6 +41,8 @@ function PanouAdmin() {
   const { noteazaComanda } = useMagazin();
   const { comenzi, incarcare, eroare, acum, reincarca, aplica } = useComenziLive(noteazaComanda);
   const [livratori, setLivratori] = useState([]);
+  const [incarcareLivratori, setIncarcareLivratori] = useState(true);
+  const [fila, setFila] = useState("comenzi");
   const [filtre, setFiltre] = useState(FILTRE_GOALE);
   const [deschis, setDeschis] = useState(null);
   const [inLucru, setInLucru] = useState(null);
@@ -48,7 +60,8 @@ function PanouAdmin() {
     let ignore = false;
     fetchLivratori()
       .then((date) => { if (!ignore) setLivratori(curataLivratori(date)); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => { if (!ignore) setIncarcareLivratori(false); });
     return () => { ignore = true; };
   }, []);
 
@@ -101,7 +114,7 @@ function PanouAdmin() {
       return (
         <FormularAsignare
           id={`asigneaza-${c.id}`}
-          livratori={livratori}
+          livratori={livratoriActivi(livratori)}
           onConfirma={(l) => executa(bruta, (p) => patchPasLivrare(p, "asignata", new Date(), { livratorId: l.id }), `${l.nume} duce comanda „${c.preparat}”.`)}
           onRenunta={() => inchideFormular(c.id)}
         />
@@ -175,6 +188,17 @@ function PanouAdmin() {
       <p className={styles.nota}>Rolul Admin e un comutator demo, nu un cont: serverul demo acceptă orice modificare.</p>
       {eroare && <p className={styles.indiciu} role="status">Ultima actualizare a eșuat ({eroare}). Încercăm din nou în câteva secunde.</p>}
 
+      <FilePanou prefix="admin" eticheta="Secțiunile panoului" file={FILE} activa={fila} onAlege={setFila} />
+
+      {fila === "livratori" && (
+        <PanouFila prefix="admin" id="livratori">
+          <AdminLivratori livratori={livratori} setLivratori={setLivratori} comenzi={lista} incarcare={incarcareLivratori} />
+        </PanouFila>
+      )}
+      {fila === "restaurante" && <PanouFila prefix="admin" id="restaurante"><AdminRestaurante /></PanouFila>}
+      {fila === "clienti" && <PanouFila prefix="admin" id="clienti"><AdminClienti comenzi={lista} /></PanouFila>}
+      {fila === "comenzi" && (
+      <PanouFila prefix="admin" id="comenzi">
       <section className={styles.sectiune} aria-labelledby="admin-indicatori">
         <h2 id="admin-indicatori" className={styles.sectiuneTitlu}>Indicatori</h2>
         <p className={styles.nota}>Duratele vin din momentele salvate în istoricul fiecărei comenzi. Comenzile vechi, fără istoric, intră doar în numărătoare și valoare. Ratele se calculează din comenzile încheiate.</p>
@@ -273,6 +297,8 @@ function PanouAdmin() {
           )}
         </section>
       </div>
+      </PanouFila>
+      )}
     </div>
   );
 }

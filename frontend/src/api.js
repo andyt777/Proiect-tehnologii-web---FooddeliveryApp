@@ -96,3 +96,36 @@ export function fetchRecenzii(timpMaxim) { // timpMaxim opțional (doar pentru t
 export function createRecenzie(recenzie) { // primește recenzia deja validată
   return request("/recenzii", { method: "POST", body: JSON.stringify(recenzie) }); // corpul cererii, ca text JSON
 } // sfârșitul funcției
+
+// Administrarea meniului (/restaurant): POST, PATCH și DELETE pe /meniu. La POST serverul pune id-ul (text, pentru meniu).
+export function createPreparat(preparat) {
+  return request("/meniu", { method: "POST", body: JSON.stringify(preparat) });
+}
+
+export function updatePreparat(id, changes) {
+  return request(`/meniu/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(changes) });
+}
+
+export function deletePreparat(id) {
+  return request(`/meniu/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+// Profilurile restaurantelor (id = slug-ul restaurantului): GET, apoi POST pentru unul nou sau PUT pentru unul existent
+export function fetchRestaurante(timpMaxim) {
+  return cereLista("/restaurante", timpMaxim);
+}
+
+export function salveazaProfilRestaurant(profil, exista) {
+  return exista
+    ? request(`/restaurante/${encodeURIComponent(profil.id)}`, { method: "PUT", body: JSON.stringify(profil) })
+    : request("/restaurante", { method: "POST", body: JSON.stringify(profil) });
+}
+
+// Administrarea livratorilor (/admin): POST un livrator nou, DELETE unul fără cursă în lucru
+export function createLivrator(livrator) {
+  return request("/livratori", { method: "POST", body: JSON.stringify(livrator) });
+}
+
+export function deleteLivrator(id) {
+  return request(`/livratori/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
