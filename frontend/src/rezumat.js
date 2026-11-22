@@ -4,6 +4,7 @@ import { CATEGORII } from "./categorii.js"; // numele categoriilor (Pizza, Burge
 import { ETICHETE_LIVRARE } from "./livrare.js"; // tipurile de livrare (standard, express, ridicare)
 import { formatComenzi, formatLei, formatProduse } from "./format.js"; // regula lui „de” (20 de produse), sumele în lei; redesign: și „6 comenzi”
 import { stareComanda } from "./stari.js"; // fluxul complet: starea derivată (anulată / respinsă)
+import { reducereComanda } from "./cupoane.js"; // pachetul C: reducerea salvată pe o comandă (0 dacă lipsește)
 
 // Etapa 7: o comandă specială are pret: null până o confirmă restaurantul; doar numerele reale intră în sume
 export function arePret(comanda) { // primește o comandă
@@ -39,7 +40,9 @@ export function rezumatComenzi(comenzi) { // primește toată lista de comenzi
     if (Object.hasOwn(peCategorie, c.categorie)) peCategorie[c.categorie] += 1; // doar categoriile cunoscute (fără chei moștenite)
     if (Object.hasOwn(peLivrare, c.livrare)) peLivrare[c.livrare] += 1; // doar tipurile de livrare cunoscute
   } // sfârșitul buclei
-  const { suma: total, faraPret } = sumaPreturi(comenzi.filter((c) => !esteOprita(c))); // Etapa 7: totalul ignoră prețurile neconfirmate (null); fluxul complet: și comenzile anulate / respinse
+  const neoprite = comenzi.filter((c) => !esteOprita(c)); // fluxul complet: comenzile anulate / respinse nu intră în total
+  const { suma, faraPret } = sumaPreturi(neoprite); // Etapa 7: totalul ignoră prețurile neconfirmate (null)
+  const total = suma - neoprite.filter(arePret).reduce((s, c) => s + Math.min(reducereComanda(c), c.pret), 0); // pachetul C: totalul e suma plătită, deci scădem reducerile cupoanelor (`pret` rămâne prețul de listă)
   return { numar: comenzi.length, total, faraPret, peDrum, livrate, peCategorie, peLivrare }; // obiect nou la fiecare apel
 } // sfârșitul funcției
 

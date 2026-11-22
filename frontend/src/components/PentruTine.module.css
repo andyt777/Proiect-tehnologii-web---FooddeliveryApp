@@ -1,0 +1,8 @@
+/* Pachetul C: rândul „Pentru tine” (CSS Modules); grila e în GrilaPreparate.module.css */
+
+.section { margin-top: 64px; }
+.explicatie { max-width: 60ch; margin: -8px 0 24px; color: var(--muted); }
+
+@media print {
+  .section { display: none !important; }
+}

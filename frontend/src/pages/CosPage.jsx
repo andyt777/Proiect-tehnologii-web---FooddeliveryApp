@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react"; // useState: câmpurile, trimiterea și erorile; useRef: focus; useEffect: focus la deschidere
 import { Link, useNavigate } from "react-router-dom"; // Link: drumul spre meniu și spre cont; useNavigate: după plasare, spre comenzi
-import { Banknote, CircleAlert, CreditCard, RotateCw, ShoppingBag, Trash2 } from "lucide-react"; // iconițele paginii
+import { Banknote, CircleAlert, CreditCard, RotateCw, ShoppingBag, Tag, Trash2, X } from "lucide-react"; // iconițele paginii
 import AlegereLivrare from "../components/AlegereLivrare.jsx"; // tipul de livrare
 import Miniatura from "../components/Miniatura.jsx"; // fotografia mică a preparatului
 import Stepper from "../components/Stepper.jsx"; // selectorul de cantitate
-import { createComanda } from "../api.js"; // POST /comenzi, prin singurul fișier cu fetch
+import { createComanda, fetchComenzi } from "../api.js"; // POST /comenzi, prin singurul fișier cu fetch
 import { detaliiCheckout, oraMinimaProgramare, valideazaCheckout } from "../checkout.js"; // fluxul complet: validarea și câmpurile noi, pure
 import { cosInComenzi, numarProduse, schimbaCantitate, totalCos } from "../cos.js"; // logica pură a coșului
+import { COD_MAX, CUPOANE, campuriCupon, gasesteCupon, imparteReducere, normalizeazaCod, numarComenziAnterioare, valideazaCupon } from "../cupoane.js";
 import { formatLei, formatProduse } from "../format.js"; // sume și numărul de produse
 import { useMagazin } from "../magazin.js"; // starea comună: coșul, meniul, livrarea, confirmarea, contul
 import { adaugaAdresa, salveazaContact } from "../profil.js"; // salvarea datelor în cont, la cerere
@@ -31,6 +32,10 @@ export default function CosPage() { // componenta rutei /cos
   const [oraMinima, setOraMinima] = useState(null); // cea mai devreme oră posibilă, calculată când se alege programarea
   const [metodaPlata, setMetodaPlata] = useState("numerar"); // „numerar” sau „card_simulat”
   const [salveazaInCont, setSalveazaInCont] = useState(false); // păstrăm numele, telefonul și adresa nouă?
+  const [codCupon, setCodCupon] = useState("");
+  const [cuponAplicat, setCuponAplicat] = useState(null);
+  const [mesajCupon, setMesajCupon] = useState("");
+  const [verificaCupon, setVerificaCupon] = useState(false);
   const [problema, setProblema] = useState(null); // { camp, mesaj } pentru câmpul greșit (null = niciunul)
   const titluRef = useRef(null); // titlul paginii
   const numeRef = useRef(null); // câmpul „Nume”, primește focus la o eroare
@@ -40,6 +45,9 @@ export default function CosPage() { // componenta rutei /cos
   const programareRef = useRef(null); // „Cât mai repede”
   const oraRef = useRef(null); // câmpul „Ora”
   const plataRef = useRef(null); // „Numerar”
+  const cuponInputRef = useRef(null);
+  const cuponEliminaRef = useRef(null);
+  const focusCupon = useRef(null);
   const navigate = useNavigate(); // navigarea după plasare
 
   // La deschidere, focusul merge pe titlu: cititorul de ecran anunță pagina nouă
@@ -49,6 +57,19 @@ export default function CosPage() { // componenta rutei /cos
 
   const produse = numarProduse(linii); // câte produse sunt în coș
   const total = totalCos(linii); // totalul de plată
+
+  // Pachetul C: cuponul aplicat se verifică din nou la fiecare randare, fiindcă subtotalul se schimbă odată cu coșul.
+  // comenziAnterioare e numărul aflat la „Aplică” (pentru regula primei comenzi); nu se cere din nou la fiecare randare.
+  const verificareCupon = cuponAplicat ? valideazaCupon(cuponAplicat.cod, { subtotal: total, comenziAnterioare: cuponAplicat.comenziAnterioare }) : null;
+  const reducere = verificareCupon?.ok ? verificareCupon.reducere : 0;
+  const totalDePlata = total - reducere;
+
+  // Câmpul cuponului și butonul „Elimină cuponul” se înlocuiesc unul pe altul; focusul îl urmează pe cel nou
+  useEffect(() => {
+    if (focusCupon.current === "elimina") cuponEliminaRef.current?.focus();
+    if (focusCupon.current === "camp") cuponInputRef.current?.focus();
+    focusCupon.current = null;
+  }, [cuponAplicat]);
   const ridicare = livrare === "ridicare"; // la ridicare nu cerem adresa
   const adresaSalvata = profil.adrese.find((a) => a.id === adresaAleasa); // adresa din cont aleasă (sau undefined)
   const adresa = adresaSalvata ? adresaSalvata.text : adresaNoua; // textul trimis la server
@@ -95,6 +116,50 @@ export default function CosPage() { // componenta rutei /cos
     return <p id={`cos-eroare-${camp}`} className={styles.eroareCamp} role="alert"><CircleAlert size={16} aria-hidden="true" />{problema.mesaj}</p>; // iconiță + text, nu doar culoare
   } // sfârșitul funcției
 
+  // Pachetul C: „Aplică”. Pentru un cupon de primă comandă citim comenzile de la server, ca să aflăm dacă clientul a mai comandat din coș.
+  async function aplicaCupon() {
+    if (verificaCupon) return;
+    const cod = normalizeazaCod(codCupon);
+    const cupon = gasesteCupon(cod);
+    let comenziAnterioare = 0;
+    if (cupon?.primaComanda) {
+      setVerificaCupon(true);
+      try {
+        comenziAnterioare = numarComenziAnterioare(await fetchComenzi());
+      } catch (err) {
+        setMesajCupon(`Nu am putut verifica dacă e prima ta comandă: ${err.message}. Încearcă din nou.`);
+        return;
+      } finally {
+        setVerificaCupon(false);
+      }
+    }
+    const rezultat = valideazaCupon(cod, { subtotal: total, comenziAnterioare });
+    if (!rezultat.ok) {
+      setMesajCupon(rezultat.mesaj);
+      cuponInputRef.current?.focus();
+      return;
+    }
+    focusCupon.current = "elimina";
+    setMesajCupon("");
+    setCodCupon("");
+    setCuponAplicat({ cod: rezultat.cupon.cod, comenziAnterioare });
+    if (problema?.camp === "cupon") setProblema(null);
+  }
+
+  function eliminaCupon() {
+    focusCupon.current = "camp";
+    setCuponAplicat(null);
+    setMesajCupon("");
+    if (problema?.camp === "cupon") setProblema(null);
+  }
+
+  // Enter în câmpul cuponului aplică codul; altfel ar trimite formularul și ar plasa comanda
+  function handleCuponTasta(e) {
+    if (e.key !== "Enter") return;
+    e.preventDefault();
+    aplicaCupon();
+  }
+
   // Etapa 7: plasarea așteaptă serverul. Butonul rămâne focalizabil (aria-disabled, nu disabled); a doua apăsare e ignorată.
   async function handleSubmit(e) { // trimiterea formularului = plasarea comenzii
     e.preventDefault(); // fără reîncărcarea paginii
@@ -102,10 +167,11 @@ export default function CosPage() { // componenta rutei /cos
     if (trimite || deTrimis.length === 0) return; // o trimitere e deja în curs sau nu e nimic de plasat
     const acum = new Date(); // momentul plasării, același pentru validare, `creata` și istoric
     const date = { nume, telefon, livrare, adresa, programare, ora, metodaPlata }; // valorile din formular
-    const gresit = valideazaCheckout(date, acum); // null sau { camp, mesaj }
+    const gresitCupon = verificareCupon && !verificareCupon.ok ? { camp: "cupon", mesaj: `${verificareCupon.mesaj} Elimină cuponul sau schimbă coșul.` } : null;
+    const gresit = valideazaCheckout(date, acum) ?? gresitCupon; // null sau { camp, mesaj }
     if (gresit) { // datele nu sunt bune: nu trimitem nimic
       setProblema(gresit); // mesajul, sub câmpul greșit
-      const refuri = { nume: numeRef, telefon: telefonRef, adresa: scrieAdresa ? adresaNouaRef : adresaSalvataRef, programare: programareRef, ora: oraRef, plata: plataRef }; // referințele câmpurilor (obiectul e creat aici, în handler, nu la randare)
+      const refuri = { nume: numeRef, telefon: telefonRef, adresa: scrieAdresa ? adresaNouaRef : adresaSalvataRef, programare: programareRef, ora: oraRef, plata: plataRef, cupon: cuponEliminaRef }; // referințele câmpurilor (obiectul e creat aici, în handler, nu la randare)
       refuri[gresit.camp]?.current?.focus(); // utilizatorul ajunge direct la câmpul de corectat
       return; // ne oprim
     } // sfârșitul validării
@@ -113,14 +179,19 @@ export default function CosPage() { // componenta rutei /cos
     setTrimite(true); // butonul arată „Se trimite…”
     setEroare(null); // ascundem eroarea unei încercări anterioare
     const extra = detaliiCheckout(date, acum); // stare, plată, istoric, adresă, contact, programare
-    const comenziNoi = cosInComenzi(deTrimis, livrare, acum.toISOString()).map((c) => ({ ...c, ...extra })); // o comandă fără id pentru fiecare linie, cu câmpurile noi
+    // Pachetul C: fiecare linie devine o comandă separată, deci reducerea coșului se împarte pe linii, proporțional cu prețul lor
+    const parti = imparteReducere(reducere, deTrimis.map((l) => l.subtotal));
+    const codFolosit = reducere > 0 ? cuponAplicat.cod : null;
+    const comenziNoi = cosInComenzi(deTrimis, livrare, acum.toISOString()).map((c, i) => ({ ...c, ...extra, ...(codFolosit ? campuriCupon(codFolosit, parti[i]) : {}) })); // o comandă fără id pentru fiecare linie, cu câmpurile noi
     const rezultate = await Promise.allSettled(comenziNoi.map((c) => createComanda(c))); // toate cererile pornesc deodată
     const liniiSalvate = deTrimis.filter((_, i) => rezultate[i].status === "fulfilled"); // liniile care au ajuns
     const erori = rezultate.filter((r) => r.status === "rejected").map((r) => r.reason); // motivele celor eșuate
     for (const r of rezultate) if (r.status === "fulfilled") noteazaComanda(r.value); // urmărirea pornește pentru comenzile noi
     if (liniiSalvate.length > 0) { // măcar o comandă a ajuns
       setCos((prev) => liniiSalvate.reduce((cos, l) => schimbaCantitate(cos, l.id, -l.cantitate), prev)); // scădem exact cantitatea trimisă
-      setConfirmare({ produse: numarProduse(liniiSalvate), total: totalCos(liniiSalvate) }); // „Comanda a fost plasată”, pe orice pagină
+      const reducereSalvata = parti.reduce((suma, parte, i) => (rezultate[i].status === "fulfilled" ? suma + parte : suma), 0);
+      setConfirmare({ produse: numarProduse(liniiSalvate), total: totalCos(liniiSalvate) - reducereSalvata }); // „Comanda a fost plasată”, pe orice pagină
+      setCuponAplicat(null);
       if (salveazaInCont) { // utilizatorul a cerut să păstrăm datele
         const idAdresa = `a${acum.getTime().toString(36)}`; // id nou, calculat aici (funcția de actualizare trebuie să rămână pură)
         const adresaDeSalvat = !ridicare && scrieAdresa ? adresa : null; // doar o adresă scrisă acum
@@ -291,9 +362,55 @@ export default function CosPage() { // componenta rutei /cos
 
           <aside className={`panel ${styles.rezumat}`} aria-label="Rezumatul comenzii">{/* foaia din dreapta: livrarea și totalul */}
             <AlegereLivrare valoare={livrare} onAlege={setLivrare} nume="livrare-cos" />{/* aceeași alegere ca în hero */}
+            <section className={styles.cupon} aria-labelledby="cos-cupon-titlu">
+              <h2 id="cos-cupon-titlu" className={styles.cuponTitlu}>Cupon de reducere</h2>
+              {cuponAplicat ? (
+                <div className={styles.cuponAplicat}>
+                  <span className={styles.cuponCod}><Tag size={16} aria-hidden="true" />{cuponAplicat.cod}</span>
+                  <button type="button" ref={cuponEliminaRef} className="btn-secondary" onClick={eliminaCupon} aria-describedby={descriere("cupon")}>
+                    <X size={16} aria-hidden="true" />
+                    Elimină cuponul
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.cuponRand}>
+                  <div className={styles.camp}>
+                    <label htmlFor="cos-cupon">Cod</label>
+                    <input
+                      id="cos-cupon"
+                      ref={cuponInputRef}
+                      type="text"
+                      value={codCupon}
+                      onChange={(e) => { setCodCupon(e.target.value); setMesajCupon(""); }}
+                      onKeyDown={handleCuponTasta}
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      spellCheck={false}
+                      maxLength={COD_MAX}
+                      aria-invalid={mesajCupon !== ""}
+                      aria-describedby={mesajCupon ? "cos-cupon-mesaj cos-cupon-reguli" : "cos-cupon-reguli"}
+                    />
+                  </div>
+                  <button type="button" className="btn-secondary" onClick={aplicaCupon} aria-disabled={verificaCupon}>{verificaCupon ? "Se verifică…" : "Aplică"}</button>
+                </div>
+              )}
+              {mesajCupon && <p id="cos-cupon-mesaj" className={styles.eroareCamp} role="alert"><CircleAlert size={16} aria-hidden="true" />{mesajCupon}</p>}
+              <p className={styles.cuponStare} role="status">{cuponAplicat && verificareCupon?.ok ? `Cuponul ${cuponAplicat.cod} e aplicat: ${formatLei(reducere)} reducere.` : ""}</p>
+              {cuponAplicat && !verificareCupon?.ok && problema?.camp !== "cupon" && <p className={styles.indicatie}>{verificareCupon.mesaj}</p>}
+              {mesajCamp("cupon")}
+              <ul id="cos-cupon-reguli" className={styles.cuponReguli}>
+                {CUPOANE.map((c) => <li key={c.cod}><strong>{c.cod}</strong>: {c.descriere}</li>)}
+              </ul>
+            </section>
             <dl className={styles.sume}>{/* perechi termen / valoare */}
               <div><dt>Produse</dt><dd>{formatProduse(produse)}</dd></div>{/* numărul de produse */}
-              <div className={styles.total}><dt>Total</dt><dd className="price">{formatLei(total)}</dd></div>{/* totalul, fără taxe inventate */}
+              {reducere > 0 && (
+                <>
+                  <div><dt>Subtotal</dt><dd className="price">{formatLei(total)}</dd></div>
+                  <div><dt>Reducere {cuponAplicat.cod}</dt><dd className="price">−{formatLei(reducere)}</dd></div>
+                </>
+              )}
+              <div className={styles.total}><dt>{reducere > 0 ? "De plată" : "Total"}</dt><dd className="price">{formatLei(totalDePlata)}</dd></div>{/* totalul, fără taxe inventate */}
             </dl>
             {problema && <p className={styles.eroare}><CircleAlert size={18} aria-hidden="true" />Verifică datele marcate în formular.</p>}{/* lângă buton: unde e problema */}
             {eroare && <p className={styles.eroare} role="alert"><CircleAlert size={18} aria-hidden="true" />{eroare}</p>}{/* Etapa 7: liniile care n-au ajuns au rămas în coș */}

@@ -54,6 +54,30 @@ with a "Încearcă din nou" button. `npm test` runs the unit tests (no server ne
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
 
+## Full order flow: roles, coupons, reviews, recommendations
+
+Spec in `docs/superpowers/specs/2026-11-22-savoro-flux-complet-design.md` (packages A, B, C). Still front end only:
+json-server + `src/api.js`, `localStorage`, no own server, no new npm dependencies.
+
+- **Role switcher is a demo, not security.** The header switcher (Client / Restaurant / Livrator / Admin) is stored in
+  `localStorage` (`src/rol.js`) and adds `/restaurant`, `/livrator` or `/admin`. Anyone can pick any role; there are no
+  accounts or passwords, and json-server accepts any request. Every rule (allowed state transitions in `src/stari.js`,
+  coupon checks, one review per order) is validated only in the browser; a real backend would have to repeat it.
+- **Demo couriers.** `db.json` → `livratori` holds three couriers whose names say "(livrator demo)". They are not real
+  people; the route on `/livrator` is an inline SVG simulation, not a map or GPS.
+- **Coupons** (`src/cupoane.js`, applied on `/cos`): `SAVORO10` gives 10% off a cart of at least 100 lei;
+  `PRIMA20` gives 20 lei off the first order placed from the cart, from 60 lei ("first" = no earlier cart order that
+  was not cancelled or rejected, counted from `/comenzi` when the code is applied). The cart becomes one order per line,
+  so the discount is split across lines in proportion to their price (`imparteReducere`); each order stores `cupon` and
+  its share in `reducere`, while `pret` stays the list price. The order page shows the code, the discount and the amount
+  to pay (`pret − reducere`).
+- **Reviews** (`src/recenzii.js`, resource `recenzii`): a delivered order gets one review (1–5 and optional text, up to
+  500 characters) on its page. The restaurant page shows the average and the list only when real reviews exist; no
+  invented ratings. If `/recenzii` cannot be loaded, the restaurant page simply hides the section.
+- **Recommendations** (`src/recomandari.js`): the "Pentru tine" row on `/` is rule based, not AI. From the order history
+  (cancelled / rejected orders ignored): dishes not ordered yet from the most-ordered category; if all were tried, the
+  most-ordered dishes. The rule used is shown under the title; with no history the row is hidden.
+
 ## Redesign „Pădure”: forest green, cream, Gabarito
 
 Branch `redesign/padure`, spec in `docs/superpowers/specs/2026-11-21-savoro-padure-redesign-design.md`. It replaces the

@@ -136,8 +136,9 @@
     right: 0; /* pe toată lățimea */
     bottom: 0; /* jos */
     z-index: 15; /* peste conținut, sub mesaje */
-    display: grid; /* cinci coloane egale */
-    grid-template-columns: repeat(5, 1fr); /* Acasă, Favorite, Coș, Cont, Despre */
+    display: grid; /* coloane egale */
+    grid-auto-flow: column; /* câte o coloană pentru fiecare link */
+    grid-auto-columns: minmax(0, 1fr); /* Acasă, (rolul demo), Favorite, Coș, Cont, Despre: cinci sau șase, egale */
     gap: 0; /* fără spații */
     height: calc(var(--nav-jos-h) + env(safe-area-inset-bottom, 0px)); /* plus zona de sub bara telefonului */
     padding-bottom: env(safe-area-inset-bottom, 0px); /* conținutul nu intră sub ea */
@@ -152,6 +153,8 @@
     padding: 0; /* fără spațiu lateral */
     font-size: 0.75rem; /* etichete mici */
     color: var(--muted); /* stins pe alb */
+    min-width: 0; /* o etichetă lungă („Restaurant”) nu lărgește coloana */
+    overflow-wrap: anywhere; /* și se poate rupe la nevoie */
   }
   .link:hover { color: var(--text); } /* mai închis la hover */
   .active { color: var(--link); } /* pagina curentă, verde */

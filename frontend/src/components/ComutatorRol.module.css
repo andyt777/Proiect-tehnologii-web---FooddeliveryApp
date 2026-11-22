@@ -1,0 +1,68 @@
+/* Pachetul B: comutatorul de roluri din antet (CSS Modules) */
+
+.comutator { position: relative; } /* panoul se așază față de buton */
+
+/* Butonul din antet: același contur crem ca butonul de temă */
+.buton {
+  display: inline-flex; /* iconița și textul */
+  align-items: center; /* centrate */
+  gap: 8px; /* spațiul dintre ele */
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 14px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: var(--on-brand); /* crem pe verde */
+  list-style: none; /* fără triunghiul implicit al lui <summary> */
+  border: 1.5px solid rgba(245, 239, 226, 0.35); /* contur crem discret */
+  border-radius: var(--r-camp); /* colțuri de control */
+  cursor: pointer; /* mânuța */
+  transition: background 0.15s, border-color 0.15s; /* schimbare lină */
+}
+.buton::-webkit-details-marker { display: none; } /* fără triunghi în Safari */
+.buton:hover { background: rgba(245, 239, 226, 0.1); border-color: rgba(245, 239, 226, 0.6); } /* hover discret */
+.comutator[open] .buton { background: rgba(245, 239, 226, 0.14); } /* deschis: puțin mai deschis */
+
+/* Panoul: plutește sub antet, deci are umbră */
+.panou {
+  position: absolute; /* sub buton */
+  top: calc(100% + 8px); /* puțin despărțit */
+  right: 0; /* aliniat la dreapta butonului */
+  z-index: 20; /* peste pagină */
+  width: min(300px, calc(100vw - 32px)); /* încape și pe telefon */
+  padding: 16px; /* spațiu interior */
+  color: var(--text); /* textul principal */
+  background: var(--surface); /* foaia albă */
+  border-radius: var(--r-foaie); /* colțurile foilor */
+  box-shadow: var(--shadow-float); /* plutește */
+}
+.titlu { margin-bottom: 8px; font-weight: 800; } /* „Vezi aplicația ca” */
+.lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; } /* rolurile, unul sub altul */
+.optiune {
+  display: flex; /* numele și bifa */
+  align-items: center; /* centrate */
+  justify-content: space-between; /* bifa în dreapta */
+  width: 100%; /* tot rândul */
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 12px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: var(--text); /* textul principal */
+  text-align: left; /* aliniat la stânga */
+  background: transparent; /* fără fundal */
+  border: none; /* fără contur */
+  border-radius: var(--r-camp); /* colțuri pentru hover și focus */
+  cursor: pointer; /* mânuța */
+}
+.optiune:hover { background: var(--soft); } /* fundal discret la hover */
+.optiune[aria-pressed="true"] { color: var(--link); background: color-mix(in srgb, var(--link) 10%, transparent); } /* rolul ales: verde, cu bifă */
+.nota { margin-top: 12px; padding-top: 12px; font-size: var(--t-14); color: var(--muted); border-top: 1px solid var(--line); } /* nota „demo, nu securitate” */
+.panou :focus-visible { outline-color: var(--focus); } /* pe foaia albă, focusul obișnuit (nu șofranul antetului) */
+
+/* Telefon: doar iconița în antet */
+@media (max-width: 640px) {
+  .buton { padding: 0; width: 44px; justify-content: center; } /* buton pătrat */
+  .text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; } /* textul rămâne pentru cititoare */
+}
+
+/* Tipărire: fără comutator */
+@media print {
+  .comutator { display: none; } /* nu e conținut */
+}

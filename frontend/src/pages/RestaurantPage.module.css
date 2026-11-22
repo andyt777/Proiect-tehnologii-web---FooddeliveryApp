@@ -28,6 +28,9 @@
 .titlu { font-size: clamp(2.4375rem, 5vw, 3.8125rem); letter-spacing: -0.035em; line-height: 1; } /* numele, mare */
 .bucatarie { margin-top: 12px; font-size: var(--t-20); font-weight: 600; } /* bucătăria */
 .descriere { margin-top: 4px; max-width: 46ch; color: var(--on-brand-muted); } /* descrierea */
+.medie { margin-top: 12px; color: var(--on-brand-muted); }
+.medie strong { color: var(--on-brand); }
+
 .livrare {
   display: flex; /* opțiunile pe un rând */
   flex-wrap: wrap; /* trec pe rândul următor când nu încap */
@@ -49,6 +52,15 @@
 }
 
 .meniu { padding-top: 112px; } /* loc pentru fotografia care iese din bandă */
+
+/* Pachetul C: recenziile reale ale restaurantului, sub meniu; lipsesc complet când nu există */
+.recenzii { margin-top: 64px; }
+.listaRecenzii { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; max-width: 72ch; }
+.recenzie { display: flex; flex-direction: column; gap: 4px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.recenzie:first-child { padding-top: 0; }
+.recenzieNota { font-size: var(--t-16); }
+.recenzieText { overflow-wrap: anywhere; white-space: pre-line; }
+.recenzieData { font-size: var(--t-14); color: var(--muted); }
 
 /* Telefon și tabletă: o coloană, fotografia sub texte */
 @media (max-width: 860px) {

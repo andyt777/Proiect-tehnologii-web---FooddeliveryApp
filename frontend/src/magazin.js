@@ -7,6 +7,7 @@ import { fetchMeniu } from "./api.js"; // GET /meniu, prin singurul fișier cu f
 import { adaugaInCos, citesteCos, liniiCos, pastreazaDinMeniu, schimbaCantitate, scoateDinCos } from "./cos.js"; // logica pură a coșului
 import { citesteFavorite, comutaFavorit, pastreazaFavoriteDinMeniu } from "./favorite.js"; // logica pură a favoritelor
 import { citesteProfil } from "./profil.js"; // fluxul complet: contul clientului (nume, telefon, adrese)
+import { citesteRol } from "./rol.js"; // pachetul B: rolul ales în comutatorul demo
 
 const DURATA_CONFIRMARE_MS = 5000; // mesajul „Comanda a fost plasată” dispare singur după 5 secunde
 
@@ -37,6 +38,7 @@ export function useStareMagazin() { // fără parametri
   const [cos, setCos] = useState(() => citesteSalvat("cos", citesteCos)); // liniile coșului: [{ produsId, cantitate }]
   const [favorite, setFavorite] = useState(() => citesteSalvat("favorite", citesteFavorite)); // id-urile preparatelor favorite
   const [profil, setProfil] = useState(() => citesteSalvat("profil", citesteProfil)); // fluxul complet: numele, telefonul și adresele salvate
+  const [rol, setRol] = useState(() => citesteSalvat("rol", citesteRol)); // pachetul B: „client”, „restaurant”, „livrator” sau „admin” (demo, nu securitate)
   const [livrare, setLivrare] = useState("standard"); // tipul de livrare ales în hero sau în coș (aceeași valoare peste tot)
   const [confirmare, setConfirmare] = useState(null); // ultima plasare reușită, pentru mesajul de jos (null = ascuns)
 
@@ -65,6 +67,7 @@ export function useStareMagazin() { // fără parametri
   useEffect(() => salveaza("cos", cos), [cos]); // coșul se păstrează între vizite
   useEffect(() => salveaza("favorite", favorite), [favorite]); // la fel favoritele
   useEffect(() => salveaza("profil", profil), [profil]); // și contul
+  useEffect(() => salveaza("rol", rol), [rol]); // pachetul B: și rolul demo
 
   // Confirmarea dispare singură; o plasare nouă (obiect nou) repornește numărătoarea
   useEffect(() => { // rulează când apare o confirmare nouă
@@ -95,6 +98,8 @@ export function useStareMagazin() { // fără parametri
     comutaFavorit: (id) => setFavorite((prev) => comutaFavorit(prev, id)), // inima de pe card
     profil, // contul: { nume, telefon, adrese, implicita }
     setProfil, // folosit de /cont și de /cos (cu funcțiile pure din profil.js)
+    rol, // pachetul B: rolul demo ales în antet
+    setRol, // schimbarea lui (comutatorul din antet și paginile rolurilor)
     livrare, // tipul de livrare ales
     setLivrare, // schimbarea lui (hero sau coș)
     confirmare, // mesajul de jos după plasare

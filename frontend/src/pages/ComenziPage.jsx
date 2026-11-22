@@ -8,6 +8,7 @@ import ComandaForm from "../components/ComandaForm.jsx"; // Etapa 7: formularul 
 import ComandaList from "../components/ComandaList.jsx"; // lista de comenzi
 import Meniu from "../components/Meniu.jsx"; // grila de preparate
 import RestauranteRand from "../components/RestauranteRand.jsx"; // redesign: rândul „Restaurante”
+import PentruTine from "../components/PentruTine.jsx";
 import { ScheletComenzi } from "../components/Schelete.jsx"; // rândurile în așteptare cât se încarcă comenzile
 import UndoToast from "../components/UndoToast.jsx"; // mesajul cu „Anulează”
 import { createComanda, deleteComanda, fetchComenzi, updateComanda } from "../api.js"; // Etapa 6–7: citire, adăugare, modificare și ștergere
@@ -240,6 +241,8 @@ export default function ComenziPage() { // pagina principală
           <>{/* Fragment: secțiunile */}
             <CategoriiCarduri meniu={meniu} activa={categorieActiva} onAlege={setCategorieActiva} incarcare={incarcareMeniu} />{/* rândul de categorii; depinde doar de meniu */}
             <RestauranteRand restaurante={restauranteAfisate} meniu={meniu} incarcare={incarcareMeniu} />{/* rândul de restaurante */}
+            {/* Pachetul C: „Pentru tine” se ascunde cât se caută sau se filtrează, ca rezultatele să rămână primele */}
+            {gata && !cautareActiva && !categorieActiva && <PentruTine comenzi={comenzi} meniu={meniu} />}
             <Meniu // grila de preparate
               meniu={meniuAfisat} // preparatele care se potrivesc cu căutarea și cu categoria
               totalMeniu={meniu.length} // pentru „2 din 9 preparate”

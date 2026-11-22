@@ -1,0 +1,74 @@
+/* Pachetul C: recenzia de pe pagina unei comenzi livrate (CSS Modules); .btn-primary și .titlu-focus sunt clase globale */
+
+.sectiune { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.titlu { font-size: var(--t-20); }
+.indiciu { font-size: var(--t-14); color: var(--muted); }
+.aviz { font-weight: 600; color: var(--link); }
+.aviz:empty { display: none; }
+
+/* Recenzia trimisă: text simplu, fără stele decorative */
+.recenzie { display: flex; flex-direction: column; gap: 6px; }
+.nota { font-size: var(--t-20); }
+.text { max-width: 60ch; overflow-wrap: anywhere; white-space: pre-line; }
+
+/* Formularul: o foaie plată, ca anularea */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border-radius: var(--r-foaie);
+}
+.grup { margin: 0; padding: 0; border: none; min-width: 0; }
+.legenda { margin-bottom: 10px; padding: 0; font-weight: 800; }
+.note { display: flex; flex-wrap: wrap; gap: 8px; }
+.optiune {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid var(--contur);
+  border-radius: var(--r-camp);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.optiune:hover { border-color: var(--text); }
+.optiune input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.optiune:has(input:checked) { border-color: var(--link); border-width: 2px; background: color-mix(in srgb, var(--link) 8%, transparent); }
+.optiuneNumar { font-weight: 800; font-variant-numeric: tabular-nums; }
+.optiuneText { font-size: var(--t-14); }
+
+.camp { display: flex; flex-direction: column; gap: 6px; }
+.camp label { font-size: var(--t-14); font-weight: 600; }
+.camp textarea {
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1.5px solid var(--contur);
+  border-radius: var(--r-camp);
+  resize: vertical;
+}
+.camp textarea:hover { border-color: var(--text); }
+.camp [aria-invalid="true"] { border-color: var(--eroare); box-shadow: 0 0 0 1px var(--eroare); }
+
+.eroareCamp { display: flex; align-items: flex-start; gap: 6px; font-size: var(--t-14); font-weight: 600; color: var(--eroare); }
+.eroareCamp svg { margin-top: 3px; flex-shrink: 0; }
+.eroare {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--eroare-bg);
+  border-left: 4px solid var(--eroare);
+  border-radius: var(--r-mic);
+}
+.eroare svg { color: var(--eroare); margin-top: 2px; flex-shrink: 0; }
+
+@media print {
+  .form { display: none !important; }
+}

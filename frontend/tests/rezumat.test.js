@@ -158,3 +158,38 @@ test("fluxul complet: comenzile anulate / respinse nu sunt pe drum și nu intră
   assert.equal(r.total, 52);
   assert.equal(frazaRezumat(comenzi), "4 comenzi: 1 pe drum, 1 livrată, 1 anulată, 1 respinsă. Total: 52 lei.");
 });
+
+// --- pachetul C: reducerile cupoanelor în total ---
+
+test("rezumatComenzi: totalul e suma plătită (pret − reducere), fără comenzile anulate / respinse", () => {
+  const comenzi = [
+    { livrata: false, pret: 100, reducere: 10, cupon: "SAVORO10", categorie: "Pizza", livrare: "standard" },
+    { livrata: true, pret: 60, reducere: 20, cupon: "PRIMA20", categorie: "Burgers", livrare: "express", stare: "livrata" },
+    { livrata: false, pret: 80, reducere: 8, cupon: "SAVORO10", categorie: "Asian", livrare: "standard", stare: "anulata" },
+    { livrata: false, pret: 50, reducere: 5, cupon: "SAVORO10", categorie: "Asian", livrare: "standard", stare: "respinsa" },
+    { livrata: false, pret: 40, categorie: "Pizza", livrare: "ridicare" },
+  ];
+  const r = rezumatComenzi(comenzi);
+  assert.equal(r.total, 170);
+  assert.equal(frazaRezumat(comenzi), "5 comenzi: 2 pe drum, 1 livrată, 1 anulată, 1 respinsă. Total: 170 lei.");
+});
+
+test("rezumatComenzi: o reducere mai mare decât prețul scade cel mult prețul (totalul nu devine negativ)", () => {
+  const r = rezumatComenzi([
+    { livrata: false, pret: 15, reducere: 30, categorie: "Pizza", livrare: "standard" },
+    { livrata: false, pret: 10, categorie: "Pizza", livrare: "standard" },
+  ]);
+  assert.equal(r.total, 10);
+});
+
+test("rezumatComenzi: reducerea unei comenzi fără preț nu scade din total; reducerile invalide sunt ignorate", () => {
+  const r = rezumatComenzi([
+    { livrata: false, pret: null, reducere: 20, speciala: true, categorie: "Pizza", livrare: "standard" },
+    { livrata: false, pret: 50, reducere: "10", categorie: "Pizza", livrare: "standard" },
+    { livrata: false, pret: 50, reducere: -10, categorie: "Pizza", livrare: "standard" },
+    { livrata: false, pret: 50, reducere: NaN, categorie: "Pizza", livrare: "standard" },
+  ]);
+  assert.equal(r.total, 150);
+  assert.equal(r.faraPret, 1);
+  assert.ok(Number.isFinite(r.total));
+});

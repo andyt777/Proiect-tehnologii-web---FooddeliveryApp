@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react"; // useRef + useEffect: focus pe titlu când se deschide pagina
+import { useEffect, useRef, useState } from "react"; // useRef + useEffect: focus pe titlu când se deschide pagina; useState: recenziile
 import { Link, useParams } from "react-router-dom"; // useParams: slug-ul din adresă; Link: drumul înapoi
 import { ArrowLeft, CircleAlert, RotateCw } from "lucide-react"; // iconițele paginii
 import GrilaPreparate from "../components/GrilaPreparate.jsx"; // grila de preparate, aceeași ca pe pagina principală
@@ -8,6 +8,9 @@ import { DURATE_LIVRARE, ETICHETE_LIVRARE } from "../livrare.js"; // opțiunile 
 import { TIPURI_LIVRARE } from "../constants.js"; // ordinea tipurilor de livrare
 import { useMagazin } from "../magazin.js"; // meniul din starea comună
 import { formatPreparate } from "../rezumat.js"; // „3 preparate”
+import { fetchRecenzii } from "../api.js";
+import { formatData } from "../format.js";
+import { ETICHETE_NOTA, NOTA_MAX, curataRecenzii, formatNota, formatRecenzii, medieRecenzii, recenziiRestaurant } from "../recenzii.js";
 import { preparateRestaurant, restaurantDupaSlug } from "../restaurante.js"; // restaurantul din adresă și preparatele lui
 import styles from "./RestaurantPage.module.css"; // stilurile paginii (CSS Modules)
 
@@ -28,7 +31,19 @@ function PaginaRestaurant({ restaurant }) { // conținutul paginii, pentru un re
     titluRef.current?.focus({ preventScroll: true }); // cititorul de ecran anunță restaurantul
   }, []); // fără dependențe: doar la deschidere
 
+  const [recenzii, setRecenzii] = useState([]);
+
+  // Pachetul C: recenziile reale de la /recenzii. La o eroare secțiunea lipsește: meniul rămâne principalul conținut.
+  useEffect(() => {
+    let ignore = false;
+    fetchRecenzii()
+      .then((lista) => { if (!ignore) setRecenzii(recenziiRestaurant(curataRecenzii(lista), restaurant.nume)); })
+      .catch(() => {});
+    return () => { ignore = true; };
+  }, [restaurant.nume]);
+
   const preparate = preparateRestaurant(meniu, restaurant.nume); // preparatele lui, în ordinea din meniu
+  const medie = medieRecenzii(recenzii);
 
   return ( // JSX-ul paginii
     <>{/* Fragment: antetul verde și meniul */}
@@ -42,6 +57,7 @@ function PaginaRestaurant({ restaurant }) { // conținutul paginii, pentru un re
             <h1 id="restaurant-titlu" className={`titlu-focus ${styles.titlu}`} ref={titluRef} tabIndex={-1}>{restaurant.nume}</h1>{/* numele */}
             <p className={styles.bucatarie}>Bucătărie {restaurant.bucatarie.toLowerCase()}</p>{/* ex. „Bucătărie japoneză” */}
             <p className={styles.descriere}>{restaurant.descriere}</p>{/* descrierea, doar ce e în meniu */}
+            {medie && <p className={styles.medie}><strong>Nota {formatNota(medie.medie)} din {NOTA_MAX}</strong>, din {formatRecenzii(medie.numar)} ale clienților</p>}
             <dl className={styles.livrare}>{/* opțiunile de livrare, din livrare.js */}
               {TIPURI_LIVRARE.map((tip) => ( // un rând pentru fiecare tip
                 <div key={tip}>{/* o pereche termen / valoare */}
@@ -86,6 +102,24 @@ function PaginaRestaurant({ restaurant }) { // conținutul paginii, pentru un re
           <GrilaPreparate preparate={preparate} faraRestaurant />// numele restaurantului e deja în titlu
         )}{/* sfârșitul randării condiționate */}
       </section>
+
+      {medie && (
+        <section className={`wrap ${styles.recenzii}`} aria-labelledby="restaurant-recenzii">
+          <div className="section-header">
+            <h2 id="restaurant-recenzii">Recenzii</h2>
+            <span className="section-meta">{formatNota(medie.medie)} din {NOTA_MAX}, din {formatRecenzii(medie.numar)}</span>
+          </div>
+          <ul className={styles.listaRecenzii}>
+            {recenzii.map((r) => (
+              <li key={r.id} className={styles.recenzie}>
+                <p className={styles.recenzieNota}><strong>{r.nota} din {NOTA_MAX}</strong>, {ETICHETE_NOTA[r.nota].toLowerCase()}</p>
+                {r.text && <p className={styles.recenzieText}>{r.text}</p>}
+                {r.creata && <p className={styles.recenzieData}><time dateTime={r.creata}>{formatData(r.creata)}</time></p>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </>
   ); // sfârșitul JSX-ului
 } // sfârșitul componentei

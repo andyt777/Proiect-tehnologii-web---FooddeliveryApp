@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react"; // useState: comanda, înc�
 import { Link, useParams } from "react-router-dom"; // Link: drumul înapoi fără reîncărcare; useParams: id-ul din adresă
 import { ArrowLeft, Check, CircleAlert, Utensils, X, Zap } from "lucide-react"; // iconițele paginii
 import AnulareComanda from "../components/AnulareComanda.jsx"; // fluxul complet: anularea, cu motiv, confirmată pe loc
+import RecenzieComanda from "../components/RecenzieComanda.jsx";
+import { dePlata, reducereComanda } from "../cupoane.js";
 import { fetchComanda } from "../api.js"; // GET /comenzi/:id, prin singurul fișier cu fetch
 import { ICONITE_CATEGORIE } from "../categorii.js"; // iconița categoriei, când comanda nu are fotografie
 import { imagineComanda } from "../imagini.js"; // fotografia preparatului (sau null)
@@ -110,6 +112,7 @@ function Detaliu({ comanda: bruta, titluRef, aviz, onActualizata }) { // primeș
   const pasi = cronologie(comanda); // pașii, cu ora reală din istoric
   const oprita = comanda.stare === "anulata" || comanda.stare === "respinsa"; // ieșirile laterale
   const poateAnula = poateTrece(comanda, "anulata", "client"); // doar înainte de preparare
+  const reducere = arePret(comanda) ? reducereComanda(comanda) : 0;
 
   return ( // JSX-ul detaliului
     <section className={styles.detaliu} data-testid="detail" aria-labelledby="detaliu-titlu">{/* reperul paginii de detaliu */}
@@ -149,6 +152,8 @@ function Detaliu({ comanda: bruta, titluRef, aviz, onActualizata }) { // primeș
 
         {poateAnula && <AnulareComanda comanda={bruta} onAnulata={onActualizata} />}{/* anularea, cât încă e permisă */}
 
+        {comanda.stare === "livrata" && <RecenzieComanda comanda={bruta} />}
+
         <dl className={styles.campuri}>{/* tot ce nu încape în listă */}
           <div>{/* livrarea */}
             <dt>Livrare</dt>{/* termenul */}
@@ -172,6 +177,18 @@ function Detaliu({ comanda: bruta, titluRef, aviz, onActualizata }) { // primeș
               <dd className={styles.lung}>{comanda.contact.nume}, {comanda.contact.telefon}</dd>{/* numele și telefonul */}
             </div>
           )}{/* sfârșitul randării condiționate */}
+          {reducere > 0 && (
+            <>
+              <div>
+                <dt>Cupon</dt>
+                <dd>{comanda.cupon ?? "Reducere"}, −{formatLei(reducere)}</dd>
+              </div>
+              <div>
+                <dt>De plată</dt>
+                <dd className="price">{formatLei(dePlata(comanda))}</dd>
+              </div>
+            </>
+          )}
           <div>{/* plata */}
             <dt>Plată</dt>{/* termenul */}
             <dd>{ETICHETE_METODA_PLATA[comanda.plata.metoda]}, {ETICHETE_STARE_PLATA[comanda.plata.stare].toLowerCase()}</dd>{/* ex. „Card (simulare), plătită” */}

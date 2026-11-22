@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react"; // useState: tema, sertarul, regiunea mesajelor; useEffect: derularea la schimbarea paginii
 import { Link, NavLink, Outlet, useLocation, useNavigate, useNavigationType } from "react-router-dom"; // navigarea fără reîncărcarea paginii
-import { Heart, House, Info, Moon, ShoppingBag, Sun, UserRound } from "lucide-react"; // iconițele navigației și ale butoanelor
+import { Bike, Heart, House, Info, LayoutDashboard, Moon, ShoppingBag, Store, Sun, UserRound } from "lucide-react"; // iconițele navigației și ale butoanelor
 import Logo from "./Logo.jsx"; // semnul Savoro
+import ComutatorRol from "./ComutatorRol.jsx"; // pachetul B: comutatorul de roluri (demo)
+import { ETICHETE_ROL, RUTE_ROL } from "../rol.js"; // textele și paginile rolurilor
 import CosDrawer from "./CosDrawer.jsx"; // sertarul coșului, disponibil pe toate paginile
 import { RegiuneToast, ToastConfirmare, ToastNotificari } from "./UndoToast.jsx"; // mesajele de jos
 import { useStareMagazin } from "../magazin.js"; // meniul, coșul, favoritele, livrarea, confirmarea
@@ -26,6 +28,9 @@ function temaInitiala() { // funcție apelată o singură dată, la prima randar
   } // sfârșitul try/catch
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; // altfel, preferința sistemului de operare
 } // sfârșitul funcției
+
+// Pachetul B: iconița linkului fiecărui rol din navigație (clientul nu are link în plus)
+const ICONITE_ROL = { restaurant: Store, livrator: Bike, admin: LayoutDashboard }; // cheia = rolul
 
 // NavLink transmite isActive; linkul activ primește și clasa „active” (aria-current="page" îl pune NavLink singur)
 function navClass({ isActive }) { // primește starea linkului de la NavLink
@@ -66,6 +71,13 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
     } // sfârșitul try/catch
   } // sfârșitul funcției
 
+  // Pachetul B: alegerea unui rol din comutator duce direct la pagina lui
+  function handleRol(nou) { // primește rolul ales
+    magazin.setRol(nou); // starea comună (salvată în localStorage)
+    navigate(RUTE_ROL[nou]); // „/restaurant”, „/livrator”, „/admin” sau „/”
+  } // sfârșitul funcției
+
+  const IconitaRol = ICONITE_ROL[magazin.rol]; // undefined pentru client
   const disponibil = !magazin.incarcareMeniu && !magazin.eroareMeniu; // meniul a sosit, deci știm ce e în coș
   const produseInCos = numarProduse(magazin.linii); // doar produsele care există în meniu
   const etichetaCos = disponibil ? `Coș: ${formatProduse(produseInCos)}` : "Coș (indisponibil momentan)"; // fără meniu nu spunem „0 produse”
@@ -85,6 +97,12 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
               <House size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița, doar pe telefon */}
               Acasă{/* textul linkului */}
             </NavLink>
+            {IconitaRol && ( // pachetul B: pagina rolului demo ales (restaurant, livrator sau admin)
+              <NavLink to={RUTE_ROL[magazin.rol]} className={navClass}>{/* ex. „/restaurant” */}
+                <IconitaRol size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița rolului */}
+                {ETICHETE_ROL[magazin.rol]}{/* ex. „Restaurant” */}
+              </NavLink>
+            )}{/* sfârșitul randării condiționate */}
             <NavLink to="/favorite" className={navClass}>{/* preparatele salvate */}
               <Heart size={22} aria-hidden="true" className={styles.navIcon} />{/* iconița */}
               Favorite{/* textul linkului */}
@@ -106,7 +124,8 @@ export default function Layout() { // componenta layout-ului, folosită ca eleme
               Despre{/* textul linkului */}
             </NavLink>
           </nav>
-          <div className={styles.actiuni}>{/* tema și coșul, în dreapta */}
+          <div className={styles.actiuni}>{/* rolul, tema și coșul, în dreapta */}
+            <ComutatorRol rol={magazin.rol} onAlege={handleRol} />{/* pachetul B: comutatorul demo, cu nota „nu e securitate” */}
             <button type="button" className={styles.temaBtn} onClick={handleTema} aria-pressed={tema === "dark"}>{/* comutator: anunță dacă modul întunecat e activ */}
               {tema === "dark" ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}{/* iconița depinde de tema curentă */}
               <span className={styles.temaText}>{tema === "dark" ? "Mod luminos" : "Mod întunecat"}</span>{/* pe telefon doar iconița; textul rămâne pentru cititoare */}

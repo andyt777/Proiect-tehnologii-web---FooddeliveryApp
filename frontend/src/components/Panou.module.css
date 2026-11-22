@@ -1,0 +1,145 @@
+/* Pachetul B: stilurile comune ale paginilor /restaurant, /livrator, /admin și ale componentelor lor (CSS Modules).
+   Sistemul „Pădure”: carduri plate pe hârtie, separate prin spațiu; umbre doar pe ce plutește (aici nimic). */
+
+/* --- pagina --- */
+.pagina { padding-top: 48px; } /* aer sub antet */
+.titlu { font-size: var(--t-39); } /* titlul paginii */
+.intro { max-width: 64ch; margin-top: 8px; color: var(--muted); } /* ce face pagina, pe rânduri scurte */
+.nota { max-width: 64ch; margin-top: 6px; font-size: var(--t-14); color: var(--muted); } /* nota „demo” */
+.bara { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; margin-top: 28px; } /* alegerea restaurantului / livratorului și butoanele */
+.alegere { display: flex; flex-direction: column; gap: 6px; } /* eticheta deasupra listei */
+.alegere label { font-size: var(--t-14); font-weight: 600; } /* eticheta */
+.alegere select,
+.filtre select {
+  min-height: 48px; /* zonă de atingere */
+  padding: 0 12px; /* spațiu lateral */
+  color: var(--text); /* textul principal */
+  background: var(--surface); /* albul cald, pe hârtie */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțurile câmpurilor */
+}
+.sectiune { margin-top: 40px; } /* o secțiune a paginii */
+.sectiuneTitlu { font-size: var(--t-25); } /* titlul secțiunii */
+.gol { padding: 18px 0; color: var(--muted); } /* „Nicio comandă aici” */
+.avertisment { margin-top: 16px; } /* panoul de eroare al unei acțiuni */
+.aviz { margin-top: 16px; font-weight: 600; color: var(--link); } /* confirmarea unei acțiuni */
+.aviz:empty { display: none; } /* regiunea există mereu, dar nu ocupă loc goală */
+
+/* Coloanele restaurantului: Noi / În preparare / Gata */
+.coloane {
+  display: grid; /* trei coloane */
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* egale */
+  align-items: start; /* fiecare cât conținutul ei */
+  gap: 24px; /* spațiul dintre ele */
+  margin-top: 32px; /* despărțite de bară */
+}
+.coloana { display: flex; flex-direction: column; gap: 12px; min-width: 0; } /* titlul, apoi cardurile */
+.coloanaTitlu { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: var(--t-20); } /* titlul și numărul */
+.coloanaNumar { font-size: var(--t-14); font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; } /* câte carduri */
+.lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; } /* cardurile, unul sub altul */
+
+/* --- cardul unei comenzi --- */
+.card {
+  display: flex; /* elementele unul sub altul */
+  flex-direction: column; /* pe verticală */
+  gap: 8px; /* spațiul dintre ele */
+  padding: 18px; /* spațiu interior */
+  background: var(--surface); /* foaia albă, plată */
+  border-radius: var(--r-foaie); /* colțurile foilor */
+}
+.cardIntarziat { box-shadow: inset 4px 0 0 var(--eroare); } /* bara roșie din stânga (plus textul de întârziere) */
+.cardSus { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 6px 12px; } /* titlul și starea */
+.cardTitlu { display: flex; flex-direction: column; gap: 2px; min-width: 0; font-size: var(--t-20); overflow-wrap: anywhere; } /* numele comenzii */
+.cardTitlu a { color: var(--text); text-decoration: none; } /* linkul, în culoarea textului */
+.cardTitlu a:hover { text-decoration: underline; } /* subliniat la hover */
+.numar { font-size: var(--t-14); font-weight: 600; letter-spacing: 0; color: var(--muted); font-variant-numeric: tabular-nums; } /* „Nr. 12” */
+.stare { display: inline-flex; align-items: center; gap: 4px; font-size: var(--t-14); font-weight: 600; color: var(--link); white-space: nowrap; } /* starea, verde, cu iconiță */
+.stareOprita { color: var(--eroare); } /* anulată / respinsă: roșu, cu X */
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: var(--t-14); color: var(--muted); } /* detaliile, despărțite prin spațiu */
+.intarziere { display: flex; align-items: center; gap: 6px; font-size: var(--t-14); font-weight: 600; color: var(--eroare); } /* întârzierea: iconiță + text */
+.motiv { font-size: var(--t-14); color: var(--muted); } /* motivul opririi */
+.detalii { display: flex; flex-direction: column; gap: 4px; margin: 0; font-size: var(--t-14); } /* rânduri termen / valoare */
+.detalii div { display: flex; flex-wrap: wrap; gap: 4px 10px; } /* termenul lângă valoare */
+.detalii dt { color: var(--muted); } /* termenul, stins */
+.detalii dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; } /* valoarea */
+.actiuni { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 4px; } /* butoanele cardului */
+.indiciu { font-size: var(--t-14); color: var(--muted); } /* de ce un buton lipsește */
+
+/* --- formularele din card (acceptare, motiv, asignare) --- */
+.formular { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--line); } /* sub detalii */
+.campuri { display: flex; flex-wrap: wrap; gap: 12px; } /* câmpurile, alăturate */
+.camp { display: flex; flex-direction: column; gap: 6px; min-width: 0; flex: 1 1 160px; } /* eticheta deasupra câmpului */
+.camp label { font-size: var(--t-14); font-weight: 600; } /* eticheta */
+.camp input,
+.camp select {
+  width: 100%; /* tot spațiul */
+  min-height: 48px; /* zonă de atingere */
+  padding: 0 12px; /* spațiu lateral */
+  color: var(--text); /* textul principal */
+  background: var(--bg); /* hârtia: câmpul se vede pe foaie */
+  border: 1.5px solid var(--contur); /* contur vizibil (3:1) */
+  border-radius: var(--r-camp); /* colțurile câmpurilor */
+}
+.camp [aria-invalid="true"] { border-color: var(--eroare); box-shadow: 0 0 0 1px var(--eroare); } /* câmpul greșit: contur dublu roșu */
+.eroare {
+  display: flex; /* iconița lângă text */
+  align-items: flex-start; /* aliniate sus */
+  gap: 8px; /* spațiul dintre ele */
+  padding: 10px 14px; /* cutie mică */
+  font-size: var(--t-14); /* text mic */
+  font-weight: 600; /* lizibil */
+  color: var(--text); /* textul principal */
+  background: var(--eroare-bg); /* roșu foarte deschis */
+  border-left: 4px solid var(--eroare); /* bara din stânga: se vede și fără culoare */
+  border-radius: var(--r-mic); /* colțuri mici */
+}
+.eroare svg { margin-top: 2px; color: var(--eroare); } /* iconița, roșie */
+.butoane { display: flex; flex-wrap: wrap; gap: 8px; } /* butoanele formularului */
+
+/* Butonul unei acțiuni distructive (respinge, anulează): roșu, colțuri de control */
+.butonPericol {
+  display: inline-flex; /* textul pe mijloc */
+  align-items: center; /* centrat */
+  gap: 8px; /* iconița și textul */
+  min-height: 44px; /* zonă de atingere */
+  padding: 0 18px; /* spațiu lateral */
+  font-weight: 600; /* lizibil */
+  color: #FFFDF8; /* alb cald pe roșu (6:1) */
+  background: #B3261E; /* roșul erorilor, același în ambele teme */
+  border: none; /* fără contur */
+  border-radius: var(--r-camp); /* colțuri de control */
+  cursor: pointer; /* mânuța */
+}
+.butonPericol:hover { background: #8C1D18; } /* mai închis la hover */
+
+/* --- admin: indicatori, filtre, jurnal --- */
+.indicatori { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0 32px; margin: 16px 0 0; } /* listă termen / valoare, pe coloane */
+.indicatori div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); } /* un rând, cu separator fin */
+.indicatori dt { color: var(--muted); } /* termenul */
+.indicatori dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; } /* valoarea */
+.filtre { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 16px; margin: 16px 0 0; padding: 0; border: none; } /* filtrele, pe un rând care se rupe */
+.filtre .alegere { min-width: 150px; } /* fiecare listă */
+.bifa { display: flex; align-items: center; gap: 10px; min-height: 48px; font-weight: 600; cursor: pointer; } /* „Doar întârziate” */
+.bifa input { width: 20px; height: 20px; margin: 0; accent-color: var(--accent); } /* bifa, verde */
+.jurnal { list-style: none; margin: 16px 0 0; padding: 0; } /* evenimentele */
+.jurnal li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: var(--t-14); } /* ora în stânga, textul în dreapta */
+.jurnal time { color: var(--muted); font-variant-numeric: tabular-nums; } /* ora */
+.doiColoane { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); align-items: start; gap: 40px; } /* lista de comenzi și jurnalul */
+
+/* --- livrator: traseul simulat --- */
+.traseu { width: 100%; max-width: 520px; height: auto; margin-top: 8px; background: var(--soft); border-radius: var(--r-foto); } /* planul abstract */
+.traseuDrum { fill: none; stroke: var(--contur); stroke-width: 3; stroke-dasharray: 6 6; stroke-linecap: round; } /* drumul, punctat */
+.traseuPunct { fill: var(--surface); stroke: var(--link); stroke-width: 3; } /* restaurantul și clientul */
+.traseuText { fill: var(--text); font-size: 13px; font-weight: 600; } /* etichetele punctelor */
+.traseuLivrator { transition: transform 1s linear; } /* mișcarea lină între bătăi (oprită de reduced motion în index.css) */
+.traseuLivrator circle { fill: var(--accent); stroke: var(--surface); stroke-width: 3; } /* livratorul, verde */
+
+/* Tabletă: coloanele restaurantului una sub alta */
+@media (max-width: 960px) {
+  .coloane { grid-template-columns: minmax(0, 1fr); } /* o coloană */
+  .doiColoane { grid-template-columns: minmax(0, 1fr); } /* jurnalul sub listă */
+}
+@media (max-width: 640px) {
+  .pagina { padding-top: 32px; } /* mai puțin aer */
+  .titlu { font-size: var(--t-31); } /* titlul, mai mic */
+}

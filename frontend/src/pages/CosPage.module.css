@@ -81,6 +81,20 @@
 .sume dd { margin: 0; } /* fără indentarea implicită */
 .total { padding-top: 10px; font-size: var(--t-25); font-weight: 800; border-top: 1px solid var(--line); } /* totalul, mare */
 .total dt { color: var(--text); } /* „Total”, în culoarea textului */
+/* Pachetul C: cuponul de reducere, în foaia din dreapta */
+.cupon { display: flex; flex-direction: column; gap: 10px; }
+.cuponTitlu { font-size: var(--t-20); }
+.cuponRand { display: flex; align-items: flex-end; gap: 8px; }
+.cuponRand .camp { flex: 1; }
+.cuponRand input { text-transform: uppercase; }
+.cuponRand :global(.btn-secondary) { min-height: 48px; }
+.cuponAplicat { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
+.cuponCod { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--link); }
+.cuponStare { font-size: var(--t-14); font-weight: 600; color: var(--link); }
+.cuponStare:empty { display: none; }
+.cuponReguli { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; font-size: var(--t-14); color: var(--muted); }
+.cuponReguli strong { color: var(--text); }
+
 .eroare {
   display: flex; /* iconița lângă text */
   gap: 10px; /* spațiul dintre ele */

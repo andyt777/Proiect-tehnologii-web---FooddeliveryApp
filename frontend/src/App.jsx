@@ -6,6 +6,9 @@ import CosPage from "./pages/CosPage.jsx"; // redesign: „/cos”, coșul și p
 import FavoritePage from "./pages/FavoritePage.jsx"; // redesign: „/favorite”, preparatele salvate
 import ComandaDetaliuPage from "./pages/ComandaDetaliuPage.jsx"; // „/comenzi/:id”: o singură comandă
 import ContPage from "./pages/ContPage.jsx"; // fluxul complet: „/cont”, numele, telefonul și adresele salvate
+import PanouRestaurantPage from "./pages/PanouRestaurantPage.jsx";
+import PanouLivratorPage from "./pages/PanouLivratorPage.jsx";
+import PanouAdminPage from "./pages/PanouAdminPage.jsx";
 import DesprePage from "./pages/DesprePage.jsx"; // „/despre”: pagina de prezentare
 import NotFoundPage from "./pages/NotFoundPage.jsx"; // orice altă adresă: pagina 404
 
@@ -21,6 +24,10 @@ export default function App() { // componenta principală
         <Route path="/favorite" element={<FavoritePage />} />{/* favoritele */}
         <Route path="/comenzi/:id" element={<ComandaDetaliuPage />} />{/* :id e un parametru; useParams() îl întoarce ca text */}
         <Route path="/cont" element={<ContPage />} />{/* contul (doar în localStorage) */}
+        {/* Pachetul B: paginile rolurilor demo; căile sunt cele din RUTE_ROL (src/rol.js) */}
+        <Route path="/restaurant" element={<PanouRestaurantPage />} />
+        <Route path="/livrator" element={<PanouLivratorPage />} />
+        <Route path="/admin" element={<PanouAdminPage />} />
         <Route path="/despre" element={<DesprePage />} />{/* pagina de prezentare */}
         <Route path="*" element={<NotFoundPage />} />{/* * prinde orice adresă care nu s-a potrivit mai sus */}
       </Route>
