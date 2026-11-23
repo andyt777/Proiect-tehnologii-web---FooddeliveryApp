@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { CATEGORII, potrivesteCategoria } from "../src/categorii.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const PIZZA = Object.freeze({ id: "p1", preparat: "Pizza Margherita", categorie: "Pizza" });
 
 test("potrivesteCategoria: null („Toate”) potrivește orice preparat", () => {

@@ -7,7 +7,7 @@ import { comandaSpecialaNoua, valideazaComandaSpeciala } from "../src/validare.j
 import { CATEGORII } from "../src/categorii.js";
 import { ETICHETE_LIVRARE } from "../src/livrare.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const tw = JSON.parse(readFileSync(new URL("../../tw.json", import.meta.url), "utf8"));
 const BUNE = Object.freeze({ preparat: "Pizza cu trufe", restaurant: "Pizzeria Napoli", livrare: "standard" });
 

@@ -148,13 +148,16 @@ export default function ComenziPage() { // pagina principală
     } // sfârșitul try/catch/finally
   } // sfârșitul funcției
 
-  // „Anulează”: comanda ștearsă se trimite din nou, cu id-ul ei vechi, și revine pe locul ei
+  // „Anulează”: comanda ștearsă se trimite din nou și revine pe locul ei.
+  // Etapa 9: serverul pune mereu id-ul (ignoră unul trimis de client), deci comanda readusă are un id nou; în listă intră obiectul întors.
   async function handleUndo() { // apelată de butonul din mesaj
     if (!ultimaStearsa) return; // mesajul tocmai a dispărut
     const { comanda, index } = ultimaStearsa; // ce am salvat la ștergere
     setUltimaStearsa(null); // ascundem mesajul (un al doilea clic nu mai e posibil)
+    const corp = { ...comanda }; // copie, fără id-ul vechi
+    delete corp.id;
     try { // cererea poate eșua
-      const readusa = await createComanda(comanda); // POST /comenzi cu tot cu id
+      const readusa = await createComanda(corp); // POST /comenzi; răspunsul are id-ul nou
       setEroareActiune(null); // a mers: ascundem o eroare veche
       noteazaComanda(readusa); // urmărirea o știe din nou
       focusPeComenzi.current = true; // butonul „Anulează” a dispărut

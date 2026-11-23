@@ -6,7 +6,7 @@ import {
   ETICHETE_NOTA, NOTA_MAX, NOTA_MIN, TEXT_RECENZIE_MAX, curataRecenzii, formatNota, formatRecenzii, medieRecenzii, poateLasaRecenzie, recenziaComenzii, recenzieNoua, recenziiRestaurant, valideazaRecenzie,
 } from "../src/recenzii.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const ACUM = new Date("2026-11-22T18:00:00.000Z");
 
 function recenzie(extra = {}) {

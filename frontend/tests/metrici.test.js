@@ -8,7 +8,7 @@ import {
 import { MINUTE_LIVRARE } from "../src/livrare.js";
 import { aplicaPasLivrare, aplicaTranzitie, campuriInitiale } from "../src/stari.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const T0 = Date.parse("2026-11-22T18:00:00.000Z");
 const MIN = 60000;
 const la = (minute) => T0 + minute * MIN;

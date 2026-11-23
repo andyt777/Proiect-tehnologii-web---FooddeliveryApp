@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { RESTAURANTE_INFO, preparateRestaurant, restaurantDupaNume, restaurantDupaSlug, slugDin } from "../src/restaurante.js";
 import { RESTAURANTE } from "../src/constants.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 
 // --- slugDin ---
 

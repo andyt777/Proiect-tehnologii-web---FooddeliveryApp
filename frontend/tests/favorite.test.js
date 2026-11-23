@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { FAVORITE_MAXIME, citesteFavorite, comutaFavorit, esteFavorit, pastreazaFavoriteDinMeniu, preparateFavorite } from "../src/favorite.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 
 // --- citesteFavorite ---
 

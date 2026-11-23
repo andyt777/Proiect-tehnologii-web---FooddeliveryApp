@@ -8,7 +8,7 @@ import { ETICHETE_LIVRARE } from "../src/livrare.js";
 import { categorieRestaurant } from "../src/constants.js";
 import { METODE_PLATA, PASI_LIVRARE, STARI_COMANDA, STARI_PLATA, stareComanda } from "../src/stari.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const NUME_CATEGORII = CATEGORII.map((c) => c.nume);
 const TIPURI_LIVRARE = Object.keys(ETICHETE_LIVRARE);
 const CAMPURI_OBLIGATORII = ["categorie", "id", "livrare", "livrata", "preparat", "pret", "restaurant"];

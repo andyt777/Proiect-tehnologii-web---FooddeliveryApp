@@ -1,6 +1,6 @@
 // Etapa 6: toate cererile către server trec prin acest fișier; e singurul loc din aplicație cu `fetch`.
 // Componentele nu știu adresa serverului și nici cum arată un răspuns HTTP: primesc doar date sau o eroare.
-// Adresa vine din .env (VITE_API_URL, vezi .env.example); fără .env folosim json-server pornit local.
+// Adresa vine din .env (VITE_API_URL, vezi .env.example); fără .env folosim serverul Express din backend/ (Etapa 9), pornit local.
 // Etapa 7: o funcție comună, request, pentru toate cele patru operații (GET, POST, PATCH, DELETE).
 
 // `?.`: sub Node (testele cu `node --test`) import.meta.env nu există; în Vite e înlocuit la build cu valorile din .env
@@ -19,7 +19,10 @@ export async function request(path, options = {}, timpMaxim = TIMP_MAXIM_MS) { /
       headers: { "Content-Type": "application/json", ...options.headers }, // corpul e JSON; apelantul poate adăuga alte antete
       signal: controller.signal, // semnalul leagă cererea de controller (timeout)
     }); // sfârșitul opțiunilor
-    if (!res.ok) throw new Error(`Eroare server: ${res.status}`); // fetch nu aruncă la 404/500: verificăm noi codul HTTP
+    if (!res.ok) { // fetch nu aruncă la 404/500: verificăm noi codul HTTP
+      const body = await res.json().catch(() => ({})); // Etapa 9: serverul trimite { error: "..." }; un corp care nu e JSON nu ne oprește
+      throw new Error(body.error || `Eroare server: ${res.status}`); // mesajul serverului, altfel codul
+    } // sfârșitul if
     return res.status === 204 ? null : await res.json(); // 204 nu are corp (res.json() ar arunca); altfel corpul, din JSON în valoare JavaScript
   } catch (err) { // cererea a eșuat
     throw traduceEroarea(err, timpMaxim); // aruncăm mai departe o eroare cu mesaj românesc, pe înțelesul utilizatorului
@@ -43,7 +46,7 @@ async function cereLista(path, timpMaxim) { // folosită de fetchComenzi, fetchM
   return date; // lista validă
 } // sfârșitul funcției
 
-// GET /comenzi: lista de comenzi din db.json
+// GET /comenzi: lista de comenzi de pe server
 export function fetchComenzi(timpMaxim) { // timpMaxim opțional (doar pentru teste)
   return cereLista("/comenzi", timpMaxim); // promisiune cu lista de comenzi
 } // sfârșitul funcției
@@ -53,8 +56,8 @@ export function fetchMeniu(timpMaxim) { // timpMaxim opțional (doar pentru test
   return cereLista("/meniu", timpMaxim); // promisiune cu lista de preparate
 } // sfârșitul funcției
 
-// Etapa 8: GET /comenzi/:id, o singură comandă (pagina de detaliu). json-server răspunde 404 pentru un id inexistent,
-// iar request aruncă atunci „Eroare server: 404”, afișat de pagină.
+// Etapa 8: GET /comenzi/:id, o singură comandă (pagina de detaliu). serverul răspunde 404 pentru un id inexistent,
+// iar request aruncă atunci mesajul lui („Comanda nu există”), afișat de pagină.
 export async function fetchComanda(id, timpMaxim) { // id-ul vine din adresă (useParams îl dă ca text); timpMaxim opțional (doar pentru teste)
   const date = await request(`/comenzi/${encodeURIComponent(id)}`, {}, timpMaxim); // encodeURIComponent: „../meniu” din adresă nu poate schimba ruta
   if (date === null || typeof date !== "object" || Array.isArray(date)) throw new Error("Răspuns neașteptat de la server"); // așteptăm un singur obiect, nu o listă sau un text
@@ -62,7 +65,7 @@ export async function fetchComanda(id, timpMaxim) { // id-ul vine din adresă (u
 } // sfârșitul funcției
 
 // Etapa 7: POST /comenzi. Serverul pune id-ul și întoarce comanda salvată; pe ecran ajunge obiectul întors.
-// Singura excepție de la „fără id”: „Anulează” retrimite comanda ștearsă cu id-ul ei vechi (json-server 0.17 îl păstrează).
+// Etapa 9: serverul ignoră orice id trimis de client, deci „Anulează” primește comanda readusă cu un id nou.
 export function createComanda(comanda) { // primește comanda de salvat
   return request("/comenzi", { method: "POST", body: JSON.stringify(comanda) }); // corpul cererii, ca text JSON
 } // sfârșitul funcției
@@ -72,7 +75,7 @@ export function updateComanda(id, changes) { // id-ul comenzii și câmpurile no
   return request(`/comenzi/${encodeURIComponent(id)}`, { method: "PATCH", body: JSON.stringify(changes) }); // encodeURIComponent: id-ul nu poate strica adresa
 } // sfârșitul funcției
 
-// Etapa 7: DELETE /comenzi/:id; json-server 0.17 răspunde 200 cu {}, alt server poate răspunde 204 (request întoarce atunci null)
+// Etapa 7: DELETE /comenzi/:id; serverul din Etapa 9 răspunde 204 (request întoarce null), json-server răspundea 200 cu {}
 export function deleteComanda(id) { // id-ul comenzii de șters
   return request(`/comenzi/${encodeURIComponent(id)}`, { method: "DELETE" }); // fără corp
 } // sfârșitul funcției

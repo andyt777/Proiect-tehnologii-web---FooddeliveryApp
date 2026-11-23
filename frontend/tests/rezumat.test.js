@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { arePret, formatFaraPret, frazaRezumat, formatPreparate, formatRestaurante, restauranteDinMeniu, rezumatComenzi, sumaPreturi } from "../src/rezumat.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 
 // --- rezumatComenzi ---
 

@@ -61,6 +61,18 @@ test("res.ok false aruncă și pentru 404", async () => {
   await assert.rejects(fetchMeniu(), { message: "Eroare server: 404" });
 });
 
+test("Etapa 9: res.ok false cu { error } aruncă mesajul serverului", async () => {
+  globalThis.fetch = async () => raspuns({ error: "Comanda nu există" }, 404);
+  await assert.rejects(fetchComanda(999), { message: "Comanda nu există" });
+  globalThis.fetch = async () => raspuns({ error: "preparat nu poate fi gol" }, 400);
+  await assert.rejects(createComanda({ preparat: "" }), { message: "preparat nu poate fi gol" });
+});
+
+test("Etapa 9: un corp de eroare care nu e JSON păstrează „Eroare server: <cod>”", async () => {
+  globalThis.fetch = async () => ({ ok: false, status: 502, json: async () => JSON.parse("<html>") });
+  await assert.rejects(fetchComenzi(), { message: "Eroare server: 502" });
+});
+
 test("un răspuns care nu e listă aruncă „Răspuns neașteptat de la server”", async () => {
   for (const date of [{ comenzi: [] }, null, "text", 5]) {
     globalThis.fetch = async () => raspuns(date);
@@ -190,7 +202,7 @@ test("createComanda trimite POST /comenzi cu comanda ca JSON și întoarce obiec
   assert.deepEqual(salvata, { ...comanda, id: 7 });
 });
 
-test("createComanda nu adaugă id: trimite exact câmpurile primite (cu id doar dacă îl are deja, ca la „Anulează”)", async () => {
+test("createComanda nu adaugă id: trimite exact câmpurile primite (cu id doar dacă îl are deja; serverul din Etapa 9 îl ignoră)", async () => {
   const apeluri = fetchInregistrat(raspuns({}, 201));
   await createComanda({ preparat: "X" });
   assert.equal("id" in JSON.parse(apeluri[0].optiuni.body), false);

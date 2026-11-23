@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { esteImagineSigura, imagineProdus, preparatDinFormular, valideazaPreparat, valoriFormularPreparat } from "../src/meniuAdmin.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const BUNE = Object.freeze({ preparat: "Pizza Prosciutto", categorie: "Pizza", pret: "50", imagine: "", disponibil: true });
 const CONTEXT = { meniu: db.meniu, restaurant: "Pizzeria Napoli" };
 

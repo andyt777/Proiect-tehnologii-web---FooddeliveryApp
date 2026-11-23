@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { RECOMANDARI_MAX, despartePreparat, explicatieRecomandari, recomandari } from "../src/recomandari.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const MENIU = db.meniu;
 const nume = (rezultat) => rezultat.preparate.map((p) => p.preparat);
 

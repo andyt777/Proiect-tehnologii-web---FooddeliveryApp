@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { IMAGINI_CATEGORIE, imagineComanda, imaginePreparat } from "../src/imagini.js";
 import { CATEGORII } from "../src/categorii.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 
 // „/img/x.webp” -> fișierul din frontend/public/img (Vite servește public/ de la rădăcină)
 function fisierPublic(cale) {

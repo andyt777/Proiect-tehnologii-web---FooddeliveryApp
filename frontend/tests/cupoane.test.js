@@ -6,7 +6,7 @@ import {
   COD_MAX, CUPOANE, calculeazaReducere, campuriCupon, dePlata, gasesteCupon, imparteReducere, normalizeazaCod, numarComenziAnterioare, reducereComanda, valideazaCupon,
 } from "../src/cupoane.js";
 
-const db = JSON.parse(readFileSync(new URL("../db.json", import.meta.url), "utf8"));
+const db = JSON.parse(readFileSync(new URL("../../backend/src/data/seed.json", import.meta.url), "utf8"));
 const SAVORO10 = CUPOANE.find((c) => c.cod === "SAVORO10");
 const PRIMA20 = CUPOANE.find((c) => c.cod === "PRIMA20");
 

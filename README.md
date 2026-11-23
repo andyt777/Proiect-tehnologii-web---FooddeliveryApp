@@ -5,13 +5,14 @@ see which ones are still on the way and mark them as delivered.
 
 ## Data model
 
-Since stage 6 the data lives in `frontend/db.json` (served by json-server), not in React code:
+Since stage 9 the data is served by our own Express server (`backend/`), kept in memory and seeded
+at every start from `backend/src/data/seed.json` (the former `frontend/db.json`, stages 6–8):
 `comenzi` holds the orders described below, `meniu` the 9 dishes that can be added to the cart
 (`id` "p1".."p9", `preparat`, `restaurant`, `categorie`, `pret`).
 
-| Field      | In code (`db.json` → `comenzi`) | Type   | Notes                                    |
+| Field      | In code (`seed.json` → `comenzi`) | Type   | Notes                                    |
 | ---------- | ---------------------- | ------------ | ------------------------------------------------ |
-| id         | `id`                   | number       | unique; since stage 7 set by json-server (max + 1) |
+| id         | `id`                   | number       | unique; set by the server (max + 1, never reused; stages 7–8: json-server) |
 | name       | `preparat`             | text         | the ordered dish, required, max 100 chars        |
 | delivered  | `livrata`              | boolean      | toggled from the list, default false             |
 | delivery   | `livrare`              | fixed values | Standard, Express, Pickup (`LIVRARI`)            |
@@ -28,29 +29,107 @@ Sample data used across all stages:
 2. Beef burger with fries, done, Standard, Burger Van, 48 lei
 3. Sushi set (12 pcs), active, Pickup, Sushi Kyo, 65 lei
 
-`db.json` adds three more (ramen, 2 × Pizza Diavola, veggie burger), so there are 6 orders.
+`seed.json` adds three more (ramen, 2 × Pizza Diavola, veggie burger), so there are 6 orders.
 
 ## How to run
 
-Two terminals, both in `frontend/` (`npm run api` keeps running, so it needs its own terminal).
+Two terminals: the backend keeps running, so it needs its own terminal.
 
-Terminal 1, the mock API at http://localhost:3001:
+Terminal 1, the backend (Express) at http://localhost:3001:
 
 ```
-cd frontend
+cd backend
 npm install
-npm run api
+npm run dev
 ```
 
 Terminal 2, the app at http://localhost:5173:
 
 ```
 cd frontend
+npm install
 npm run dev
 ```
 
-Then open the address printed in terminal 2 (pages: `/`, `/restaurante/sushi-kyo`, `/cos`, `/favorite`, `/comenzi/1`, `/despre`). Without `npm run api` the page shows an error
-with a "Încearcă din nou" button. `npm test` runs the unit tests (no server needed).
+Then open the address printed in terminal 2 (pages: `/`, `/restaurante/sushi-kyo`, `/cos`, `/favorite`, `/comenzi/1`, `/despre`). Without the backend the page shows an error
+with a "Încearcă din nou" button. `npm test` runs the unit tests in each folder (no server needed: the backend
+tests start the app on a free port themselves). `npm run dev` restarts the backend when a file changes
+(`node --watch`); `npm start` runs it without watching. Every restart brings the data back to `seed.json`.
+
+Optional settings for the backend (see `backend/.env.example`): `PORT` (default 3001) and `CORS_ORIGIN`
+(default `http://localhost:5173`). Node does not read the example file by itself; set them in the shell if needed.
+
+## Stage 9: own backend
+
+json-server is gone: the frontend now talks to our own server, written with Express 5 in `backend/`.
+`frontend/db.json`, the `api` script and the `json-server` dependency were removed; the data moved to
+`backend/src/data/seed.json`. The data lives in memory (arrays + `nextId`) and resets on every restart;
+stage 10 moves it to MariaDB.
+
+```
+backend/
+  package.json        "type": "module", scripts start / dev / test, express ^5 + cors
+  .env.example        PORT=3001, CORS_ORIGIN=http://localhost:5173
+  src/server.js       only app.listen(PORT)
+  src/app.js          cors, express.json(), GET /health, the five routers, 404, central error handler
+  src/validation.js   entry point for the validators in src/validation/ (one per resource)
+  src/routes/         one express.Router per resource
+  src/reguli/         server-side rules that need data (menu price, courier with an active trip)
+  src/data/           seed.json, the in-memory store and a small collection helper
+  tests/              node:test + fetch against app.listen(0)
+```
+
+REST routes (all answers are JSON; every error is `{ "error": "..." }` in Romanian):
+
+| Resource | Id | Routes | Used by the frontend for |
+| -------- | -- | ------ | ------------------------ |
+| `/comenzi` (tw.json) | number, set by the server | GET list, GET `/:id`, POST, PATCH `/:id`, DELETE `/:id` | list, detail, special order, cart, toggle, undo, role panels |
+| `/meniu` | text ("p10"), set by the server | GET list, GET `/:id`, POST, PATCH `/:id`, DELETE `/:id` | menu, restaurant menu admin |
+| `/livratori` | number, set by the server | GET list, GET `/:id`, POST, PATCH `/:id`, DELETE `/:id` | courier panel, admin couriers |
+| `/recenzii` | number, set by the server | GET list, GET `/:id`, POST, PATCH `/:id`, DELETE `/:id` | reviews after delivery |
+| `/restaurante` | the restaurant slug, sent by the client | GET list, GET `/:id`, POST, PUT `/:id`, PATCH `/:id`, DELETE `/:id` | restaurant profile and opening hours |
+
+Status codes: 200 read / modify, 201 POST, 204 DELETE (no body), 400 invalid data, invalid id or malformed
+JSON ("Corpul cererii nu este JSON valid"), 404 missing element ("Comanda nu există", "Preparatul nu
+există", ...) or unknown route ("Ruta nu există"), 409 for a conflict (second review of an order, a profile
+that already exists, deleting a courier with an active trip), 500 "Eroare internă" (details only in the
+server log).
+
+- **Server-side validation, as a whitelist.** Every validator returns `{ erori, date }`; only known fields,
+  cleaned (trimmed text, phone without separators), are stored. Unknown fields and a client-sent `id` are
+  ignored. PATCH uses the same validator with `partial: true` (only the sent fields, no defaults). The fixed
+  values are the frontend's (`constants.js`, `livrare.js`, `stari.js`, `cupoane.js`, `meniuAdmin.js`, ...),
+  copied into `backend/src/constants.js`; `frontend/tests/backendConstante.test.js` fails if they drift apart
+- **The frontend does not decide what is valid.** Enum fields (`livrare`, `stare`, `livrareStare`,
+  `plata.metoda` / `plata.stare`, `cupon`) are checked on the server. For a dish from the menu
+  ("Pizza Diavola × 2") the server sets `pret` (menu price × quantity) and `categorie`, ignoring the client's
+  price; anything else is a special order (`speciala: true`, `pret: null` until the restaurant accepts it).
+  A review needs a delivered, existing order and takes its restaurant from the order. The full order state
+  machine (the `TRANZITII` table in `stari.js`) is still checked only in the browser; moving it to the server is a
+  follow-up
+- **Minimal order.** `{ preparat, livrata, restaurant, livrare }` (the checker's POST) is enough: the server fills
+  `stare: "plasata"`, `plata`, `livrareStare`, `istoric`, `creata` and the other fields with the same defaults
+  the frontend uses (`campuriInitiale` in `stari.js`)
+- **CORS** allows only `CORS_ORIGIN` (default `http://localhost:5173`), so the Vite app can call port 3001
+- **Undo** used to re-POST the deleted order with its old id (json-server kept it). The server now always sets
+  the id, so "Anulează" sends the order without `id` and puts the returned object (new id) back in its place
+- `api.js`: on an error, `request()` reads `{ error }` from the body and shows the server's message (fallback
+  "Eroare server: <code>"), so `/comenzi/999` now shows "Comanda nu există"
+- tests: `backend/tests/*.test.js` (checker flow, 400s, malformed JSON, whitelist, 404 route, CORS, one file per
+  resource); the frontend data-integrity tests read `backend/src/data/seed.json`
+
+Check it by hand (backend running):
+
+```
+curl -i http://localhost:3001/comenzi
+curl -i -X POST http://localhost:3001/comenzi -H "Content-Type: application/json" -d '{"preparat":"X","livrata":false,"restaurant":"Pizzeria Napoli","livrare":"standard"}'
+curl -i -X POST http://localhost:3001/comenzi -H "Content-Type: application/json" -d '{"preparat":""}'
+curl -i http://localhost:3001/comenzi/999
+curl -i -X DELETE http://localhost:3001/comenzi/7
+```
+
+Expected: 200 with the list, 201 with the new order (id 7), 400 `{"error":"preparat nu poate fi gol; ..."}`,
+404 `{"error":"Comanda nu există"}`, 204.
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
 
@@ -545,6 +624,7 @@ empty restaurant, price that is not a positive number, category not in `CATEGORI
 | Claude | "Comandă specială" form, validation, request() and server-first add / toggle / delete / undo / cart, tw.json, tests, stage 7 |
 | Claude | React Router pages (layout, detail, about, 404), fetchComanda, CSS Modules split, tests, stage 8 |
 | Claude | „Pădure” redesign: tokens, Gabarito, restaurant / cart / favourites pages, shared state, status steps, helper tests |
+| Claude | Express backend in backend/ (five resources, whitelist validation, CORS, error handler), undo with a new id, backend tests, stage 9 |
 
 Details per stage: see the ai-log/ folder.
 
@@ -558,4 +638,5 @@ Details per stage: see the ai-log/ folder.
 - [x] Stage 6: loading data from a mock API
 - [x] Stage 7: form and validation
 - [x] Stage 8: routing and detail page
-- [ ] Stage 9: own backend with Express
+- [x] Stage 9: own backend with Express
+- [ ] Stage 10: MariaDB and full CRUD
