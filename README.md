@@ -74,7 +74,9 @@ backend/
   src/app.js          cors, express.json(), GET /health, the five routers, 404, central error handler
   src/validation.js   entry point for the validators in src/validation/ (one per resource)
   src/routes/         one express.Router per resource
-  src/reguli/         server-side rules that need data (menu price, courier with an active trip)
+  src/reguli/         domain rules: comenzi.js (Order Management), stari.js (order lifecycle), plata.js (Payment),
+                      livrare.js (Delivery & Dispatch), restaurant.js (Restaurant / Catalog)
+  src/idempotenta.js  Idempotency-Key registry for POST /comenzi
   src/data/           seed.json, the in-memory store and a small collection helper
   tests/              node:test + fetch against app.listen(0)
 ```
@@ -104,9 +106,8 @@ server log).
   `plata.metoda` / `plata.stare`, `cupon`) are checked on the server. For a dish from the menu
   ("Pizza Diavola × 2") the server sets `pret` (menu price × quantity) and `categorie`, ignoring the client's
   price; anything else is a special order (`speciala: true`, `pret: null` until the restaurant accepts it).
-  A review needs a delivered, existing order and takes its restaurant from the order. The full order state
-  machine (the `TRANZITII` table in `stari.js`) is still checked only in the browser; moving it to the server is a
-  follow-up
+  A review needs a delivered, existing order and takes its restaurant from the order. The order state
+  machine is also enforced on the server (see "Server-side rules" below)
 - **Minimal order.** `{ preparat, livrata, restaurant, livrare }` (the checker's POST) is enough: the server fills
   `stare: "plasata"`, `plata`, `livrareStare`, `istoric`, `creata` and the other fields with the same defaults
   the frontend uses (`campuriInitiale` in `stari.js`)
@@ -132,6 +133,46 @@ Expected: 200 with the list, 201 with the new order (id 7), 400 `{"error":"prepa
 404 `{"error":"Comanda nu există"}`, 204.
 
 The stage 1 and 2 files (static page and `comenzi.js`) were moved to `mockup/`.
+
+### Server-side rules (development plan)
+
+Plan §4.3 / §5 / stages 3–4, inside the stage 9 architecture (Express, data in memory, no users yet). The server,
+not the frontend, decides the three separate fields `stare`, `plata.stare` and `livrareStare`.
+
+- **State machine.** `backend/src/reguli/stari.js` and `livrare.js` are copies of the rules in `frontend/src/stari.js`
+  (same states, same transitions, same side effects). `frontend/tests/backendReguli.test.js` compares both copies on
+  every combination of state, role, delivery type, payment and delivery step, and runs the real frontend PATCH bodies
+  against the server. On `PATCH /comenzi/:id` the server computes the result itself and the sent values must match it:
+  - order: `plasata -> acceptata | respinsa | anulata`, `acceptata -> in_preparare | anulata`, `in_preparare -> gata | anulata`,
+    `gata -> in_livrare` (delivery) `| livrata` (pickup) `| anulata`, `in_livrare -> livrata | anulata`; final: `livrata`, `anulata`, `respinsa`
+  - the "Livrată" checkbox on "/" (`{ livrata: true/false }`) stays a manual shortcut, exactly as in the UI: any
+    non-delivered state -> `livrata`; un-ticking goes back to the state before the last delivery (from `istoric`)
+  - delivery: `neasignata -> asignata -> spre_restaurant -> preluata -> spre_client -> livrata`, `asignata -> neasignata`
+    (withdraw); assigning needs an accepted order and an existing, active courier; `preluata` needs `gata` and moves the
+    order to `in_livrare`; `livrata` needs `in_livrare`
+  - payment: card (simulated) is paid at placement, cash is paid on delivery and unpaid again if un-ticked, a paid order
+    that is cancelled or rejected becomes `rambursata`; `plata`, `livratorId`, `timpPreparare` and `motiv` cannot be changed directly
+  - cancel / reject need `motiv` (400); accept needs `timpPreparare` 5–180 (400) and, for a special order without price, `pret` (400)
+  - switching between pickup and delivery is allowed only while the order is `plasata`
+- **History.** The server appends `{ stare, la }` (server time) on every accepted state change; a client-sent
+  `istoric` is ignored, on POST and on PATCH.
+- **Placement (POST).** A new order starts at `plasata` (or `livrata` with `livrata: true`, as the stage 7 form allows);
+  any other `stare` -> 409. The server sets the payment state, `livrareStare`, `livratorId`, `timpPreparare`, `motiv`.
+  409 when the menu dish has `disponibil: false`, the restaurant is paused, or it is closed at the order time
+  (`programataLa` for a scheduled order, otherwise now; server time zone). Special orders follow the same pause and
+  opening-hours rules. A restaurant without a saved profile or program is always open, so the checker's POST for
+  "Pizzeria Napoli" (no profile in the seed) gets 201 at any hour. Undo of an order that had already moved past
+  `plasata` now gets a 409 (the server does not accept a lifecycle it did not record).
+- **Duplicates.** `Idempotency-Key` header on `POST /comenzi`: the same key with the same body returns the original
+  response again (201, same order, header `Idempotent-Replayed: true`), no new order; same key with another body -> 409;
+  malformed key -> 400; only successful creations keep the key (in memory, last 1000). `/cos` sends one
+  `crypto.randomUUID()` per line per placement attempt.
+- **Dispatch.** `POST /comenzi/:id/dispatch` assigns a courier that is online, active and without a trip in progress
+  (fewest completed deliveries, then lowest id): 200 with the updated order, 409 when the order cannot get a courier now
+  or nobody is available, 404 / 400 for the id. `/admin` has an "Asignează automat" button next to the manual assignment.
+
+Status codes: 409 for a rule that conflicts with the current state (illegal transition, unavailable dish, paused or
+closed restaurant, reused key, no courier), 400 for missing or malformed input.
 
 ## Full order flow: roles, coupons, reviews, recommendations
 

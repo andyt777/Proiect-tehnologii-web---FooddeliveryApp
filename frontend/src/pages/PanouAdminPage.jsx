@@ -6,7 +6,7 @@ import FormularAsignare from "../components/FormularAsignare.jsx";
 import FormularMotiv from "../components/FormularMotiv.jsx";
 import PoartaRol from "../components/PoartaRol.jsx";
 import { patchPasLivrare, patchTranzitie } from "../actiuniComenzi.js";
-import { fetchLivratori } from "../api.js";
+import { dispatchComanda, fetchLivratori } from "../api.js";
 import { useComenziLive } from "../comenziLive.js";
 import { formatComenzi, formatData, formatLei, formatOra } from "../format.js";
 import { curataLivratori, livratoriActivi, numeLivrator } from "../livrator.js";
@@ -39,7 +39,7 @@ export default function PanouAdminPage() {
 
 function PanouAdmin() {
   const { noteazaComanda } = useMagazin();
-  const { comenzi, incarcare, eroare, acum, reincarca, aplica } = useComenziLive(noteazaComanda);
+  const { comenzi, incarcare, eroare, acum, reincarca, aplica, aplicaPeServer } = useComenziLive(noteazaComanda);
   const [livratori, setLivratori] = useState([]);
   const [incarcareLivratori, setIncarcareLivratori] = useState(true);
   const [fila, setFila] = useState("comenzi");
@@ -97,6 +97,25 @@ function PanouAdmin() {
     }
   }
 
+  // Plan §5: serverul alege livratorul (online, activ, fără cursă în lucru)
+  async function asigneazaAutomat(comanda) {
+    if (inLucru !== null) return;
+    setInLucru(comanda.id);
+    try {
+      const actualizata = await aplicaPeServer(() => dispatchComanda(comanda.id));
+      const nume = numeLivrator(livratori, actualizata.livratorId) ?? `Livratorul nr. ${actualizata.livratorId}`;
+      focusDupa.current = comanda.id;
+      setDeschis(null);
+      setEroareActiune(null);
+      setAviz(`Asignare automată: ${nume} duce comanda „${comanda.preparat}”.`);
+    } catch (err) {
+      setAviz("");
+      setEroareActiune(`Nu am putut asigna automat un livrator la „${comanda.preparat}”: ${err.message}`);
+    } finally {
+      setInLucru(null);
+    }
+  }
+
   function inchideFormular(id) {
     focusDupa.current = id;
     setDeschis(null);
@@ -134,6 +153,7 @@ function PanouAdmin() {
     const ocupat = inLucru === c.id;
     const butoane = [
       poateAvansaLivrarea(c, "asignata") && <button key="asigneaza" type="button" className="btn-primary" onClick={() => setDeschis({ id: c.id, tip: "asigneaza" })}>Asignează livrator</button>,
+      poateAvansaLivrarea(c, "asignata") && <button key="automat" type="button" className="btn-secondary" aria-disabled={ocupat} onClick={() => asigneazaAutomat(bruta)}>{ocupat ? "Se trimite…" : "Asignează automat"}</button>,
       poateAvansaLivrarea(c, "neasignata") && <button key="retrage" type="button" className="btn-secondary" aria-disabled={ocupat} onClick={() => retrage(bruta)}>{ocupat ? "Se trimite…" : "Retrage livratorul"}</button>,
       poateTrece(c, "anulata", "admin") && <button key="anuleaza" type="button" className="btn-secondary" onClick={() => setDeschis({ id: c.id, tip: "anuleaza" })}>Anulează</button>,
     ].filter(Boolean);
@@ -185,7 +205,7 @@ function PanouAdmin() {
     <div className={`wrap ${styles.pagina}`}>
       <h1 ref={titluRef} tabIndex={-1} className={`titlu-focus ${styles.titlu}`}>Panoul de administrare</h1>
       <p className={styles.intro}>Toate comenzile, cu starea comenzii, a livrării și a plății. Lista se actualizează singură la 10 secunde.</p>
-      <p className={styles.nota}>Rolul Admin e un comutator demo, nu un cont: serverul demo acceptă orice modificare.</p>
+      <p className={styles.nota}>Rolul Admin e un comutator demo, nu un cont: serverul verifică regulile comenzilor, dar nu și cine face modificarea.</p>
       {eroare && <p className={styles.indiciu} role="status">Ultima actualizare a eșuat ({eroare}). Încercăm din nou în câteva secunde.</p>}
 
       <FilePanou prefix="admin" eticheta="Secțiunile panoului" file={FILE} activa={fila} onAlege={setFila} />

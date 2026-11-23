@@ -1,8 +1,8 @@
 // Fluxul complet: stările unei comenzi, ale plății și ale livrării, într-un singur loc.
 // Toate trecerile (client, restaurant, livrator, admin și bifa „Livrată” de pe „/”) folosesc funcțiile de aici;
 // interfața nu construiește niciodată de mână corpul unui PATCH. Funcții pure (fără React), testate cu `node --test`.
-// Atenție: rolurile sunt un comutator demo, iar verificările de aici rulează doar în browser. Nu sunt securitate:
-// json-server acceptă orice PATCH. Un server real ar trebui să repete aceleași reguli.
+// Atenție: rolurile sunt un comutator demo. Serverul (backend/src/reguli/) repetă aceleași reguli și refuză cu 409
+// o trecere nepermisă (testul tests/backendReguli.test.js ține cele două copii identice), dar nu știe încă cine o cere.
 
 // Stările comenzii, în ordinea drumului principal; „anulata” și „respinsa” sunt ieșiri laterale
 export const STARI_COMANDA = Object.freeze(["plasata", "acceptata", "in_preparare", "gata", "in_livrare", "livrata", "anulata", "respinsa"]); // toate valorile permise pentru `stare`

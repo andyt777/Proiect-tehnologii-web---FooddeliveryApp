@@ -191,7 +191,9 @@ export default function CosPage() { // componenta rutei /cos
     const parti = imparteReducere(reducere, deTrimis.map((l) => l.subtotal));
     const codFolosit = reducere > 0 ? cuponAplicat.cod : null;
     const comenziNoi = cosInComenzi(deTrimis, livrare, acum.toISOString()).map((c, i) => ({ ...c, ...extra, ...(codFolosit ? campuriCupon(codFolosit, parti[i]) : {}) })); // o comandă fără id pentru fiecare linie, cu câmpurile noi
-    const rezultate = await Promise.allSettled(comenziNoi.map((c) => createComanda(c))); // toate cererile pornesc deodată
+    // Plan §5: o cheie Idempotency-Key pentru fiecare linie, la fiecare încercare de plasare (serverul nu dublează o cerere repetată)
+    const chei = comenziNoi.map(() => crypto.randomUUID());
+    const rezultate = await Promise.allSettled(comenziNoi.map((c, i) => createComanda(c, { cheieIdempotenta: chei[i] }))); // toate cererile pornesc deodată
     const liniiSalvate = deTrimis.filter((_, i) => rezultate[i].status === "fulfilled"); // liniile care au ajuns
     const erori = rezultate.filter((r) => r.status === "rejected").map((r) => r.reason); // motivele celor eșuate
     for (const r of rezultate) if (r.status === "fulfilled") noteazaComanda(r.value); // urmărirea pornește pentru comenzile noi

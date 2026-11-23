@@ -27,7 +27,8 @@ test("livratori: 400 pentru nume greșit sau dublură, 404 pentru id inexistent"
 
 test("DELETE /livratori/:id -> 204; refuzat (409) dacă livratorul are o cursă în lucru", async (t) => {
   const { cerere } = await porneste(t);
-  await cerere("PATCH", "/comenzi/1", { livratorId: 2, livrareStare: "asignata" });
+  assert.equal((await cerere("PATCH", "/comenzi/1", { stare: "acceptata", timpPreparare: 20 })).status, 200);
+  assert.equal((await cerere("PATCH", "/comenzi/1", { livratorId: 2, livrareStare: "asignata" })).status, 200);
   const refuzat = await cerere("DELETE", "/livratori/2");
   assert.equal(refuzat.status, 409);
   assert.equal(typeof refuzat.body.error, "string");

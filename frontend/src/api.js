@@ -66,8 +66,11 @@ export async function fetchComanda(id, timpMaxim) { // id-ul vine din adresă (u
 
 // Etapa 7: POST /comenzi. Serverul pune id-ul și întoarce comanda salvată; pe ecran ajunge obiectul întors.
 // Etapa 9: serverul ignoră orice id trimis de client, deci „Anulează” primește comanda readusă cu un id nou.
-export function createComanda(comanda) { // primește comanda de salvat
-  return request("/comenzi", { method: "POST", body: JSON.stringify(comanda) }); // corpul cererii, ca text JSON
+// Plan §5: `cheieIdempotenta` (opțional) pleacă în antetul Idempotency-Key; aceeași cheie trimisă din nou
+// primește comanda creată prima dată, deci o retrimitere nu dublează comanda.
+export function createComanda(comanda, { cheieIdempotenta } = {}) { // primește comanda de salvat
+  const headers = cheieIdempotenta ? { "Idempotency-Key": cheieIdempotenta } : {};
+  return request("/comenzi", { method: "POST", body: JSON.stringify(comanda), headers }); // corpul cererii, ca text JSON
 } // sfârșitul funcției
 
 // Etapa 7: PATCH /comenzi/:id, doar cu câmpurile schimbate (ex. { livrata: true }); întoarce comanda actualizată
@@ -79,6 +82,11 @@ export function updateComanda(id, changes) { // id-ul comenzii și câmpurile no
 export function deleteComanda(id) { // id-ul comenzii de șters
   return request(`/comenzi/${encodeURIComponent(id)}`, { method: "DELETE" }); // fără corp
 } // sfârșitul funcției
+
+// Plan §5: POST /comenzi/:id/dispatch, serverul alege singur un livrator disponibil; întoarce comanda actualizată
+export function dispatchComanda(id) {
+  return request(`/comenzi/${encodeURIComponent(id)}/dispatch`, { method: "POST" });
+}
 
 // Fluxul complet: GET /livratori, livratorii demo ({ id, nume, online })
 export function fetchLivratori(timpMaxim) { // timpMaxim opțional (doar pentru teste)

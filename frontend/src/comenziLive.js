@@ -77,5 +77,15 @@ export function useComenziLive(noteazaComanda) { // primește funcția din Layou
     return actualizata; // pentru mesajul paginii
   }, [noteazaComanda]); // noteazaComanda e stabilă (useCallback în urmarireComenzi.js)
 
-  return { comenzi, incarcare, eroare, acum, reincarca, aplica }; // ce primesc paginile
+  // Plan §5: o acțiune decisă de server (ex. alocarea automată): `trimite()` face cererea și întoarce comanda actualizată
+  const aplicaPeServer = useCallback(async (trimite) => {
+    versiune.current += 1;
+    const actualizata = await trimite();
+    versiune.current += 1;
+    noteazaComanda(actualizata);
+    setComenzi((prev) => prev.map((c) => (c.id === actualizata.id ? actualizata : c)));
+    return actualizata;
+  }, [noteazaComanda]);
+
+  return { comenzi, incarcare, eroare, acum, reincarca, aplica, aplicaPeServer }; // ce primesc paginile
 } // sfârșitul hook-ului

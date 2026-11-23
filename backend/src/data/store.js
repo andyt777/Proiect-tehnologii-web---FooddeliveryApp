@@ -2,6 +2,7 @@
 // repornire (și fiecare app creat în teste) începe de la aceleași date.
 import { readFileSync } from "node:fs";
 import { creeazaColectie, idCuPrefix, idNumeric } from "./colectie.js";
+import { creeazaRegistruIdempotenta } from "../idempotenta.js";
 
 const SEED = JSON.parse(readFileSync(new URL("./seed.json", import.meta.url), "utf8"));
 
@@ -15,5 +16,7 @@ export function creeazaStore(seed = SEED) {
     restaurante: creeazaColectie(date.restaurante, () => {
       throw new Error("Restaurantele primesc id-ul (slug-ul) de la client");
     }),
+    // cheile Idempotency-Key ale comenzilor deja create (vezi idempotenta.js)
+    cheiComenzi: creeazaRegistruIdempotenta(),
   };
 }

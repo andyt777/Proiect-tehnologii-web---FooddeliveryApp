@@ -33,3 +33,21 @@
 - `cors({ origin })` with a fixed string always sends that origin; the browser then blocks every other site.
 - A whitelist changes old habits: json-server stored any field (and any id) it got, so undo relied on that.
 - `localhost` can resolve to IPv6 (`::1`) first: an old json-server still listening there answered instead of the new server. Using `127.0.0.1` in curl showed which server was replying.
+
+## Follow-up: server-side order rules (development plan §4.3, §5, stages 3–4)
+- Asked: move the order state machine to the server (three separate fields), server-written history, placement rules
+  (availability, pause, opening hours), duplicate protection with `Idempotency-Key`, automatic courier assignment,
+  without users, a database or new dependencies.
+- Got: domain modules in `backend/src/reguli/` (`stari.js`, `plata.js`, `livrare.js`, `restaurant.js`, plus the
+  orchestration in `comenzi.js`), `src/idempotenta.js`, `POST /comenzi/:id/dispatch`, an "Asignează automat" button in
+  `/admin`, an optional key parameter in `createComanda` and a `dispatchComanda` function in `api.js`.
+- Changed or rejected: The server has no roles yet, so it accepts a transition that at least one role may make.
+  The rules are copied, not imported across packages; `frontend/tests/backendReguli.test.js` compares both copies on
+  every combination and replays the frontend's PATCH bodies against the server. The "Livrată" checkbox stays legal
+  from any state, like the UI. A POST that starts past `plasata` is refused, so undo works only for orders that had
+  not moved past `plasata` (or delivered ones). The idempotency keys are per placement attempt, so a manual retry
+  after a timeout still gets new keys.
+- Checks: backend `npm test` 52 passing; frontend `npm test` 511 passing, `npm run lint` clean, `npm run build` ok;
+  curl on 127.0.0.1:3001: illegal transition 409, accept 200 with a server `istoric` entry, dispatch 409 then 200,
+  repeated key 201 with `Idempotent-Replayed: true` and the same id.
+

@@ -3,7 +3,7 @@
 // Sub Node, import.meta.env nu există; api.js folosește `import.meta.env?.VITE_API_URL`, deci cade pe adresa implicită.
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import { API_URL, TIMP_MAXIM_MS, createComanda, createLivrator, createPreparat, deleteLivrator, deletePreparat, fetchRestaurante, salveazaProfilRestaurant, updatePreparat, createRecenzie, deleteComanda, fetchComanda, fetchComenzi, fetchLivratori, fetchMeniu, fetchRecenzii, request, updateComanda, updateLivrator } from "../src/api.js";
+import { API_URL, TIMP_MAXIM_MS, createComanda, dispatchComanda, createLivrator, createPreparat, deleteLivrator, deletePreparat, fetchRestaurante, salveazaProfilRestaurant, updatePreparat, createRecenzie, deleteComanda, fetchComanda, fetchComenzi, fetchLivratori, fetchMeniu, fetchRecenzii, request, updateComanda, updateLivrator } from "../src/api.js";
 
 const fetchOriginal = globalThis.fetch;
 afterEach(() => {
@@ -346,4 +346,31 @@ test("livratorii: createLivrator POST /livratori, deleteLivrator DELETE /livrato
   await deleteLivrator(4);
   assert.equal(apeluri[0].url, "http://localhost:3001/livratori/4");
   assert.equal(apeluri[0].optiuni.method, "DELETE");
+});
+
+// --- Plan §5: Idempotency-Key și alocarea automată ---
+
+test("createComanda trimite Idempotency-Key doar când primește o cheie; Content-Type rămâne", async () => {
+  const apeluri = [];
+  globalThis.fetch = async (url, optiuni) => {
+    apeluri.push({ url, optiuni });
+    return raspuns({ id: 7 }, 201);
+  };
+  await createComanda({ preparat: "X" }, { cheieIdempotenta: "c-1" });
+  await createComanda({ preparat: "X" });
+  assert.deepEqual(apeluri[0].optiuni.headers, { "Content-Type": "application/json", "Idempotency-Key": "c-1" });
+  assert.deepEqual(apeluri[1].optiuni.headers, { "Content-Type": "application/json" });
+  assert.equal(apeluri[0].optiuni.method, "POST");
+});
+
+test("dispatchComanda trimite POST /comenzi/:id/dispatch și aruncă mesajul serverului la 409", async () => {
+  let cerut;
+  globalThis.fetch = async (url, optiuni) => {
+    cerut = { url, metoda: optiuni.method };
+    return raspuns({ id: 3, livratorId: 2, livrareStare: "asignata" });
+  };
+  assert.deepEqual(await dispatchComanda(3), { id: 3, livratorId: 2, livrareStare: "asignata" });
+  assert.deepEqual(cerut, { url: "http://localhost:3001/comenzi/3/dispatch", metoda: "POST" });
+  globalThis.fetch = async () => raspuns({ error: "Niciun livrator disponibil acum" }, 409);
+  await assert.rejects(dispatchComanda(3), { message: "Niciun livrator disponibil acum" });
 });
